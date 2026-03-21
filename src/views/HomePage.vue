@@ -267,7 +267,7 @@ onUnmounted(() => {
           </div>
         </div>
         <div class="container text-center copyright-container animate-on-load delay-4">
-          <p class="copyright-text">&copy; 2024 Herbs & Motion. All rights reserved.</p>
+          <p class="copyright-text">&copy; 2026 Herbs & Motion. All rights reserved.</p>
         </div>
       </footer>
     </main>

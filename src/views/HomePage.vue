@@ -5,6 +5,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import imgMassage from '../assets/massage2.png'
 import imgPhysio from '../assets/Physiotherapy2.png'
 import imgMedicine from '../assets/Chinese_Medicine2.png'
+import logo from '../assets/logo.svg'
 
 // --- 逻辑处理 ---
 const loading = ref(true)
@@ -52,7 +53,7 @@ const setSectionRef = (el) => {
 onMounted(() => {
   setTimeout(() => {
     loading.value = false
-  }, 2500)
+  }, 1500)
 
   window.addEventListener('scroll', handleScroll)
 
@@ -84,8 +85,11 @@ onUnmounted(() => {
   <div class="app-container">
     <Transition name="fade-out">
       <div v-if="loading" class="loading-overlay">
-        <div class="loader-logo">
-          <div class="logo-placeholder">🌿 H&M</div>
+        <div class="loader-logo-container">
+          <span class="logo-icon-wrap">
+            <img class="logo-img" src="../assets/logo.png" alt="Herbs & Motion Logo" />
+          </span>
+          <span class="logo-text-animate">Herbs & Motion</span>
         </div>
         <div class="loader-spinner"></div>
       </div>
@@ -99,19 +103,19 @@ onUnmounted(() => {
       <header :class="['page-header', { 'is-scrolled': isScrolled }]">
         <div class="container header-inner">
           <div class="logo-area">
-            <span class="logo-icon">🌿</span>
+            <span class="logo-icon"><img class="logo" src="../assets/logo.png" /></span>
             <span class="logo-text">Herbs & Motion</span>
           </div>
           <nav class="nav-links">
-            <a href="#">Business</a>
+            <a href="#">Home</a>
             <a href="#">About</a>
-            <a href="#">Advice</a>
-            <a href="#">FAQ</a>
-            <a href="#">Contact</a>
+            <a href="#">Our Services</a>
+            <a href="#">What to Expect</a>
+            <a href="#">Focused Healing</a>
           </nav>
           <div class="auth-buttons">
-            <a href="#" class="btn-login">Log in</a>
-            <button class="btn-get-started">Get started</button>
+            <a href="#" class="btn-login">Location</a>
+            <button class="btn-get-started">Book a Consultation</button>
           </div>
         </div>
       </header>
@@ -120,7 +124,7 @@ onUnmounted(() => {
         <div class="container text-center hero-text-container">
           <h1 class="hero-headline animate-on-load delay-1">
             Your Wellness Journey,<br />
-            Personalized.
+            Starts here.
           </h1>
           <p class="hero-subline animate-on-load delay-2">
             Expert remedial therapy and ancient Chinese medicine combined to restore your natural
@@ -203,12 +207,16 @@ onUnmounted(() => {
 
           <div class="philosophy-images animate-slide-in-right">
             <div class="image-box box-1">
-              <div class="photo-placeholder img-photo-placeholder">Acupuncture Photo</div>
+              <div class="photo-placeholder img-photo-placeholder">
+                <img width="320px" src="../assets/zhenjiu.png" />
+              </div>
             </div>
             <div class="image-box box-2">
-              <div class="photo-placeholder img-photo-placeholder">Herb Tray Photo</div>
+              <div class="photo-placeholder img-photo-placeholder">
+                <img width="260px" src="../assets/HerbTray.png" />
+              </div>
             </div>
-            <div class="heart-icon-overlay">💖</div>
+            <div class="heart-icon-overlay"><img width="48px" src="../assets/pinkLogo.png" /></div>
           </div>
         </div>
       </section>
@@ -228,7 +236,7 @@ onUnmounted(() => {
         <div class="container footer-inner">
           <div class="footer-left animate-on-load">
             <div class="logo-area footer-logo">
-              <span class="logo-icon">🌿</span>
+              <span class="logo-icon"><img class="logo" src="../assets/logo.png" /></span>
               <span class="logo-text">Herbs & Motion</span>
             </div>
             <p class="footer-desc">
@@ -516,6 +524,11 @@ button {
   font-size: 24px;
   color: var(--primary-teal);
 }
+.logo {
+  width: 24px;
+  display: flex;
+  align-items: center;
+}
 .logo-text {
   font-size: 20px;
   font-weight: bold;
@@ -544,7 +557,7 @@ button {
    Hero Section & Cards 
    ========================================================================== */
 .hero-section {
-  padding: 60px 0 100px;
+  padding: 40px 0 100px;
   overflow: hidden;
 }
 .hero-headline {
@@ -577,7 +590,7 @@ button {
 
 .hero-card-v2 {
   flex: 1;
-  height: 480px;
+  height: 350px;
   max-width: 380px;
   background-color: var(--bg-color);
   border-radius: 20px;
@@ -868,5 +881,163 @@ button {
   font-size: 12px;
   color: var(--text-dark);
   opacity: 0.6;
+}
+
+/* ==========================================================================
+   全新 Loading 动画：弹性渐入 + 持续呼吸浮动
+   ========================================================================== */
+.loader-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 1. 图标包裹层出场 */
+.logo-icon-wrap {
+  margin-right: 15px;
+  display: inline-block;
+  opacity: 0; /* 初始隐藏 */
+  /* 出场：像植物发芽一样缩放渐入，持续0.8秒 */
+  animation: bloom-in 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.logo-img {
+  width: 45px; /* 这里可以根据你的 logo 实际大小调整 */
+  height: auto;
+  /* 出场完毕后：加入一个持续的轻微上下呼吸浮动，显得有生命力 */
+  animation: float-breathe 3s ease-in-out infinite 0.8s;
+}
+
+/* 2. 文字跳跃出场 */
+/* 2. 文字跳跃出场 */
+.logo-text-animate {
+  font-size: 32px;
+  font-weight: bold;
+  color: #94a78f; /* 👈 这里改成了和 logo 保持一致的高级灰绿色 */
+  display: inline-block;
+  opacity: 0;
+  animation: jump-fade-in 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.15s forwards;
+}
+
+/* --- 核心动画 Keyframes --- */
+
+/* 图标：旋转+缩放渐入 (像叶子舒展) */
+@keyframes bloom-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-20deg);
+  }
+  60% {
+    transform: scale(1.1) rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* 文字：从下方弹跳进入 */
+@keyframes jump-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-8px);
+  } /* 冲过头一点 */
+  75% {
+    transform: translateY(4px);
+  } /* 弹回来一点 */
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  } /* 稳稳落下 */
+}
+
+/* 持续浮动效果 (悬浮感) */
+@keyframes float-breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/*首页加载loading*/
+/* ==========================================================================
+   Loading 动画：专门针对加载页的文字和图标
+   ========================================================================== */
+
+/* 1. 图标像植物发芽一样缩放渐入，并在加载时上下呼吸浮动 */
+.loading-overlay .logo-icon {
+  display: inline-block;
+  opacity: 0;
+  animation: bloom-in 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.loading-overlay .logo-icon img {
+  width: 45px;
+  height: auto;
+  animation: float-breathe 3s ease-in-out infinite 0.8s;
+}
+
+/* 2. 文字跳跃渐入，并强制修改颜色为 #94a78f */
+/* 2. 文字跳跃渐入，优化清晰度和对比度 */
+.loading-overlay .logo-text {
+  font-size: 34px; /* 稍微放大一点点 */
+  font-weight: 800; /* 👈 进一步加粗，增加文字的视觉面积 */
+  letter-spacing: 0.5px; /* 👈 增加一点点字间距，防止浅色文字糊在一起 */
+  color: #72856e !important; /* 👈 这是 #94a78f 的同色调加深版，保持了灰绿感，但在白底上更清晰 */
+  display: inline-block;
+  opacity: 0;
+  animation: jump-fade-in 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.15s forwards;
+  /* 👈 终极秘籍：加一层极其微弱的阴影，不仔细看看不出来，但能让文字边缘瞬间锐利 */
+  text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+/* --- 核心动画 Keyframes --- */
+@keyframes bloom-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-20deg);
+  }
+  60% {
+    transform: scale(1.1) rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes jump-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-8px);
+  }
+  75% {
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 </style>

@@ -126,13 +126,13 @@ onUnmounted(() => {
             Your Wellness Journey,<br />
             Starts here.
           </h1>
-          <p class="hero-subline animate-on-load delay-2">
+          <!-- <p class="hero-subline animate-on-load delay-2">
             Expert remedial therapy and ancient Chinese medicine combined to restore your natural
             rhythm.
-          </p>
-          <p class="hero-question animate-on-load delay-3">
+          </p> -->
+          <!-- <p class="hero-question animate-on-load delay-3">
             What type of care are you looking for?
-          </p>
+          </p> -->
         </div>
 
         <div class="container hero-cards-container">

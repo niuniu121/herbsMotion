@@ -448,7 +448,7 @@ button {
 }
 
 /* ==========================================================================
-   全新 Loading 动画：只留 Logo 流动转圈
+   全新 Loading 动画：柔和呼吸悬浮 (取消旋转)
    ========================================================================== */
 .loading-overlay {
   position: fixed;
@@ -475,10 +475,10 @@ button {
   animation: fadeIn 0.3s ease forwards;
 }
 .logo-img {
-  width: 65px; /* 加大尺寸让视觉焦点集中 */
+  width: 65px;
   height: auto;
-  /* 旋转和呼吸放大缩小动画组合 */
-  animation: logo-spin-breathe 1.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  /* 替换成了新的温和呼吸动画 */
+  animation: logo-gentle-breathe 2s ease-in-out infinite;
 }
 
 .fade-out-leave-active {
@@ -488,16 +488,14 @@ button {
   opacity: 0;
 }
 
-/* Logo 旋转及呼吸放大的关键帧 */
-@keyframes logo-spin-breathe {
-  0% {
-    transform: rotate(0deg) scale(0.9);
+/* 【已修改】柔和呼吸悬浮的关键帧，不再转圈，只是微微上下浮动+呼吸放大 */
+@keyframes logo-gentle-breathe {
+  0%,
+  100% {
+    transform: translateY(0) scale(0.95);
   }
   50% {
-    transform: rotate(180deg) scale(1.1);
-  }
-  100% {
-    transform: rotate(360deg) scale(0.9);
+    transform: translateY(-8px) scale(1.05);
   }
 }
 

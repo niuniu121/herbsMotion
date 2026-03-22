@@ -68,9 +68,11 @@ const closeMobileMenu = () => {
 }
 
 onMounted(() => {
+  // 【核心修改】：总加载时间设定为 2000ms (2秒)
+  // 配合下方 CSS 动画：前 1 秒跳两下，后 1 秒保持不动，然后触发消失进入主页
   setTimeout(() => {
     loading.value = false
-  }, 1500)
+  }, 2000)
 
   window.addEventListener('scroll', handleScroll)
 
@@ -448,7 +450,7 @@ button {
 }
 
 /* ==========================================================================
-   全新 Loading 动画：充满活力的两连跳 (取消旋转)
+   全新 Loading 动画：严格的 跳两下 -> 停 1 秒
    ========================================================================== */
 .loading-overlay {
   position: fixed;
@@ -477,8 +479,8 @@ button {
 .logo-img {
   width: 65px;
   height: auto;
-  /* 换成了无旋转的双段跳跃 */
-  animation: logo-active-bounce 2.5s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
+  /* 动画总长度设置为 2秒，只播放一次 (forwards 停留在最后一帧) */
+  animation: logo-precise-bounce 2s ease-in-out forwards;
 }
 
 .fade-out-leave-active {
@@ -488,40 +490,41 @@ button {
   opacity: 0;
 }
 
-/* 【已修改】活力两连跳关键帧：
-   蓄力压扁 -> 左跳伸展 -> 落地压扁 -> 右跳伸展 -> 落地站稳休息
+/* 【已修改】精准的两连跳 + 静止
+   0% ~ 50% (前 1 秒)：完成两次跳跃
+   50% ~ 100% (后 1 秒)：完全静止
 */
-@keyframes logo-active-bounce {
+@keyframes logo-precise-bounce {
   0% {
     transform: translateY(0) scale(1) rotate(0deg);
   }
 
-  /* --- 弹跳 1 (左脚起跳) --- */
-  8% {
-    transform: translateY(0) scaleX(1.15) scaleY(0.85) rotate(0deg);
-  } /* 往下蓄力压扁 */
-  18% {
+  /* --- 第 1 跳 (0s - 0.5s / 0% - 25%) --- */
+  5% {
+    transform: translateY(0) scaleX(1.15) scaleY(0.85);
+  } /* 压扁蓄力 */
+  15% {
     transform: translateY(-25px) scaleX(0.9) scaleY(1.1) rotate(-8deg);
-  } /* 往上弹跳，微向左倾 */
-  28% {
-    transform: translateY(0) scaleX(1.1) scaleY(0.9) rotate(0deg);
-  } /* 落地缓冲压扁 */
-
-  /* --- 弹跳 2 (右脚起跳) --- */
-  38% {
-    transform: translateY(-25px) scaleX(0.9) scaleY(1.1) rotate(8deg);
-  } /* 紧接着往上弹跳，微向右倾 */
-  48% {
-    transform: translateY(0) scaleX(1.05) scaleY(0.95) rotate(0deg);
-  } /* 落地轻微缓冲 */
-
-  /* --- 站稳、呼吸休息 --- */
-  55% {
+  } /* 起跳微左倾 */
+  25% {
     transform: translateY(0) scale(1) rotate(0deg);
-  } /* 恢复原状 */
+  } /* 落地 */
+
+  /* --- 第 2 跳 (0.5s - 1.0s / 25% - 50%) --- */
+  30% {
+    transform: translateY(0) scaleX(1.15) scaleY(0.85);
+  } /* 压扁蓄力 */
+  40% {
+    transform: translateY(-25px) scaleX(0.9) scaleY(1.1) rotate(8deg);
+  } /* 起跳微右倾 */
+  50% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  } /* 彻底落地 */
+
+  /* --- 停 1 秒不动 (1.0s - 2.0s / 50% - 100%) --- */
   100% {
     transform: translateY(0) scale(1) rotate(0deg);
-  } /* 保持静止一段时间，形成运动节奏 */
+  }
 }
 
 /* ==========================================================================

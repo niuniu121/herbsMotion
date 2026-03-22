@@ -94,7 +94,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener('removeEventListener', handleScroll)
 })
 </script>
 
@@ -448,7 +448,7 @@ button {
 }
 
 /* ==========================================================================
-   全新 Loading 动画：柔和呼吸悬浮 (取消旋转)
+   全新 Loading 动画：充满活力的跑步 + 空翻序列
    ========================================================================== */
 .loading-overlay {
   position: fixed;
@@ -477,8 +477,10 @@ button {
 .logo-img {
   width: 65px;
   height: auto;
-  /* 替换成了新的温和呼吸动画 */
-  animation: logo-gentle-breathe 2s ease-in-out infinite;
+  /* 时间设定为您要求的 2.5s。
+     使用了 cubic-bezier 来增加弹性和爆发感，让它看起来更像人在运动。
+  */
+  animation: logo-run-and-spin 2.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
 }
 
 .fade-out-leave-active {
@@ -488,14 +490,56 @@ button {
   opacity: 0;
 }
 
-/* 【已修改】柔和呼吸悬浮的关键帧，不再转圈，只是微微上下浮动+呼吸放大 */
-@keyframes logo-gentle-breathe {
-  0%,
-  100% {
-    transform: translateY(0) scale(0.95);
+/* 【已修改】充满活力的跑步+空翻序列的关键帧：
+   序列：[0% 蓄力] -> [15% 弹跳1] -> [30% 落地蓄力] -> [45% 弹跳2] -> [60% 爆发空翻] -> [85% 落地稳定]
+*/
+@keyframes logo-run-and-spin {
+  0% {
+    transform: translateY(0) scale(1) rotate(0deg);
   }
-  50% {
-    transform: translateY(-8px) scale(1.05);
+
+  /* --- 弹跳 1 (模拟跑步的一步) --- */
+  5% {
+    /* 向下蓄力：压扁 */
+    transform: translateY(0) scaleX(1.1) scaleY(0.8) rotate(0deg);
+  }
+  15% {
+    /* 爆发弹跳：拉伸，轻微向前倾斜 */
+    transform: translateY(-25px) scaleX(0.9) scaleY(1.1) rotate(-5deg);
+  }
+  25% {
+    /* 回落落地 */
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+
+  /* --- 弹跳 2 (模拟跑步的第二步，为翻滚蓄力) --- */
+  30% {
+    /* 落地蓄力：压扁 */
+    transform: translateY(0) scaleX(1.1) scaleY(0.8) rotate(0deg);
+  }
+  45% {
+    /* 再次充满活力的弹跳 */
+    transform: translateY(-25px) scaleX(0.9) scaleY(1.1) rotate(5deg);
+  }
+
+  /* --- 爆发转圈 (利落的空翻) --- */
+  55% {
+    /* 准备翻滚：轻微离地 */
+    transform: translateY(-10px) scale(1.05) rotate(0deg);
+  }
+  75% {
+    /* 快速、利落的 360 度空翻 */
+    transform: translateY(-15px) scale(1.05) rotate(360deg);
+  }
+
+  /* --- 落地稳定 --- */
+  85% {
+    /* 落地冲击：轻微压扁稳定 */
+    transform: translateY(0) scaleX(1.05) scaleY(0.95) rotate(360deg);
+  }
+  100% {
+    /* 恢复原状，准备下一次循环 */
+    transform: translateY(0) scale(1) rotate(360deg);
   }
 }
 

@@ -94,7 +94,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  window.removeEventListener('removeEventListener', handleScroll)
+  window.removeEventListener('scroll', handleScroll)
 })
 </script>
 
@@ -448,7 +448,7 @@ button {
 }
 
 /* ==========================================================================
-   全新 Loading 动画：充满活力的跑步 + 空翻序列
+   全新 Loading 动画：充满活力的两连跳 (取消旋转)
    ========================================================================== */
 .loading-overlay {
   position: fixed;
@@ -477,10 +477,8 @@ button {
 .logo-img {
   width: 65px;
   height: auto;
-  /* 时间设定为您要求的 2.5s。
-     使用了 cubic-bezier 来增加弹性和爆发感，让它看起来更像人在运动。
-  */
-  animation: logo-run-and-spin 2.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+  /* 换成了无旋转的双段跳跃 */
+  animation: logo-active-bounce 2.5s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
 }
 
 .fade-out-leave-active {
@@ -490,57 +488,40 @@ button {
   opacity: 0;
 }
 
-/* 【已修改】充满活力的跑步+空翻序列的关键帧：
-   序列：[0% 蓄力] -> [15% 弹跳1] -> [30% 落地蓄力] -> [45% 弹跳2] -> [60% 爆发空翻] -> [85% 落地稳定]
+/* 【已修改】活力两连跳关键帧：
+   蓄力压扁 -> 左跳伸展 -> 落地压扁 -> 右跳伸展 -> 落地站稳休息
 */
-@keyframes logo-run-and-spin {
+@keyframes logo-active-bounce {
   0% {
     transform: translateY(0) scale(1) rotate(0deg);
   }
 
-  /* --- 弹跳 1 (模拟跑步的一步) --- */
-  5% {
-    /* 向下蓄力：压扁 */
-    transform: translateY(0) scaleX(1.1) scaleY(0.8) rotate(0deg);
-  }
-  15% {
-    /* 爆发弹跳：拉伸，轻微向前倾斜 */
-    transform: translateY(-25px) scaleX(0.9) scaleY(1.1) rotate(-5deg);
-  }
-  25% {
-    /* 回落落地 */
-    transform: translateY(0) scale(1) rotate(0deg);
-  }
+  /* --- 弹跳 1 (左脚起跳) --- */
+  8% {
+    transform: translateY(0) scaleX(1.15) scaleY(0.85) rotate(0deg);
+  } /* 往下蓄力压扁 */
+  18% {
+    transform: translateY(-25px) scaleX(0.9) scaleY(1.1) rotate(-8deg);
+  } /* 往上弹跳，微向左倾 */
+  28% {
+    transform: translateY(0) scaleX(1.1) scaleY(0.9) rotate(0deg);
+  } /* 落地缓冲压扁 */
 
-  /* --- 弹跳 2 (模拟跑步的第二步，为翻滚蓄力) --- */
-  30% {
-    /* 落地蓄力：压扁 */
-    transform: translateY(0) scaleX(1.1) scaleY(0.8) rotate(0deg);
-  }
-  45% {
-    /* 再次充满活力的弹跳 */
-    transform: translateY(-25px) scaleX(0.9) scaleY(1.1) rotate(5deg);
-  }
+  /* --- 弹跳 2 (右脚起跳) --- */
+  38% {
+    transform: translateY(-25px) scaleX(0.9) scaleY(1.1) rotate(8deg);
+  } /* 紧接着往上弹跳，微向右倾 */
+  48% {
+    transform: translateY(0) scaleX(1.05) scaleY(0.95) rotate(0deg);
+  } /* 落地轻微缓冲 */
 
-  /* --- 爆发转圈 (利落的空翻) --- */
+  /* --- 站稳、呼吸休息 --- */
   55% {
-    /* 准备翻滚：轻微离地 */
-    transform: translateY(-10px) scale(1.05) rotate(0deg);
-  }
-  75% {
-    /* 快速、利落的 360 度空翻 */
-    transform: translateY(-15px) scale(1.05) rotate(360deg);
-  }
-
-  /* --- 落地稳定 --- */
-  85% {
-    /* 落地冲击：轻微压扁稳定 */
-    transform: translateY(0) scaleX(1.05) scaleY(0.95) rotate(360deg);
-  }
+    transform: translateY(0) scale(1) rotate(0deg);
+  } /* 恢复原状 */
   100% {
-    /* 恢复原状，准备下一次循环 */
-    transform: translateY(0) scale(1) rotate(360deg);
-  }
+    transform: translateY(0) scale(1) rotate(0deg);
+  } /* 保持静止一段时间，形成运动节奏 */
 }
 
 /* ==========================================================================

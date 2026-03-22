@@ -2,9 +2,9 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 
 // --- 引入 src/assets 图片 (已严格对照你的本地目录文件名修改) ---
-import imgPhysio from '../assets/Physiotherapy2.png'
-import imgMedicine from '../assets/Chinese_Medicine2.png'
-import imgMassage from '../assets/Remedial_Massage.png' // 新换的图片
+import imgPhysio from '../assets/wulizhiliao1.png'
+import imgMedicine from '../assets/zhongyi1.png'
+import imgMassage from '../assets/anmo1.png' // 新换的图片
 import logo from '../assets/logo.svg' // (如果你用到 svg 的话留着，没用到可以删)
 
 // --- 逻辑处理 ---
@@ -28,13 +28,13 @@ const heroCards = [
   {
     title: 'Chinese Medicine',
     desc: 'For holistic health',
-    bgColor: '#967C60',
+    bgColor: '#2D5041',
     bgImage: `url(${imgMedicine})`,
   },
   {
     title: 'Remedial Massage',
     desc: 'For my recovery',
-    bgColor: '#2D5041',
+    bgColor: '#967C60',
     bgImage: `url(${imgMassage})`,
   },
 ]
@@ -128,6 +128,7 @@ onUnmounted(() => {
             <nav class="nav-links">
               <a href="#" @click="closeMobileMenu">Home</a>
               <a href="#" @click="closeMobileMenu">About</a>
+              <a href="#" @click="closeMobileMenu">Visualization</a>
               <a href="#" @click="closeMobileMenu">Our Services</a>
               <a href="#" @click="closeMobileMenu">What to Expect</a>
               <a href="#" @click="closeMobileMenu">Focused Healing</a>
@@ -232,7 +233,7 @@ onUnmounted(() => {
           <div class="philosophy-images animate-slide-in-right">
             <div class="image-box box-1">
               <div class="photo-placeholder img-photo-placeholder">
-                <img width="320px" src="../assets/zhenjiu.png" />
+                <img width="320px" src="../assets/Acupuncture.png" />
               </div>
             </div>
             <div class="image-box box-2">
@@ -644,7 +645,7 @@ button {
 
 .hero-card-v2 {
   flex: 1;
-  height: 420px;
+  height: 400px;
   max-width: 380px;
   background-color: var(--bg-color);
   border-radius: 20px;
@@ -674,10 +675,19 @@ button {
   flex: 1;
   width: 100%;
   background-image: var(--bg-image);
-  background-size: 56%;
-  background-position: center bottom 20px;
+  /* 【核心修改】：让图片宽度 100% 铺满左右，高度自适应 */
+  background-size: 100% auto;
+  /* 【核心修改】：紧贴底部，不要留任何缝隙 */
+  background-position: bottom center;
   background-repeat: no-repeat;
   opacity: 0;
+  /* 加一点过渡动画，如果卡片 hover 有放大的话会更平滑 */
+  transition: transform 0.4s ease;
+}
+
+/* 选填：如果你想鼠标放上去时图片微微放大，可以加上这行 */
+.hero-card-v2:hover .card-illustration {
+  transform: scale(1.05);
 }
 
 .card-title,
@@ -1028,11 +1038,11 @@ button {
     width: 100%;
     max-width: 100%;
     min-height: 400px; /* 强制高度 */
-    height: 400px;
+    height: 350px;
   }
   .card-illustration {
-    background-size: 80%; /* 缩小一点确保手机上完整展示 */
-    background-position: center bottom 10px;
+    background-size: 100% auto; /* 手机端同样 100% 铺满 */
+    background-position: center bottom; /* 紧贴底部 */
   }
 
   /* --- Philosophy 区块适配 --- */

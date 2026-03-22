@@ -1,29 +1,24 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 
-// 【关键修复 1】：Vite 中引入 src/assets 图片必须通过 import 导入！
-import imgMassage from '../assets/massage2.png'
+// --- 引入 src/assets 图片 (已严格对照你的本地目录文件名修改) ---
 import imgPhysio from '../assets/Physiotherapy2.png'
 import imgMedicine from '../assets/Chinese_Medicine2.png'
-import logo from '../assets/logo.svg'
+import imgMassage from '../assets/Remedial_Massage.png' // 新换的图片
+import logo from '../assets/logo.svg' // (如果你用到 svg 的话留着，没用到可以删)
 
 // --- 逻辑处理 ---
 const loading = ref(true)
 const isScrolled = ref(false)
-// 页面动态背景色，初始为老板喜欢的低饱和度绿色
 const currentBgColor = ref('#CFDAC8')
 
-// 用于存放需要监听的区域节点
+// 控制手机端汉堡包菜单的开关状态
+const isMobileMenuOpen = ref(false)
+
 const sectionRefs = ref([])
 
-// 卡片数据 (直接使用 import 进来的图片变量)
+// 卡片数据 (按老板要求重新排序：Physio左, Medicine中, Massage右)
 const heroCards = [
-  {
-    title: 'Remedial Massage',
-    desc: 'For my recovery',
-    bgColor: '#2D5041',
-    bgImage: `url(${imgMassage})`,
-  },
   {
     title: 'Physiotherapy',
     desc: 'For active movement',
@@ -35,6 +30,12 @@ const heroCards = [
     desc: 'For holistic health',
     bgColor: '#967C60',
     bgImage: `url(${imgMedicine})`,
+  },
+  {
+    title: 'Remedial Massage',
+    desc: 'For my recovery',
+    bgColor: '#2D5041',
+    bgImage: `url(${imgMassage})`,
   },
 ]
 
@@ -50,6 +51,22 @@ const setSectionRef = (el) => {
   }
 }
 
+// 切换移动端菜单，并在打开时禁止页面背景滚动
+const toggleMobileMenu = () => {
+  isMobileMenuOpen.value = !isMobileMenuOpen.value
+  if (isMobileMenuOpen.value) {
+    document.body.style.overflow = 'hidden'
+  } else {
+    document.body.style.overflow = ''
+  }
+}
+
+// 点击菜单项后自动关闭菜单
+const closeMobileMenu = () => {
+  isMobileMenuOpen.value = false
+  document.body.style.overflow = ''
+}
+
 onMounted(() => {
   setTimeout(() => {
     loading.value = false
@@ -60,7 +77,7 @@ onMounted(() => {
   const observerOptions = {
     root: null,
     rootMargin: '0px',
-    threshold: 0.4,
+    threshold: 0.2,
   }
 
   const observer = new IntersectionObserver((entries) => {
@@ -89,9 +106,7 @@ onUnmounted(() => {
           <span class="logo-icon-wrap">
             <img class="logo-img" src="../assets/logo.png" alt="Herbs & Motion Logo" />
           </span>
-          <span class="logo-text-animate">Herbs & Motion</span>
         </div>
-        <div class="loader-spinner"></div>
       </div>
     </Transition>
 
@@ -106,16 +121,31 @@ onUnmounted(() => {
             <span class="logo-icon"><img class="logo" src="../assets/logo.png" /></span>
             <span class="logo-text">Herbs & Motion</span>
           </div>
-          <nav class="nav-links">
-            <a href="#">Home</a>
-            <a href="#">About</a>
-            <a href="#">Our Services</a>
-            <a href="#">What to Expect</a>
-            <a href="#">Focused Healing</a>
-          </nav>
+
+          <div :class="['nav-overlay', { 'is-open': isMobileMenuOpen }]">
+            <nav class="nav-links">
+              <a href="#" @click="closeMobileMenu">Home</a>
+              <a href="#" @click="closeMobileMenu">About</a>
+              <a href="#" @click="closeMobileMenu">Our Services</a>
+              <a href="#" @click="closeMobileMenu">What to Expect</a>
+              <a href="#" @click="closeMobileMenu">Focused Healing</a>
+              <a href="#" class="mobile-only-link" @click="closeMobileMenu">Location</a>
+            </nav>
+          </div>
+
           <div class="auth-buttons">
-            <a href="#" class="btn-login">Location</a>
+            <a href="#" class="btn-login desktop-only">Location</a>
             <button class="btn-get-started">Book a Consultation</button>
+
+            <div
+              class="hamburger"
+              :class="{ 'is-active': isMobileMenuOpen }"
+              @click="toggleMobileMenu"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
           </div>
         </div>
       </header>
@@ -126,13 +156,6 @@ onUnmounted(() => {
             Your Wellness Journey,<br />
             Starts here.
           </h1>
-          <!-- <p class="hero-subline animate-on-load delay-2">
-            Expert remedial therapy and ancient Chinese medicine combined to restore your natural
-            rhythm.
-          </p> -->
-          <!-- <p class="hero-question animate-on-load delay-3">
-            What type of care are you looking for?
-          </p> -->
         </div>
 
         <div class="container hero-cards-container">
@@ -150,7 +173,6 @@ onUnmounted(() => {
               <h2 class="card-title">{{ card.title }}</h2>
               <div class="card-subtitle-group">
                 <span class="card-desc">{{ card.desc }}</span>
-
                 <span class="card-arrow">
                   <svg
                     viewBox="0 0 24 24"
@@ -225,7 +247,7 @@ onUnmounted(() => {
         <div class="container cta-inner animate-on-load">
           <h2 class="section-headline">Start Your Healing Story Today</h2>
           <p class="cta-description">
-            Your first consultation includes a complete body assessment and a customized treatment
+            Your first consultation includes a complete body assessment and a customised treatment
             plan tailored to your lifestyle.
           </p>
           <button class="btn-book-now">Book Online Now</button>
@@ -381,14 +403,6 @@ button {
     transform: translateX(0);
   }
 }
-@keyframes loader-rotate {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
 
 .animate-on-load,
 .animate-slide-in-up,
@@ -396,7 +410,6 @@ button {
 .animate-slide-in-right {
   opacity: 0;
 }
-
 .loaded .animate-on-load {
   animation: fadeIn 1s forwards;
 }
@@ -409,7 +422,6 @@ button {
 .loaded .animate-slide-in-right {
   animation: slideInRight 0.8s forwards;
 }
-
 .delay-1 {
   animation-delay: 0.1s !important;
 }
@@ -425,13 +437,10 @@ button {
 
 /* Placeholders */
 .photo-placeholder {
-  background: #333;
-  color: #888;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-style: italic;
-  font-size: 14px;
 }
 .img-photo-placeholder {
   width: 100%;
@@ -439,7 +448,7 @@ button {
 }
 
 /* ==========================================================================
-   Loading Screen Styles
+   全新 Loading 动画：只留 Logo 流动转圈
    ========================================================================== */
 .loading-overlay {
   position: fixed;
@@ -455,25 +464,41 @@ button {
   z-index: 2000;
   transition: opacity 0.5s ease;
 }
-.logo-placeholder {
-  font-size: 30px;
-  font-weight: bold;
-  color: var(--primary-teal);
+.loader-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.loader-spinner {
-  margin-top: 20px;
-  border: 4px solid rgba(50, 91, 73, 0.1);
-  border-left-color: var(--primary-teal);
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: loader-rotate 1s linear infinite;
+.logo-icon-wrap {
+  display: inline-block;
+  opacity: 0;
+  animation: fadeIn 0.3s ease forwards;
 }
+.logo-img {
+  width: 65px; /* 加大尺寸让视觉焦点集中 */
+  height: auto;
+  /* 旋转和呼吸放大缩小动画组合 */
+  animation: logo-spin-breathe 1.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
 .fade-out-leave-active {
   transition: opacity 0.5s ease;
 }
 .fade-out-leave-to {
   opacity: 0;
+}
+
+/* Logo 旋转及呼吸放大的关键帧 */
+@keyframes logo-spin-breathe {
+  0% {
+    transform: rotate(0deg) scale(0.9);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(360deg) scale(0.9);
+  }
 }
 
 /* ==========================================================================
@@ -493,7 +518,7 @@ button {
 }
 
 /* ==========================================================================
-   Header Section
+   Header Section (包含汉堡包菜单样式)
    ========================================================================== */
 .page-header {
   position: sticky;
@@ -519,6 +544,8 @@ button {
   align-items: center;
   gap: 10px;
   cursor: pointer;
+  position: relative;
+  z-index: 1600;
 }
 .logo-icon {
   font-size: 24px;
@@ -534,6 +561,8 @@ button {
   font-weight: bold;
   color: var(--text-dark);
 }
+
+/* 桌面端导航 */
 .nav-links {
   display: flex;
   gap: 30px;
@@ -551,7 +580,17 @@ button {
   display: flex;
   align-items: center;
   gap: 15px;
+  position: relative;
+  z-index: 1600;
 }
+
+/* 移动端专属类初始化 */
+.mobile-only-link {
+  display: none;
+}
+.hamburger {
+  display: none;
+} /* 桌面端隐藏汉堡包 */
 
 /* ==========================================================================
    Hero Section & Cards 
@@ -567,17 +606,6 @@ button {
   line-height: 1.1;
   margin-bottom: 20px;
 }
-.hero-subline {
-  font-size: 20px;
-  color: var(--text-primary);
-  margin-bottom: 50px;
-  opacity: 0.9;
-}
-.hero-question {
-  font-size: 18px;
-  font-weight: bold;
-  color: var(--text-primary);
-}
 
 .hero-cards-container {
   display: flex;
@@ -590,7 +618,7 @@ button {
 
 .hero-card-v2 {
   flex: 1;
-  height: 350px;
+  height: 420px;
   max-width: 380px;
   background-color: var(--bg-color);
   border-radius: 20px;
@@ -605,7 +633,6 @@ button {
   display: flex;
   flex-direction: column;
 }
-
 .hero-card-v2:hover {
   transform: translateY(-8px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
@@ -617,12 +644,11 @@ button {
   color: white;
   z-index: 2;
 }
-
 .card-illustration {
   flex: 1;
   width: 100%;
   background-image: var(--bg-image);
-  background-size: 85%;
+  background-size: 56%;
   background-position: center bottom 20px;
   background-repeat: no-repeat;
   opacity: 0;
@@ -639,7 +665,6 @@ button {
   margin: 0 0 15px 0;
   letter-spacing: -0.5px;
 }
-
 .card-subtitle-group {
   display: flex;
   align-items: center;
@@ -651,7 +676,6 @@ button {
   margin: 0;
 }
 
-/* SVG箭头样式，确保能完美显示 */
 .card-arrow {
   display: flex;
   align-items: center;
@@ -663,7 +687,6 @@ button {
   display: block;
   transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
-
 .hero-card-v2:hover .card-arrow svg {
   transform: translateX(6px);
 }
@@ -780,8 +803,6 @@ button {
   background: white;
   border-radius: 50%;
   border: 4px solid var(--accent-pink);
-  color: var(--accent-pink);
-  font-size: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -884,160 +905,173 @@ button {
 }
 
 /* ==========================================================================
-   全新 Loading 动画：弹性渐入 + 持续呼吸浮动
+   H5 移动端响应式适配 (Mobile Responsive & Hamburger Menu)
    ========================================================================== */
-.loader-logo-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+@media (max-width: 768px) {
+  /* --- Header & 汉堡包菜单 --- */
+  .desktop-only {
+    display: none !important;
+  }
+  .btn-get-started {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
 
-/* 1. 图标包裹层出场 */
-.logo-icon-wrap {
-  margin-right: 15px;
-  display: inline-block;
-  opacity: 0; /* 初始隐藏 */
-  /* 出场：像植物发芽一样缩放渐入，持续0.8秒 */
-  animation: bloom-in 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-}
-
-.logo-img {
-  width: 45px; /* 这里可以根据你的 logo 实际大小调整 */
-  height: auto;
-  /* 出场完毕后：加入一个持续的轻微上下呼吸浮动，显得有生命力 */
-  animation: float-breathe 3s ease-in-out infinite 0.8s;
-}
-
-/* 2. 文字跳跃出场 */
-/* 2. 文字跳跃出场 */
-.logo-text-animate {
-  font-size: 32px;
-  font-weight: bold;
-  color: #94a78f; /* 👈 这里改成了和 logo 保持一致的高级灰绿色 */
-  display: inline-block;
-  opacity: 0;
-  animation: jump-fade-in 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.15s forwards;
-}
-
-/* --- 核心动画 Keyframes --- */
-
-/* 图标：旋转+缩放渐入 (像叶子舒展) */
-@keyframes bloom-in {
-  0% {
+  /* 汉堡包按钮样式 */
+  .hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 24px;
+    height: 18px;
+    cursor: pointer;
+    margin-left: 15px;
+    z-index: 1600; /* 确保在菜单之上 */
+  }
+  .hamburger span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: var(--text-dark);
+    transition: all 0.3s ease-in-out;
+    transform-origin: left center;
+  }
+  /* 汉堡包点击变成 X */
+  .hamburger.is-active span:nth-child(1) {
+    transform: rotate(45deg);
+  }
+  .hamburger.is-active span:nth-child(2) {
     opacity: 0;
-    transform: scale(0.3) rotate(-20deg);
+    width: 0;
   }
-  60% {
-    transform: scale(1.1) rotate(5deg);
+  .hamburger.is-active span:nth-child(3) {
+    transform: rotate(-45deg);
   }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-}
 
-/* 文字：从下方弹跳进入 */
-@keyframes jump-fade-in {
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
+  /* 移动端全屏折叠菜单 (抽屉) */
+  .nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(235, 240, 232, 0.96); /* 贴合主题色的背景 */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    z-index: 1500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 默认在顶部屏幕之外 */
+    transform: translateY(-100%);
+    transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
   }
-  50% {
-    opacity: 1;
-    transform: translateY(-8px);
-  } /* 冲过头一点 */
-  75% {
-    transform: translateY(4px);
-  } /* 弹回来一点 */
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  } /* 稳稳落下 */
-}
+  .nav-overlay.is-open {
+    transform: translateY(0); /* 划入屏幕 */
+  }
 
-/* 持续浮动效果 (悬浮感) */
-@keyframes float-breathe {
-  0%,
-  100% {
-    transform: translateY(0);
+  /* 菜单内的链接排版 */
+  .nav-links {
+    flex-direction: column;
+    gap: 35px;
+    text-align: center;
   }
-  50% {
-    transform: translateY(-6px);
+  .nav-links a {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--text-dark);
   }
-}
+  .mobile-only-link {
+    display: block;
+    margin-top: 15px;
+    color: var(--primary-teal) !important;
+  }
 
-/*首页加载loading*/
-/* ==========================================================================
-   Loading 动画：专门针对加载页的文字和图标
-   ========================================================================== */
+  /* --- 主视觉 & 卡片区适配 --- */
+  .hero-headline {
+    font-size: 38px;
+  }
+  .hero-cards-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 0 15px;
+  }
+  /* 【核心修复】：强制卡片在手机端有足够高度，防止图片被吃掉 */
+  .hero-card-v2 {
+    width: 100%;
+    max-width: 100%;
+    min-height: 400px; /* 强制高度 */
+    height: 400px;
+  }
+  .card-illustration {
+    background-size: 80%; /* 缩小一点确保手机上完整展示 */
+    background-position: center bottom 10px;
+  }
 
-/* 1. 图标像植物发芽一样缩放渐入，并在加载时上下呼吸浮动 */
-.loading-overlay .logo-icon {
-  display: inline-block;
-  opacity: 0;
-  animation: bloom-in 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-}
+  /* --- Philosophy 区块适配 --- */
+  .philosophy-section {
+    padding: 60px 0;
+  }
+  .philosophy-inner {
+    flex-direction: column;
+    gap: 50px;
+  }
+  .section-headline {
+    font-size: 32px;
+  }
+  .philosophy-features {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
 
-.loading-overlay .logo-icon img {
-  width: 45px;
-  height: auto;
-  animation: float-breathe 3s ease-in-out infinite 0.8s;
-}
+  .philosophy-images {
+    height: auto;
+    min-height: 360px;
+    display: flex;
+    justify-content: center;
+  }
+  .box-1 {
+    width: 240px;
+    height: 280px;
+    position: relative;
+    z-index: 2;
+  }
+  .box-2 {
+    width: 180px;
+    height: 220px;
+    top: 100px;
+    right: 0;
+    position: absolute;
+    z-index: 1;
+  }
+  .heart-icon-overlay {
+    top: 220px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 70px;
+    z-index: 3;
+  }
+  .heart-icon-overlay img {
+    width: 36px;
+  }
 
-/* 2. 文字跳跃渐入，并强制修改颜色为 #94a78f */
-/* 2. 文字跳跃渐入，优化清晰度和对比度 */
-.loading-overlay .logo-text {
-  font-size: 34px; /* 稍微放大一点点 */
-  font-weight: 800; /* 👈 进一步加粗，增加文字的视觉面积 */
-  letter-spacing: 0.5px; /* 👈 增加一点点字间距，防止浅色文字糊在一起 */
-  color: #72856e !important; /* 👈 这是 #94a78f 的同色调加深版，保持了灰绿感，但在白底上更清晰 */
-  display: inline-block;
-  opacity: 0;
-  animation: jump-fade-in 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.15s forwards;
-  /* 👈 终极秘籍：加一层极其微弱的阴影，不仔细看看不出来，但能让文字边缘瞬间锐利 */
-  text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.04);
-}
+  /* --- CTA & Footer 区块适配 --- */
+  .cta-section {
+    padding: 60px 0;
+  }
+  .cta-inner {
+    padding: 40px 20px;
+    border-radius: 16px;
+  }
 
-/* --- 核心动画 Keyframes --- */
-@keyframes bloom-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.3) rotate(-20deg);
+  .footer-inner {
+    grid-template-columns: 1fr;
+    gap: 30px;
   }
-  60% {
-    transform: scale(1.1) rotate(5deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-@keyframes jump-fade-in {
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  50% {
-    opacity: 1;
-    transform: translateY(-8px);
-  }
-  75% {
-    transform: translateY(4px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes float-breathe {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
+  .footer-left {
+    align-items: flex-start;
   }
 }
 </style>

@@ -593,7 +593,7 @@ onUnmounted(() => {
           <Transition name="fade" mode="out-in">
             <div :key="selectedId" class="dashboard-grid">
               <!-- Recovery Timeline -->
-              <div class="dash-card shimmer-effect sweep-card">
+              <div class="dash-card shimmer-effect sweep-card hover-card">
                 <div class="card-header">
                   <div class="icon-circle teal">
                     <svg
@@ -652,7 +652,7 @@ onUnmounted(() => {
                     </div>
 
                     <div class="chart-content">
-                      <div class="chart-svg-container line-sheen">
+                      <div class="chart-svg-container line-sheen hover-chart">
                         <svg viewBox="0 0 100 50" preserveAspectRatio="none" class="growth-curve">
                           <line
                             x1="0"
@@ -727,7 +727,7 @@ onUnmounted(() => {
               </div>
 
               <!-- Outcome Comparison -->
-              <div class="dash-card shimmer-effect sweep-card sweep-card-strong">
+              <div class="dash-card shimmer-effect sweep-card sweep-card-strong hover-card">
                 <div class="card-header">
                   <div class="icon-circle pink">
                     <svg
@@ -771,7 +771,7 @@ onUnmounted(() => {
                 </div>
 
                 <div class="comparison-bars">
-                  <div class="bar-group">
+                  <div class="bar-group hover-info-block">
                     <div class="bar-info">
                       <span class="bar-title">With TCM</span>
                       <span class="bar-value teal-text">{{ selectedData.tcmRate }}</span>
@@ -784,7 +784,7 @@ onUnmounted(() => {
                     </div>
                   </div>
 
-                  <div class="bar-group mt-20">
+                  <div class="bar-group mt-20 hover-info-block">
                     <div class="bar-info">
                       <span class="bar-title">No Treatment (Spontaneous)</span>
                       <span class="bar-value brown-text">{{ selectedData.noTreatment }}</span>
@@ -799,7 +799,7 @@ onUnmounted(() => {
                 </div>
 
                 <div class="treatment-split mt-30">
-                  <div class="split-box">
+                  <div class="split-box hover-info-block">
                     <span class="split-label">
                       <svg
                         width="26"
@@ -846,7 +846,7 @@ onUnmounted(() => {
                     <span class="split-text">{{ selectedData.acuRole }}</span>
                   </div>
 
-                  <div class="split-box mt-10">
+                  <div class="split-box mt-10 hover-info-block">
                     <span class="split-label">
                       <svg
                         width="26"
@@ -903,8 +903,7 @@ onUnmounted(() => {
                   </div>
                 </div>
 
-                <!-- Long-term Stability -->
-                <div class="sustain-block mt-30">
+                <div class="sustain-block mt-30 hover-info-block">
                   <div class="sustain-header">
                     <h4>Long-term Stability</h4>
                     <span class="sub-text">Sustained Relief (3 / 6 / 12 months)</span>
@@ -956,7 +955,7 @@ onUnmounted(() => {
                   </h4>
 
                   <div
-                    class="factor-card"
+                    class="factor-card hover-factor-card"
                     v-for="(item, i) in selectedData.speedUp"
                     :key="`up-${i}`"
                     :style="{ '--factor-index': i }"
@@ -972,7 +971,7 @@ onUnmounted(() => {
                   </h4>
 
                   <div
-                    class="factor-card pink-card"
+                    class="factor-card pink-card hover-factor-card"
                     v-for="(item, i) in selectedData.slowDown"
                     :key="`down-${i}`"
                     :style="{ '--factor-index': i }"
@@ -1000,10 +999,7 @@ onUnmounted(() => {
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <!-- soft alert circle -->
                     <circle cx="12" cy="12" r="8" stroke="#D68BA2" stroke-width="1.5" />
-
-                    <!-- exclamation -->
                     <line
                       x1="12"
                       y1="8"
@@ -1014,8 +1010,6 @@ onUnmounted(() => {
                       stroke-linecap="round"
                     />
                     <circle cx="12" cy="15.2" r="1.1" fill="#325B49" />
-
-                    <!-- tiny leaf accent -->
                     <path
                       d="M15.4 8.4C15.4 7.3 16.3 6.5 17.4 6.5C17.4 7.6 16.7 8.5 15.6 8.6"
                       stroke="#325B49"
@@ -1044,10 +1038,7 @@ onUnmounted(() => {
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <!-- soft alert circle -->
                     <circle cx="12" cy="12" r="8" stroke="#D68BA2" stroke-width="1.5" />
-
-                    <!-- exclamation -->
                     <line
                       x1="12"
                       y1="8"
@@ -1058,8 +1049,6 @@ onUnmounted(() => {
                       stroke-linecap="round"
                     />
                     <circle cx="12" cy="15.2" r="1.1" fill="#325B49" />
-
-                    <!-- tiny leaf accent -->
                     <path
                       d="M15.4 8.4C15.4 7.3 16.3 6.5 17.4 6.5C17.4 7.6 16.7 8.5 15.6 8.6"
                       stroke="#325B49"
@@ -1118,17 +1107,14 @@ onUnmounted(() => {
 .text-teal {
   color: var(--primary-teal);
 }
-
 .teal-text {
   color: var(--primary-teal);
   font-weight: 700;
 }
-
 .pink-text {
   color: var(--accent-pink);
   font-weight: 700;
 }
-
 .brown-text {
   color: #967c60;
   font-weight: 700;
@@ -1286,7 +1272,6 @@ onUnmounted(() => {
 .icon-circle.teal {
   background: rgba(50, 91, 73, 0.1);
 }
-
 .icon-circle.pink {
   background: rgba(214, 139, 162, 0.15);
 }
@@ -1339,6 +1324,7 @@ onUnmounted(() => {
   text-align: right;
   padding-bottom: 22px;
   font-weight: 600;
+  transition: color 0.25s ease;
 }
 
 .chart-content {
@@ -1352,6 +1338,12 @@ onUnmounted(() => {
   border-left: 2px solid #f0f0f0;
   position: relative;
   overflow: visible;
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease,
+    border-color 0.28s ease,
+    background-color 0.28s ease;
+  border-radius: 16px;
 }
 
 .growth-curve {
@@ -1359,6 +1351,7 @@ onUnmounted(() => {
   height: 100%;
   display: block;
   overflow: visible;
+  transition: transform 0.28s ease;
 }
 
 .animate-curve {
@@ -1391,6 +1384,7 @@ onUnmounted(() => {
   color: #aaa;
   margin-top: 10px;
   font-weight: 600;
+  transition: color 0.25s ease;
 }
 
 .bar-info {
@@ -1412,6 +1406,10 @@ onUnmounted(() => {
   background: #f0f0f0;
   border-radius: 999px;
   overflow: hidden;
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease,
+    background-color 0.28s ease;
 }
 
 .bar-fill {
@@ -1423,7 +1421,6 @@ onUnmounted(() => {
 .teal-fill {
   background: var(--primary-teal);
 }
-
 .brown-fill {
   background: #967c60;
 }
@@ -1445,6 +1442,12 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease,
+    background-color 0.28s ease,
+    border-color 0.28s ease;
+  border: 1px solid transparent;
 }
 
 .split-label {
@@ -1462,11 +1465,16 @@ onUnmounted(() => {
   line-height: 1.4;
 }
 
-/* Long-term Stability */
 .sustain-block {
   background: #f9fbf9;
   border-radius: 14px;
   padding: 16px;
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease,
+    background-color 0.28s ease,
+    border-color 0.28s ease;
+  border: 1px solid transparent;
 }
 
 .sustain-header {
@@ -1566,7 +1574,6 @@ onUnmounted(() => {
 .arrow-up {
   background: var(--primary-teal);
 }
-
 .arrow-down {
   background: var(--accent-pink);
 }
@@ -1580,6 +1587,11 @@ onUnmounted(() => {
   text-align: left;
   opacity: 0;
   animation: factorSlideUp 0.6s ease-out forwards calc(var(--factor-index) * 0.15s + 0.2s);
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease,
+    background-color 0.28s ease,
+    border-left-color 0.28s ease;
 }
 
 .pink-card {
@@ -1592,6 +1604,7 @@ onUnmounted(() => {
   font-size: 16px;
   color: var(--text-dark);
   font-weight: 700;
+  transition: color 0.25s ease;
 }
 
 .factor-card p {
@@ -1814,6 +1827,12 @@ onUnmounted(() => {
 
 .dash-card {
   position: relative;
+  transition:
+    transform 0.32s ease,
+    box-shadow 0.32s ease,
+    border-color 0.32s ease,
+    background-color 0.32s ease;
+  border: 1px solid transparent;
 }
 
 .dash-card::before {
@@ -1836,6 +1855,82 @@ onUnmounted(() => {
   z-index: 2;
 }
 
+/* ===== Hover interactions ===== */
+.hover-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 22px 44px rgba(50, 91, 73, 0.12);
+  border-color: rgba(50, 91, 73, 0.08);
+}
+
+.hover-card:hover .icon-circle {
+  transform: scale(1.05);
+}
+
+.icon-circle {
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease;
+}
+
+.hover-chart:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 28px rgba(50, 91, 73, 0.08);
+  background: rgba(50, 91, 73, 0.02);
+  border-left-color: rgba(50, 91, 73, 0.22);
+}
+
+.hover-card:hover .growth-curve {
+  transform: scale(1.01);
+}
+
+.hover-card:hover .chart-x-axis,
+.hover-card:hover .y-axis {
+  color: #8d9a92;
+}
+
+.hover-info-block {
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease,
+    background-color 0.28s ease,
+    border-color 0.28s ease;
+  border-radius: 14px;
+}
+
+.hover-info-block:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 28px rgba(50, 91, 73, 0.08);
+}
+
+.hover-info-block:hover.split-box,
+.hover-info-block:hover.sustain-block {
+  background: #fbfdfb;
+  border-color: rgba(50, 91, 73, 0.1);
+}
+
+.hover-info-block:hover .bar-track {
+  transform: scaleY(1.04);
+  box-shadow: inset 0 0 0 1px rgba(50, 91, 73, 0.04);
+}
+
+.hover-factor-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 30px rgba(50, 91, 73, 0.1);
+  background: #f7fbf7;
+  border-left-color: #4f7b67;
+}
+
+.hover-factor-card:hover h5 {
+  color: var(--primary-teal);
+}
+
+.pink-card.hover-factor-card:hover {
+  background: rgba(214, 139, 162, 0.1);
+  border-left-color: #d68ba2;
+  box-shadow: 0 16px 30px rgba(214, 139, 162, 0.12);
+}
+
+/* ===== transitions ===== */
 .dropdown-enter-active,
 .dropdown-leave-active {
   transition:
@@ -1864,6 +1959,27 @@ onUnmounted(() => {
 .fade-leave-to {
   opacity: 0;
   transform: translateY(-15px);
+}
+
+/* ===== disclaimer ===== */
+.disclaimer-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.disclaimer-icon {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.disclaimer-box h4 {
+  margin: 0;
 }
 
 @media (max-width: 768px) {
@@ -1909,25 +2025,5 @@ onUnmounted(() => {
     flex-direction: column;
     align-items: flex-start;
   }
-}
-
-.disclaimer-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.disclaimer-icon {
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.disclaimer-box h4 {
-  margin: 0;
 }
 </style>

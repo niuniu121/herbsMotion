@@ -1,23 +1,21 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 
-// --- 引入 src/assets 图片 (已严格对照你的本地目录文件名修改) ---
+// 1. 引入组件
+import NavBar from '../component/NavBar.vue'
+import PageFooter from '../component/PageFooter.vue'
+
+// 2. 引入首页专用的图片
 import imgPhysio from '../assets/wulizhiliao1.png'
 import imgMedicine from '../assets/zhongyi1.png'
-import imgMassage from '../assets/anmo1.png' // 新换的图片
-import logo from '../assets/logo.svg' // (如果你用到 svg 的话留着，没用到可以删)
+import imgMassage from '../assets/anmo1.png'
 
-// --- 逻辑处理 ---
 const loading = ref(true)
-const isScrolled = ref(false)
 const currentBgColor = ref('#CFDAC8')
-
-// 控制手机端汉堡包菜单的开关状态
-const isMobileMenuOpen = ref(false)
-
 const sectionRefs = ref([])
+let observer = null
 
-// 卡片数据 (按老板要求重新排序：Physio左, Medicine中, Massage右)
+// 卡片数据
 const heroCards = [
   {
     title: 'Physiotherapy',
@@ -39,42 +37,24 @@ const heroCards = [
   },
 ]
 
-const socialIcons = ['📱', '📷']
-
-const handleScroll = () => {
-  isScrolled.value = window.scrollY > 50
-}
-
 const setSectionRef = (el) => {
   if (el && !sectionRefs.value.includes(el)) {
     sectionRefs.value.push(el)
   }
 }
 
-// 切换移动端菜单，并在打开时禁止页面背景滚动
-const toggleMobileMenu = () => {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value
-  if (isMobileMenuOpen.value) {
-    document.body.style.overflow = 'hidden'
-  } else {
-    document.body.style.overflow = ''
-  }
-}
-
-// 点击菜单项后自动关闭菜单
-const closeMobileMenu = () => {
-  isMobileMenuOpen.value = false
-  document.body.style.overflow = ''
-}
-
 onMounted(() => {
-  // 【核心修改】：总加载时间设定为 2000ms (2秒)
-  // 配合下方 CSS 动画：前 1 秒跳两下，后 1 秒保持不动，然后触发消失进入主页
-  setTimeout(() => {
-    loading.value = false
-  }, 2000)
+  window.scrollTo(0, 0)
 
-  window.addEventListener('scroll', handleScroll)
+  // 首次进入播放 loading，返回首页时直接显示
+  if (!sessionStorage.getItem('home_first_loaded')) {
+    setTimeout(() => {
+      loading.value = false
+      sessionStorage.setItem('home_first_loaded', 'true')
+    }, 2000)
+  } else {
+    loading.value = false
+  }
 
   const observerOptions = {
     root: null,
@@ -82,21 +62,28 @@ onMounted(() => {
     threshold: 0.2,
   }
 
-  const observer = new IntersectionObserver((entries) => {
+  observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        currentBgColor.value = entry.target.dataset.bgcolor
+        currentBgColor.value = entry.target.dataset.bgcolor || '#CFDAC8'
       }
     })
   }, observerOptions)
 
+  // 只观察真正的 DOM 元素，避免组件实例导致报错
   sectionRefs.value.forEach((section) => {
-    observer.observe(section)
+    if (section instanceof Element) {
+      observer.observe(section)
+    }
   })
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
+  if (observer) {
+    observer.disconnect()
+    observer = null
+  }
+  sectionRefs.value = []
 })
 </script>
 
@@ -117,41 +104,7 @@ onUnmounted(() => {
       class="main-content"
       :style="{ backgroundColor: currentBgColor }"
     >
-      <header :class="['page-header', { 'is-scrolled': isScrolled }]">
-        <div class="container header-inner">
-          <div class="logo-area">
-            <span class="logo-icon"><img class="logo" src="../assets/logo.png" /></span>
-            <span class="logo-text">Herbs & Motion</span>
-          </div>
-
-          <div :class="['nav-overlay', { 'is-open': isMobileMenuOpen }]">
-            <nav class="nav-links">
-              <a href="#" @click="closeMobileMenu">Home</a>
-              <a href="#" @click="closeMobileMenu">About</a>
-              <a href="#" @click="closeMobileMenu">Visualization</a>
-              <a href="#" @click="closeMobileMenu">Our Services</a>
-              <a href="#" @click="closeMobileMenu">What to Expect</a>
-              <a href="#" @click="closeMobileMenu">Focused Healing</a>
-              <a href="#" class="mobile-only-link" @click="closeMobileMenu">Location</a>
-            </nav>
-          </div>
-
-          <div class="auth-buttons">
-            <a href="#" class="btn-login desktop-only">Location</a>
-            <button class="btn-get-started">Book a Consultation</button>
-
-            <div
-              class="hamburger"
-              :class="{ 'is-active': isMobileMenuOpen }"
-              @click="toggleMobileMenu"
-            >
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <NavBar />
 
       <section class="hero-section" :ref="setSectionRef" data-bgcolor="#CFDAC8">
         <div class="container text-center hero-text-container">
@@ -257,52 +210,15 @@ onUnmounted(() => {
         </div>
       </section>
 
-      <footer class="page-footer" :ref="setSectionRef" data-bgcolor="#EED6DF">
-        <div class="container footer-inner">
-          <div class="footer-left animate-on-load">
-            <div class="logo-area footer-logo">
-              <span class="logo-icon"><img class="logo" src="../assets/logo.png" /></span>
-              <span class="logo-text">Herbs & Motion</span>
-            </div>
-            <p class="footer-desc">
-              Integrating modern physical therapy with holistic wellness for lasting health and
-              mobility.
-            </p>
-            <div class="social-links">
-              <a href="#" v-for="icon in socialIcons" :key="icon">{{ icon }}</a>
-            </div>
-          </div>
-
-          <div class="footer-links-group animate-on-load delay-1">
-            <h4>Services</h4>
-            <a href="#">Remedial Massage</a>
-            <a href="#">Physiotherapy</a>
-            <a href="#">Chinese Medicine</a>
-          </div>
-          <div class="footer-links-group animate-on-load delay-2">
-            <h4>Company</h4>
-            <a href="#">About Us</a>
-            <a href="#">Contact</a>
-            <a href="#">Success Stories</a>
-          </div>
-          <div class="footer-links-group animate-on-load delay-3">
-            <h4>Legal</h4>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-          </div>
-        </div>
-        <div class="container text-center copyright-container animate-on-load delay-4">
-          <p class="copyright-text">&copy; 2026 Herbs & Motion. All rights reserved.</p>
-        </div>
-      </footer>
+      <!-- 关键修复：不要直接给组件绑 ref，让外层 div 参与背景监听 -->
+      <div :ref="setSectionRef" data-bgcolor="#EED6DF">
+        <PageFooter />
+      </div>
     </main>
   </div>
 </template>
 
 <style>
-/* ==========================================================================
-   Global Styles, Variables, and Animations
-   ========================================================================== */
 :root {
   --white-content: #ffffff;
   --primary-teal: #325b49;
@@ -337,7 +253,6 @@ body {
   color: var(--accent-pink);
 }
 
-/* Buttons */
 button {
   font-family: var(--font-family-main);
   cursor: pointer;
@@ -345,29 +260,18 @@ button {
   border-radius: 20px;
   transition: all 0.3s ease;
 }
-.btn-get-started,
 .btn-book-now {
   background: var(--primary-teal);
   color: white;
-  padding: 10px 20px;
+  padding: 15px 30px;
+  font-weight: bold;
 }
-.btn-get-started:hover,
 .btn-book-now:hover {
   background: var(--text-dark);
   transform: translateY(-2px);
 }
-.btn-login {
-  color: var(--text-dark);
-  text-decoration: none;
-  padding: 10px 15px;
-  font-weight: 500;
-}
-.btn-book-now {
-  font-weight: bold;
-  padding: 15px 30px;
-}
 
-/* Animations */
+/* --- Animations --- */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -450,9 +354,9 @@ button {
   height: 100%;
 }
 
-/* ==========================================================================
-   全新 Loading 动画：严格的 跳两下 -> 停 1 秒
-   ========================================================================== */
+/* ========================================================================== */
+/* Loading Screen */
+/* ========================================================================== */
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -480,10 +384,8 @@ button {
 .logo-img {
   width: 65px;
   height: auto;
-  /* 动画总长度设置为 2秒，只播放一次 (forwards 停留在最后一帧) */
   animation: logo-precise-bounce 2s ease-in-out forwards;
 }
-
 .fade-out-leave-active {
   transition: opacity 0.5s ease;
 }
@@ -491,46 +393,36 @@ button {
   opacity: 0;
 }
 
-/* 【已修改】精准的两连跳 + 静止
-   0% ~ 50% (前 1 秒)：完成两次跳跃
-   50% ~ 100% (后 1 秒)：完全静止
-*/
 @keyframes logo-precise-bounce {
   0% {
     transform: translateY(0) scale(1) rotate(0deg);
   }
-
-  /* --- 第 1 跳 (0s - 0.5s / 0% - 25%) --- */
   5% {
     transform: translateY(0) scaleX(1.15) scaleY(0.85);
-  } /* 压扁蓄力 */
+  }
   15% {
     transform: translateY(-25px) scaleX(0.9) scaleY(1.1) rotate(-8deg);
-  } /* 起跳微左倾 */
+  }
   25% {
     transform: translateY(0) scale(1) rotate(0deg);
-  } /* 落地 */
-
-  /* --- 第 2 跳 (0.5s - 1.0s / 25% - 50%) --- */
+  }
   30% {
     transform: translateY(0) scaleX(1.15) scaleY(0.85);
-  } /* 压扁蓄力 */
+  }
   40% {
     transform: translateY(-25px) scaleX(0.9) scaleY(1.1) rotate(8deg);
-  } /* 起跳微右倾 */
+  }
   50% {
     transform: translateY(0) scale(1) rotate(0deg);
-  } /* 彻底落地 */
-
-  /* --- 停 1 秒不动 (1.0s - 2.0s / 50% - 100%) --- */
+  }
   100% {
     transform: translateY(0) scale(1) rotate(0deg);
   }
 }
 
-/* ==========================================================================
-   Main Content Layout
-   ========================================================================== */
+/* ========================================================================== */
+/* Main Content Layout */
+/* ========================================================================== */
 .main-content {
   position: relative;
   z-index: 1;
@@ -541,87 +433,12 @@ button {
   min-height: 100vh;
 }
 .main-content.loaded {
-  opacity: 1;
+  opacity: 1 !important;
 }
 
-/* ==========================================================================
-   Header Section (包含汉堡包菜单样式)
-   ========================================================================== */
-.page-header {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  padding: 25px 0;
-  transition: all 0.4s ease;
-}
-.page-header.is-scrolled {
-  padding: 15px 0;
-  background-color: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
-.header-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.logo-area {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  position: relative;
-  z-index: 1600;
-}
-.logo-icon {
-  font-size: 24px;
-  color: var(--primary-teal);
-}
-.logo {
-  width: 24px;
-  display: flex;
-  align-items: center;
-}
-.logo-text {
-  font-size: 20px;
-  font-weight: bold;
-  color: var(--text-dark);
-}
-
-/* 桌面端导航 */
-.nav-links {
-  display: flex;
-  gap: 30px;
-}
-.nav-links a {
-  color: var(--text-dark);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s;
-}
-.nav-links a:hover {
-  color: var(--accent-pink);
-}
-.auth-buttons {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  position: relative;
-  z-index: 1600;
-}
-
-/* 移动端专属类初始化 */
-.mobile-only-link {
-  display: none;
-}
-.hamburger {
-  display: none;
-} /* 桌面端隐藏汉堡包 */
-
-/* ==========================================================================
-   Hero Section & Cards 
-   ========================================================================== */
+/* ========================================================================== */
+/* Hero Section & Cards */
+/* ========================================================================== */
 .hero-section {
   padding: 40px 0 100px;
   overflow: hidden;
@@ -675,17 +492,12 @@ button {
   flex: 1;
   width: 100%;
   background-image: var(--bg-image);
-  /* 【核心修改】：让图片宽度 100% 铺满左右，高度自适应 */
   background-size: 100% auto;
-  /* 【核心修改】：紧贴底部，不要留任何缝隙 */
   background-position: bottom center;
   background-repeat: no-repeat;
   opacity: 0;
-  /* 加一点过渡动画，如果卡片 hover 有放大的话会更平滑 */
   transition: transform 0.4s ease;
 }
-
-/* 选填：如果你想鼠标放上去时图片微微放大，可以加上这行 */
 .hero-card-v2:hover .card-illustration {
   transform: scale(1.05);
 }
@@ -740,9 +552,9 @@ button {
   animation: slideInUp 0.8s forwards calc(0.8s + var(--card-index) * 0.1s + 0.5s);
 }
 
-/* ==========================================================================
-   Philosophy Section
-   ========================================================================== */
+/* ========================================================================== */
+/* Philosophy Section */
+/* ========================================================================== */
 .philosophy-section {
   padding: 120px 0;
 }
@@ -846,9 +658,9 @@ button {
   box-shadow: 0 10px 20px rgba(214, 139, 162, 0.2);
 }
 
-/* ==========================================================================
-   CTA Section
-   ========================================================================== */
+/* ========================================================================== */
+/* CTA Section */
+/* ========================================================================== */
 .cta-section {
   padding: 100px 0;
 }
@@ -868,162 +680,10 @@ button {
   font-size: 18px;
 }
 
-/* ==========================================================================
-   Footer Section
-   ========================================================================== */
-.page-footer {
-  padding: 80px 0 40px;
-}
-.footer-inner {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 40px;
-}
-.footer-left {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-.footer-logo {
-  margin-bottom: 10px;
-  cursor: pointer;
-}
-.footer-desc {
-  font-size: 14px;
-  color: var(--text-dark);
-  line-height: 1.6;
-  opacity: 0.8;
-}
-.social-links {
-  display: flex;
-  gap: 15px;
-  margin-top: 10px;
-}
-.social-links a {
-  font-size: 20px;
-  color: var(--text-dark);
-  text-decoration: none;
-  transition: opacity 0.3s;
-}
-.social-links a:hover {
-  opacity: 0.6;
-}
-.footer-links-group {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.footer-links-group h4 {
-  margin: 0 0 10px;
-  font-weight: bold;
-  color: var(--text-dark);
-}
-.footer-links-group a {
-  color: var(--text-dark);
-  text-decoration: none;
-  font-size: 14px;
-  opacity: 0.8;
-  transition: opacity 0.3s;
-}
-.footer-links-group a:hover {
-  opacity: 1;
-  text-decoration: underline;
-}
-.copyright-container {
-  margin-top: 60px;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-  padding-top: 20px;
-}
-.copyright-text {
-  font-size: 12px;
-  color: var(--text-dark);
-  opacity: 0.6;
-}
-
-/* ==========================================================================
-   H5 移动端响应式适配 (Mobile Responsive & Hamburger Menu)
-   ========================================================================== */
+/* ========================================================================== */
+/* Mobile */
+/* ========================================================================== */
 @media (max-width: 768px) {
-  /* --- Header & 汉堡包菜单 --- */
-  .desktop-only {
-    display: none !important;
-  }
-  .btn-get-started {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-
-  /* 汉堡包按钮样式 */
-  .hamburger {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 24px;
-    height: 18px;
-    cursor: pointer;
-    margin-left: 15px;
-    z-index: 1600; /* 确保在菜单之上 */
-  }
-  .hamburger span {
-    display: block;
-    width: 100%;
-    height: 2px;
-    background-color: var(--text-dark);
-    transition: all 0.3s ease-in-out;
-    transform-origin: left center;
-  }
-  /* 汉堡包点击变成 X */
-  .hamburger.is-active span:nth-child(1) {
-    transform: rotate(45deg);
-  }
-  .hamburger.is-active span:nth-child(2) {
-    opacity: 0;
-    width: 0;
-  }
-  .hamburger.is-active span:nth-child(3) {
-    transform: rotate(-45deg);
-  }
-
-  /* 移动端全屏折叠菜单 (抽屉) */
-  .nav-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    background: rgba(235, 240, 232, 0.96); /* 贴合主题色的背景 */
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    z-index: 1500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* 默认在顶部屏幕之外 */
-    transform: translateY(-100%);
-    transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
-  }
-  .nav-overlay.is-open {
-    transform: translateY(0); /* 划入屏幕 */
-  }
-
-  /* 菜单内的链接排版 */
-  .nav-links {
-    flex-direction: column;
-    gap: 35px;
-    text-align: center;
-  }
-  .nav-links a {
-    font-size: 24px;
-    font-weight: bold;
-    color: var(--text-dark);
-  }
-  .mobile-only-link {
-    display: block;
-    margin-top: 15px;
-    color: var(--primary-teal) !important;
-  }
-
-  /* --- 主视觉 & 卡片区适配 --- */
   .hero-headline {
     font-size: 38px;
   }
@@ -1033,19 +693,17 @@ button {
     gap: 20px;
     padding: 0 15px;
   }
-  /* 【核心修复】：强制卡片在手机端有足够高度，防止图片被吃掉 */
   .hero-card-v2 {
     width: 100%;
     max-width: 100%;
-    min-height: 400px; /* 强制高度 */
+    min-height: 400px;
     height: 350px;
   }
   .card-illustration {
-    background-size: 100% auto; /* 手机端同样 100% 铺满 */
-    background-position: center bottom; /* 紧贴底部 */
+    background-size: 100% auto;
+    background-position: center bottom;
   }
 
-  /* --- Philosophy 区块适配 --- */
   .philosophy-section {
     padding: 60px 0;
   }
@@ -1093,21 +751,12 @@ button {
     width: 36px;
   }
 
-  /* --- CTA & Footer 区块适配 --- */
   .cta-section {
     padding: 60px 0;
   }
   .cta-inner {
     padding: 40px 20px;
     border-radius: 16px;
-  }
-
-  .footer-inner {
-    grid-template-columns: 1fr;
-    gap: 30px;
-  }
-  .footer-left {
-    align-items: flex-start;
   }
 }
 </style>

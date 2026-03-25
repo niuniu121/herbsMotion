@@ -1,13 +1,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-
-// 1. 引入组件
 import NavBar from '../component/NavBar.vue'
 import PageFooter from '../component/PageFooter.vue'
-
-// 2. 引入首页专用的图片
 import imgPhysio from '../assets/wulizhiliao1.png'
-import imgMedicine from '../assets/zhongyi1.png'
+import imgMedicine from '../assets/zhongyi2.png'
 import imgMassage from '../assets/anmo1.png'
 
 const loading = ref(true)
@@ -15,7 +11,6 @@ const currentBgColor = ref('#CFDAC8')
 const sectionRefs = ref([])
 let observer = null
 
-// 卡片数据
 const heroCards = [
   {
     title: 'Physiotherapy',
@@ -70,7 +65,6 @@ onMounted(() => {
     })
   }, observerOptions)
 
-  // 只观察真正的 DOM 元素，避免组件实例导致报错
   sectionRefs.value.forEach((section) => {
     if (section instanceof Element) {
       observer.observe(section)
@@ -184,17 +178,17 @@ onUnmounted(() => {
           </div>
 
           <div class="philosophy-images animate-slide-in-right">
-            <div class="image-box box-1">
+            <div class="image-card">
               <div class="photo-placeholder img-photo-placeholder">
-                <img width="320px" src="../assets/Acupuncture.png" />
+                <img src="../assets/Acupuncture1.png" alt="Acupuncture tools" />
               </div>
             </div>
-            <div class="image-box box-2">
+
+            <div class="image-card">
               <div class="photo-placeholder img-photo-placeholder">
-                <img width="260px" src="../assets/HerbTray.png" />
+                <img src="../assets/Herb.png" alt="Chinese herbs" />
               </div>
             </div>
-            <div class="heart-icon-overlay"><img width="48px" src="../assets/pinkLogo.png" /></div>
           </div>
         </div>
       </section>
@@ -210,7 +204,6 @@ onUnmounted(() => {
         </div>
       </section>
 
-      <!-- 关键修复：不要直接给组件绑 ref，让外层 div 参与背景监听 -->
       <div :ref="setSectionRef" data-bgcolor="#EED6DF">
         <PageFooter />
       </div>
@@ -243,12 +236,15 @@ body {
   margin: 0 auto;
   padding: 0 20px;
 }
+
 .text-center {
   text-align: center;
 }
+
 .text-uppercase {
   text-transform: uppercase;
 }
+
 .text-pink {
   color: var(--accent-pink);
 }
@@ -260,12 +256,14 @@ button {
   border-radius: 20px;
   transition: all 0.3s ease;
 }
+
 .btn-book-now {
   background: var(--primary-teal);
   color: white;
   padding: 15px 30px;
   font-weight: bold;
 }
+
 .btn-book-now:hover {
   background: var(--text-dark);
   transform: translateY(-2px);
@@ -280,6 +278,7 @@ button {
     opacity: 1;
   }
 }
+
 @keyframes slideInUp {
   from {
     opacity: 0;
@@ -290,6 +289,7 @@ button {
     transform: translateY(0);
   }
 }
+
 @keyframes slideInLeft {
   from {
     opacity: 0;
@@ -300,6 +300,7 @@ button {
     transform: translateX(0);
   }
 }
+
 @keyframes slideInRight {
   from {
     opacity: 0;
@@ -317,27 +318,35 @@ button {
 .animate-slide-in-right {
   opacity: 0;
 }
+
 .loaded .animate-on-load {
   animation: fadeIn 1s forwards;
 }
+
 .loaded .animate-slide-in-up {
   animation: slideInUp 0.8s forwards;
 }
+
 .loaded .animate-slide-in-left {
   animation: slideInLeft 0.8s forwards;
 }
+
 .loaded .animate-slide-in-right {
   animation: slideInRight 0.8s forwards;
 }
+
 .delay-1 {
   animation-delay: 0.1s !important;
 }
+
 .delay-2 {
   animation-delay: 0.2s !important;
 }
+
 .delay-3 {
   animation-delay: 0.3s !important;
 }
+
 .delay-4 {
   animation-delay: 0.4s !important;
 }
@@ -349,9 +358,17 @@ button {
   align-items: center;
   justify-content: center;
 }
+
 .img-photo-placeholder {
   width: 100%;
   height: 100%;
+}
+
+.img-photo-placeholder img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 /* ========================================================================== */
@@ -371,24 +388,29 @@ button {
   z-index: 2000;
   transition: opacity 0.5s ease;
 }
+
 .loader-logo-container {
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .logo-icon-wrap {
   display: inline-block;
   opacity: 0;
   animation: fadeIn 0.3s ease forwards;
 }
+
 .logo-img {
   width: 65px;
   height: auto;
   animation: logo-precise-bounce 2s ease-in-out forwards;
 }
+
 .fade-out-leave-active {
   transition: opacity 0.5s ease;
 }
+
 .fade-out-leave-to {
   opacity: 0;
 }
@@ -432,6 +454,7 @@ button {
     background-color 0.8s ease-in-out;
   min-height: 100vh;
 }
+
 .main-content.loaded {
   opacity: 1 !important;
 }
@@ -443,6 +466,7 @@ button {
   padding: 40px 0 100px;
   overflow: hidden;
 }
+
 .hero-headline {
   font-size: 56px;
   font-weight: bold;
@@ -477,6 +501,7 @@ button {
   display: flex;
   flex-direction: column;
 }
+
 .hero-card-v2:hover {
   transform: translateY(-8px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
@@ -488,6 +513,7 @@ button {
   color: white;
   z-index: 2;
 }
+
 .card-illustration {
   flex: 1;
   width: 100%;
@@ -498,6 +524,7 @@ button {
   opacity: 0;
   transition: transform 0.4s ease;
 }
+
 .hero-card-v2:hover .card-illustration {
   transform: scale(1.05);
 }
@@ -507,17 +534,20 @@ button {
 .card-arrow {
   opacity: 0;
 }
+
 .card-title {
   font-size: 32px;
   font-weight: 500;
   margin: 0 0 15px 0;
   letter-spacing: -0.5px;
 }
+
 .card-subtitle-group {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
 .card-desc {
   font-size: 16px;
   color: rgba(255, 255, 255, 0.9);
@@ -529,12 +559,14 @@ button {
   align-items: center;
   color: white;
 }
+
 .card-arrow svg {
   width: 22px;
   height: 22px;
   display: block;
   transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
+
 .hero-card-v2:hover .card-arrow svg {
   transform: translateX(6px);
 }
@@ -542,12 +574,15 @@ button {
 .loaded .card-title {
   animation: fadeIn 0.5s forwards calc(0.8s + var(--card-index) * 0.1s + 0.2s);
 }
+
 .loaded .card-desc {
   animation: fadeIn 0.5s forwards calc(0.8s + var(--card-index) * 0.1s + 0.3s);
 }
+
 .loaded .card-arrow {
   animation: fadeIn 0.5s forwards calc(0.8s + var(--card-index) * 0.1s + 0.4s);
 }
+
 .loaded .card-illustration {
   animation: slideInUp 0.8s forwards calc(0.8s + var(--card-index) * 0.1s + 0.5s);
 }
@@ -558,20 +593,24 @@ button {
 .philosophy-section {
   padding: 120px 0;
 }
+
 .philosophy-inner {
   display: flex;
   align-items: center;
   gap: 80px;
 }
+
 .philosophy-text-block {
   flex: 1;
 }
+
 .philosophy-description {
   margin-bottom: 40px;
   line-height: 1.6;
   font-size: 18px;
   opacity: 0.9;
 }
+
 .section-headline {
   font-size: 42px;
   font-weight: bold;
@@ -584,6 +623,7 @@ button {
   grid-template-columns: 1fr 1fr;
   gap: 30px;
 }
+
 .feature-item {
   display: flex;
   align-items: center;
@@ -593,21 +633,25 @@ button {
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-  transition: transform 0.3s;
+  transition: transform 0.3s ease;
 }
+
 .feature-item:hover {
   transform: translateY(-5px);
 }
+
 .feature-icon {
   font-size: 28px;
   color: var(--accent-pink);
 }
+
 .feature-text h3 {
   margin: 0 0 5px;
   font-size: 16px;
   font-weight: bold;
   color: var(--text-primary);
 }
+
 .feature-text p {
   margin: 0;
   font-size: 14px;
@@ -615,47 +659,31 @@ button {
   opacity: 0.8;
 }
 
+/* clean side-by-side image layout */
 .philosophy-images {
   flex: 1;
-  position: relative;
-  width: 100%;
-  max-width: 500px;
-  height: 450px;
-}
-.image-box {
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-  position: absolute;
-}
-.box-1 {
-  width: 320px;
-  height: 380px;
-  top: 0;
-  left: 0;
-  z-index: 1;
-}
-.box-2 {
-  width: 260px;
-  height: 320px;
-  bottom: 0;
-  right: 0;
-  z-index: 0;
-}
-.heart-icon-overlay {
-  position: absolute;
-  top: 160px;
-  left: 280px;
-  width: 90px;
-  height: 90px;
-  background: white;
-  border-radius: 50%;
-  border: 4px solid var(--accent-pink);
   display: flex;
-  align-items: center;
+  gap: 24px;
   justify-content: center;
-  z-index: 2;
-  box-shadow: 0 10px 20px rgba(214, 139, 162, 0.2);
+  align-items: center;
+}
+
+.image-card {
+  flex: 1;
+  max-width: 280px;
+  height: 380px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.image-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12);
 }
 
 /* ========================================================================== */
@@ -664,6 +692,7 @@ button {
 .cta-section {
   padding: 100px 0;
 }
+
 .cta-inner {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(10px);
@@ -673,6 +702,7 @@ button {
   max-width: 900px;
   margin: 0 auto;
 }
+
 .cta-description {
   margin: 20px auto 40px;
   max-width: 600px;
@@ -687,18 +717,21 @@ button {
   .hero-headline {
     font-size: 38px;
   }
+
   .hero-cards-container {
     flex-direction: column;
     align-items: center;
     gap: 20px;
     padding: 0 15px;
   }
+
   .hero-card-v2 {
     width: 100%;
     max-width: 100%;
     min-height: 400px;
     height: 350px;
   }
+
   .card-illustration {
     background-size: 100% auto;
     background-position: center bottom;
@@ -707,53 +740,37 @@ button {
   .philosophy-section {
     padding: 60px 0;
   }
+
   .philosophy-inner {
     flex-direction: column;
     gap: 50px;
   }
+
   .section-headline {
     font-size: 32px;
   }
+
   .philosophy-features {
     grid-template-columns: 1fr;
     gap: 15px;
   }
 
   .philosophy-images {
-    height: auto;
-    min-height: 360px;
-    display: flex;
-    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
   }
-  .box-1 {
-    width: 240px;
-    height: 280px;
-    position: relative;
-    z-index: 2;
-  }
-  .box-2 {
-    width: 180px;
-    height: 220px;
-    top: 100px;
-    right: 0;
-    position: absolute;
-    z-index: 1;
-  }
-  .heart-icon-overlay {
-    top: 220px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 70px;
-    height: 70px;
-    z-index: 3;
-  }
-  .heart-icon-overlay img {
-    width: 36px;
+
+  .image-card {
+    width: 100%;
+    max-width: 320px;
+    height: 300px;
   }
 
   .cta-section {
     padding: 60px 0;
   }
+
   .cta-inner {
     padding: 40px 20px;
     border-radius: 16px;

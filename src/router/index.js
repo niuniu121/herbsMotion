@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '../views/HomePage.vue'
 import TCMVisualization from '../views/TCMVisualization.vue'
+import PhysioOutcomeView from '../views/PhysioOutcomeView.vue'
+import FAQPage from '../views/FAQPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,6 +16,16 @@ const router = createRouter({
       path: '/tcm',
       name: 'TCM',
       component: TCMVisualization,
+    },
+    {
+      path: '/physio',
+      name: 'Physio',
+      component: PhysioOutcomeView,
+    },
+    {
+      path: '/faq',
+      name: 'FAQPage',
+      component: FAQPage,
     },
   ],
   // 🌟 修复版：使用 Promise 延迟滚动

@@ -10,453 +10,398 @@ const activeChartPoint = ref(null)
 const showTheoryNoteTooltip = ref(false)
 let observer = null
 
-const tcmConditions = [
+const physioConditions = [
   {
-    id: 'insomnia',
-    name: 'Insomnia',
-    time: '2–4 wks',
-    timeUnit: 'weeks',
-    medianValue: 3,
-    axisMax: 4,
-    tcmRate: '78% – 85%',
-    tcmRateNum: 82,
-    noTreatment: '~15%',
-    noTreatNum: 15,
-    sustained: '92% / 85% / 78%',
-    acuRole: 'Best for falling asleep.',
-    herbRole: 'Best for sleep depth.',
-    speedUp: [
-      {
-        title: 'Consistent Circadian Rhythm',
-        desc: ' • Going to bed and waking at the same time stabilizes "Heart Shen" (spirit). \n • Early morning sunlight exposure helps reset the biological clock.',
-      },
-      {
-        title: 'Evening "Wind-Down" Ritual',
-        desc: ' • Reducing screen time 1 hour before bed prevents "Liver Fire" from rising. \n• Warm foot soaks draw energy down from the head.',
-      },
-    ],
-    slowDown: [
-      {
-        title: 'Late Night "Active" Digestion',
-        desc: ' • Eating heavy meals late forces the body to stay "Yang" (active) to digest. \n• Stomach disharmony leads to disturbed sleep.',
-      },
-      {
-        title: 'Inconsistent Treatment',
-        desc: ' • Missing acupuncture sessions prevents the cumulative calming of the nervous system. \n• The body "forgets" the relaxed state and reverts to hyper-arousal.',
-      },
-    ],
-  },
-  {
-    id: 'stress',
-    name: 'Stress/Anxiety',
-    time: '2–4 wks',
-    timeUnit: 'weeks',
-    medianValue: 3,
-    axisMax: 4,
-    tcmRate: '68% – 76%',
-    tcmRateNum: 72,
-    noTreatment: 'Variable',
-    noTreatNum: 20,
-    sustained: '88% / 80% / 72%',
-    acuRole: 'Rapid "reset" of nerves.',
-    herbRole: 'Emotional resilience.',
-  },
-  {
-    id: 'eczema',
-    name: 'Eczema',
-    time: '4–8 wks',
-    timeUnit: 'weeks',
-    medianValue: 6,
-    axisMax: 8,
-    tcmRate: '65% – 75%',
-    tcmRateNum: 70,
-    noTreatment: '~15%',
-    noTreatNum: 15,
-    sustained: '85% / 70% / 62%',
-    acuRole: 'Stops the itch.',
-    herbRole: 'Heals skin barrier & redness.',
-    speedUp: [
-      {
-        title: 'Moisture Management',
-        desc: ' • No Moisture Treatment" in specific phases helps skin dry and regenerate. \n • Using TCM herbal washes reduces Damp-Heat inflammation.',
-      },
-      {
-        title: 'Anti-Inflammatory Diet',
-        desc: ' • Focusing on cooling foods like mung beans or cucumber. \n • Avoiding trigger foods such as dairy, sugar and alcohol.',
-      },
-    ],
-    slowDown: [
-      {
-        title: 'Chronic Scratching',
-        desc: ' • Scratching breaks the skin barrier, invites irritation, and prolongs healing. \n • Physical damage causes the skin to thicken (lichenification), which takes longer to heal.',
-      },
-      {
-        title: 'Topical Steroid Overuse',
-        desc: ' • Prolonged use can thin the skin significantly. \n • Withdrawal from steroids (TSW) can result in a recovery timeline 5x longer than standard eczema.',
-      },
-    ],
-  },
-  {
-    id: 'weight',
-    name: 'Weight Loss',
-    time: '8–12 wks',
-    timeUnit: 'weeks',
-    medianValue: 10,
-    axisMax: 12,
-    tcmRate: '5% – 10% BMI',
-    tcmRateNum: 60,
-    noTreatment: '<2% net',
-    noTreatNum: 10,
-    sustained: '75% / 60% / 45%',
-    acuRole: 'Controls appetite.',
-    herbRole: 'Boosts metabolic rate.',
-  },
-  {
-    id: 'pms',
-    name: 'PMS',
-    time: '2–3 cycles',
-    timeUnit: 'cycles',
-    medianValue: 2.5,
-    axisMax: 3,
-    tcmRate: '75% – 88%',
-    tcmRateNum: 82,
-    noTreatment: '<10%',
-    noTreatNum: 10,
-    sustained: '94% / 88% / 80%',
-    acuRole: 'Best for mood/cramps.',
-    herbRole: 'Best for breast pain.',
-  },
-  {
-    id: 'ivf',
-    name: 'IVF Support',
-    time: '3 months*',
-    timeUnit: 'months',
-    medianValue: 3,
-    axisMax: 3,
-    tcmRate: '+15%–20%',
-    tcmRateNum: 75,
-    noTreatment: 'Baseline',
-    noTreatNum: 40,
-    sustained: 'N/A (Goal is Live Birth)',
-    acuRole: 'Uterine blood flow.',
-    herbRole: 'Egg & lining quality.',
-  },
-  {
-    id: 'bloating',
-    name: 'Bloating/Reflux',
-    time: '1–2 wks',
-    timeUnit: 'weeks',
-    medianValue: 1.5,
-    axisMax: 2,
-    tcmRate: '72% – 84%',
-    tcmRateNum: 78,
-    noTreatment: '20%',
-    noTreatNum: 20,
-    sustained: '90% / 82% / 75%',
-    acuRole: 'Relieves pressure.',
-    herbRole: 'Repairs digestive lining.',
-    speedUp: [
-      {
-        title: 'Mindful Eating',
-        desc: ' •	Chewing each bite 20-30 times reduces the mechanical load on the Spleen. \n• Saliva enzymes start the "TCM transformation" process early.',
-      },
-      {
-        title: 'Warm, Cooked Foods',
-        desc: ' • The stomach needs a "fire" to digest; warm food preserves "Digestive Qi. \n• Soups and stews are "pre-digested" and heal the esophageal lining faster.',
-      },
-    ],
-    slowDown: [
-      {
-        title: 'Cold/Raw Food Intake',
-        desc: ' • Iced drinks and raw salads "extinguish" digestive fire. \n• This leads to "Dampness," causing the heavy, sunken feeling of bloating.',
-      },
-      {
-        title: 'Late Night Eating',
-        desc: ' • Lying down with a full stomach allows acid to travel upward via gravity. \n• Digestion slows significantly during sleep, leading to fermentation and gas.',
-      },
-    ],
-  },
-  {
-    id: 'hayfever',
-    name: 'Hay Fever',
-    time: '1–2 wks',
-    timeUnit: 'weeks',
-    medianValue: 1.5,
-    axisMax: 2,
-    tcmRate: '70% – 88%',
-    tcmRateNum: 79,
-    noTreatment: 'Seasonal',
-    noTreatNum: 30,
-    sustained: '95% / 80% / 65%',
-    acuRole: 'Clears sinuses fast.',
-    herbRole: 'Prevents the next flare.',
-  },
-  {
-    id: 'cold',
-    name: 'Frequent Cold',
-    time: '3 months*',
-    timeUnit: 'months',
-    medianValue: 3,
-    axisMax: 3,
-    tcmRate: '~55% Fewer',
-    tcmRateNum: 55,
-    noTreatment: 'No change',
-    noTreatNum: 5,
-    sustained: '90% / 85% / 80%',
-    acuRole: 'Quick recovery.',
-    herbRole: 'Builds "Wei Qi" (Immunity).',
-  },
-  {
-    id: 'fatigue',
-    name: 'Chronic Fatigue',
-    time: '6–8 wks',
-    timeUnit: 'weeks',
-    medianValue: 7,
-    axisMax: 8,
-    tcmRate: '62% – 72%',
-    tcmRateNum: 67,
-    noTreatment: '<8%',
-    noTreatNum: 8,
-    sustained: '82% / 75% / 68%',
-    acuRole: 'Clears brain fog.',
-    herbRole: 'Rebuilds core stamina.',
-    speedUp: [
-      {
-        title: 'Pacing (Relative Rest)',
-        desc: ' • Staying within your "energy envelope" prevents the "crash" (post-exertional malaise). \n• Gradual, modified activity is better than complete bed rest for maintaining muscle Qi.',
-      },
-      {
-        title: 'Building "Wei Qi"',
-        desc: ' • Consistent use of tonifying herbs like Astragalus (Huang Qi). \n• Acupuncture at "Zusanli" (ST36) to boost white blood cell production.',
-      },
-    ],
-    slowDown: [
-      {
-        title: 'Boom and Bust Cycles',
-        desc: ' • Over-exerting on a "good day" depletes your remaining Kidney Essence (Jing). \n• This creates a "debt" that requires days or weeks of recovery.',
-      },
-      {
-        title: 'Mental Over-Exertion',
-        desc: ' • Intense screen work or emotional stress drains "Heart Blood." \n• In TCM, mental fatigue is just as physically draining as manual labor.',
-      },
-    ],
-  },
-  {
-    id: 'gout',
-    name: 'Gout (Acute/Chronic)',
-    time: '3–7 days',
-    timeUnit: 'days',
-    medianValue: 5,
-    axisMax: 7,
-    tcmRate: '70% – 82%',
-    tcmRateNum: 76,
-    noTreatment: '~15% (slow)',
-    noTreatNum: 15,
-    sustained: '88% / 75% / 60%',
-    acuRole: 'Best for acute pain.',
-    herbRole: 'Best for lowering Uric Acid.',
-    speedUp: [
-      {
-        title: 'Hydration & Alkalization',
-        desc: ' • Drinking 2.5L+ water helps the "Kidneys" flush uric acid crystals. \n• Lemon water or celery juice acts as a natural diuretic in TCM.',
-      },
-      {
-        title: 'Anti-Inflammatory Loading',
-        desc: ' • TCM herbs like Phellodendron (Huang Bai) clear "Damp-Heat" from joints. \n• Applying herbal poultices directly to the joint reduces local swelling.',
-      },
-    ],
-    slowDown: [
-      {
-        title: 'High-Purine Trigger Foods',
-        desc: ' • Alcohol (especially beer) and shellfish fuel "Internal Heat." \n• Fructose/High-sugar drinks interfere with uric acid excretion.',
-      },
-      {
-        title: 'Sudden Extreme Exercise',
-        desc: ' • Over-exerting an inflamed joint causes micro-trauma. \n• "Relative Rest" is required to allow the joint capsule to heal.',
-      },
-    ],
-  },
-  {
-    id: 'bells',
-    name: 'Bell’s Palsy',
-    time: '2–6 wks',
+    id: 'lowbackpain',
+    name: 'Low Back Pain (Non-specific)',
+    time: '2–12 wks',
     timeUnit: 'weeks',
     medianValue: 4,
     axisMax: 6,
-    tcmRate: '85% – 95%',
-    tcmRateNum: 90,
-    noTreatment: '70%',
-    noTreatNum: 70,
-    sustained: '98% / 95% / 90%',
-    acuRole: 'Critical for nerve stimulation.',
-    herbRole: 'Anti-inflammatory support.',
+    physioRate: '85% – 95%',
+    physioRateNum: 90,
+    noTreatment: '~12 weeks (natural course)',
+    noTreatNum: 18,
+    sustained: '92% / 85% / 80%',
+    manualRole: 'Rapid relief of acute spasm & pain.',
+    exerciseRole: 'Rebuilds core stability & prevents recurrence.',
     speedUp: [
       {
-        title: 'Early Intervention',
-        desc: ' • Starting acupuncture within 3 days significantly prevents nerve atrophy. \n• "Electro-acupuncture" at low frequencies encourages nerve regeneration.',
+        title: 'Early, Calm Re-Activation',
+        desc: '• Gentle walking and graded spinal movement reduce fear-based guarding.\n• A confident return to simple daily activity often improves progress quickly.',
       },
       {
-        title: 'Facial Warmth',
-        desc: ' • Keeping the face covered and warm prevents "Wind-Cold" from worsening the paralysis. \n• Gentle facial massage (Gua Sha) maintains muscle tone while the nerve is dormant.',
+        title: 'Pacing + Load Control',
+        desc: '• Breaking activity into manageable blocks helps avoid pain spikes.\n• Smart pacing usually supports steadier week-to-week recovery.',
       },
     ],
     slowDown: [
       {
-        title: 'Cold Exposure',
-        desc: ' • Cold wind or air conditioning constricts blood flow to the facial nerve. \n• In TCM, "Cold" causes "Stagnation," which blocks the nerve is "Qi".',
+        title: 'Complete Resting or Bed Rest',
+        desc: '• Doing too little often increases stiffness and reduces tolerance.\n• Avoidance can delay the return of normal movement confidence.',
       },
       {
-        title: 'High Stress Levels',
-        desc: ' • Stress raises cortisol, which inhibits the body’s natural inflammatory repair. \n• Poor sleep prevents the deep tissue repair that happens during REM cycles.',
+        title: 'Repeated Heavy Bending / Twisting',
+        desc: '• Repeated flare-ups from poor load choices can keep symptoms active.\n• Recovery is slower when the tissue never really settles.',
       },
     ],
   },
   {
-    id: 'sweating',
-    name: 'Excessive Sweating',
-    time: '4–6 wks',
+    id: 'neckpain',
+    name: 'Neck Pain (Non-specific)',
+    time: '2–12 wks',
+    timeUnit: 'weeks',
+    medianValue: 3,
+    axisMax: 4,
+    physioRate: '80% – 90%',
+    physioRateNum: 85,
+    noTreatment: '~12 weeks',
+    noTreatNum: 15,
+    sustained: '88% / 82% / 75%',
+    manualRole: 'Improves joint mobility & releases tight muscles.',
+    exerciseRole: 'Strengthens deep neck flexors & posture control.',
+    speedUp: [
+      {
+        title: 'Posture Variation',
+        desc: '• Changing positions regularly reduces prolonged cervical loading.\n• Small movement breaks during desk work help reduce irritation.',
+      },
+      {
+        title: 'Targeted Deep Neck Training',
+        desc: '• Rebuilding endurance in stabilising muscles improves support.\n• Better control often reduces recurrent pain episodes.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'Long Static Desk Positions',
+        desc: '• Staying still too long can increase local stiffness and sensitivity.\n• Symptoms often persist when the neck never gets movement variety.',
+      },
+      {
+        title: 'Stress-Driven Muscle Guarding',
+        desc: '• Stress can increase upper-trap tension and headache patterns.\n• That tension often makes recovery feel slower than it should.',
+      },
+    ],
+  },
+  {
+    id: 'rotatorcufftendinopathy',
+    name: 'Rotator Cuff Tendinopathy',
+    time: '1.5–6 months',
+    timeUnit: 'months',
+    medianValue: 3,
+    axisMax: 6,
+    physioRate: '75% – 88%',
+    physioRateNum: 82,
+    noTreatment: '<10%',
+    noTreatNum: 10,
+    sustained: '85% / 80% / 70%',
+    manualRole: 'Relieves compensatory muscle tension.',
+    exerciseRole: 'Progressive tendon loading (gold standard long-term).',
+    speedUp: [
+      {
+        title: 'Progressive Tendon Loading',
+        desc: '• Tendons respond best to steady, graded strengthening.\n• Consistency matters more than occasional hard sessions.',
+      },
+      {
+        title: 'Scapular Control',
+        desc: '• Better shoulder blade mechanics reduce overload on the cuff.\n• Cleaner movement usually improves tolerance faster.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'Stop-Start Rehab',
+        desc: '• Tendons dislike long breaks followed by overload.\n• Irregular loading often causes repeated setbacks.',
+      },
+      {
+        title: 'Aggressive Overhead Irritation',
+        desc: '• Heavy overhead work too early can repeatedly provoke symptoms.\n• That keeps the tendon in an irritated state.',
+      },
+    ],
+  },
+  {
+    id: 'rotatorcufftear',
+    name: 'Rotator Cuff Tear (Conservative)',
+    time: '2–6.5 months',
+    timeUnit: 'months',
+    medianValue: 4,
+    axisMax: 6.5,
+    physioRate: '60% – 80%',
+    physioRateNum: 72,
+    noTreatment: '<5%',
+    noTreatNum: 5,
+    sustained: '75% / 70% / 65%',
+    manualRole: 'Pain modulation & inflammation control.',
+    exerciseRole: 'Strengthens intact muscles for compensation.',
+    speedUp: [
+      {
+        title: 'Compensatory Strengthening',
+        desc: '• Building the remaining intact shoulder musculature improves function.\n• Good compensation often reduces pain during daily tasks.',
+      },
+      {
+        title: 'Functional Range Progression',
+        desc: '• Gradually reclaiming useful motion supports confidence.\n• The goal is better function, not forcing perfect movement early.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'Forcing Painful Range',
+        desc: '• Pushing too aggressively into painful motion can increase irritation.\n• It may slow adaptation instead of helping it.',
+      },
+      {
+        title: 'Weak Scapular Support',
+        desc: '• Poor shoulder blade control increases load on already compromised tissues.\n• That often limits progress.',
+      },
+    ],
+  },
+  {
+    id: 'kneeoa',
+    name: 'Knee Osteoarthritis (Acute Phase)',
+    time: '2–12 wks',
     timeUnit: 'weeks',
     medianValue: 5,
     axisMax: 6,
-    tcmRate: '65% – 78%',
-    tcmRateNum: 71,
-    noTreatment: '<10%',
-    noTreatNum: 10,
-    sustained: '85% / 78% / 70%',
-    acuRole: 'Regulates ANS.',
-    herbRole: '"Astringes" the pores.',
-  },
-  {
-    id: 'hives',
-    name: 'Hives (Chronic)',
-    time: '2–4 wks',
-    timeUnit: 'weeks',
-    medianValue: 3,
-    axisMax: 4,
-    tcmRate: '60% – 75%',
-    tcmRateNum: 67,
+    physioRate: '70% – 85%',
+    physioRateNum: 78,
     noTreatment: '~20%',
     noTreatNum: 20,
-    sustained: '82% / 72% / 65%',
-    acuRole: 'Immediate itch relief.',
-    herbRole: 'Stabilizes the immune system.',
-  },
-  {
-    id: 'acne',
-    name: 'Acne',
-    time: '4–8 wks',
-    timeUnit: 'weeks',
-    medianValue: 6,
-    axisMax: 8,
-    tcmRate: '70% – 85%',
-    tcmRateNum: 77,
-    noTreatment: 'Variable',
-    noTreatNum: 25,
-    sustained: '88% / 75% / 60%',
-    acuRole: 'Reduces redness.',
-    herbRole: 'Clears internal "Damp-Heat."',
-  },
-  {
-    id: 'hairloss',
-    name: 'Hair Loss (AGA)',
-    time: '3–6 mo',
-    timeUnit: 'months',
-    medianValue: 4.5,
-    axisMax: 6,
-    tcmRate: '55% – 65%',
-    tcmRateNum: 60,
-    noTreatment: '<5%',
-    noTreatNum: 5,
-    sustained: '90% / 82% / 70%',
-    acuRole: 'Scalp microcirculation.',
-    herbRole: 'Nourishes "Kidney Essence."',
+    sustained: '80% / 75% / 65%',
+    manualRole: 'Reduces joint effusion & synovial inflammation.',
+    exerciseRole: 'Strengthens quadriceps to reduce joint load.',
     speedUp: [
       {
-        title: 'Blood Nourishment',
-        desc: ' • Eating iron-rich and "dark" foods (black sesame, goji) nourishes "Liver Blood." \n• Improved blood quality leads to stronger hair follicles and clearer skin.',
+        title: 'Quadriceps Re-Activation',
+        desc: '• Stronger quads improve shock absorption and joint support.\n• Even small strength gains can change pain quite quickly.',
       },
       {
-        title: 'Scalp Stimulation',
-        desc: ' • Daily "comb-tapping" or Plum Blossom needling increases local Qi flow. \n• Consistent use of sulfur-based herbal washes clears fungal/bacterial load.',
+        title: 'Symptom-Calmed Movement',
+        desc: '• Cycling, controlled walking and sit-to-stand progressions help.\n• Calm movement usually improves lubrication and confidence.',
       },
     ],
     slowDown: [
       {
-        title: 'Chronic Sleep Deprivation',
-        desc: ' • Hair and skin repair occurs between 11 PM and 3 AM (Liver/Gallbladder time). \n• Missing this window results in "Yin Deficiency," leading to dry skin and brittle hair.',
+        title: 'Boom-Bust Activity',
+        desc: '• Doing too much on a good day often causes a painful rebound.\n• OA responds better to consistency than big swings.',
       },
       {
-        title: 'High-Glycemic Diet',
-        desc: ' • Sugar spikes insulin, which triggers sebum (oil) production and acne. \n• Excess sugar glydates collagen, making skin less resilient to dermatitis.',
+        title: 'Persistent Swelling',
+        desc: '• Ongoing effusion can shut down muscle activation.\n• That makes the joint feel weaker and slower to improve.',
       },
     ],
   },
   {
-    id: 'cancerpain',
-    name: 'Cancer Pain',
-    time: '1–2 wks',
-    timeUnit: 'weeks',
-    medianValue: 1.5,
-    axisMax: 2,
-    tcmRate: '~50% Reduction',
-    tcmRateNum: 50,
-    noTreatment: 'Baseline',
-    noTreatNum: 5,
-    sustained: 'Dependent on illness',
-    acuRole: 'Best for neuropathic pain.',
-    herbRole: 'General palliative support.',
+    id: 'meniscus',
+    name: 'Meniscus Injury',
+    time: '1–4 months',
+    timeUnit: 'months',
+    medianValue: 2.5,
+    axisMax: 4,
+    physioRate: '65% – 80%',
+    physioRateNum: 74,
+    noTreatment: '<10%',
+    noTreatNum: 10,
+    sustained: '82% / 75% / 70%',
+    manualRole: 'Improves knee range of motion.',
+    exerciseRole: 'Closed-chain strengthening (e.g., squats).',
+    speedUp: [
+      {
+        title: 'Range + Confidence Recovery',
+        desc: '• Restoring comfortable bend/straighten range improves normal gait.\n• Better movement confidence supports faster functional return.',
+      },
+      {
+        title: 'Closed-Chain Strengthening',
+        desc: '• Controlled weight-bearing exercises usually transfer well to daily life.\n• They help rebuild trust in the knee.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'Twisting Under Load',
+        desc: '• Poorly controlled twisting can keep the knee reactive.\n• Symptoms tend to linger when rotation is repeatedly provoked.',
+      },
+      {
+        title: 'Avoiding Weight-Bearing Too Long',
+        desc: '• Too much unloading reduces strength and tolerance.\n• That can make normal tasks feel harder for longer.',
+      },
+    ],
   },
   {
-    id: 'tmj',
-    name: 'TMJ (Jaw Pain)',
-    time: '2–4 wks',
+    id: 'acl',
+    name: 'ACL Reconstruction',
+    time: '6–9 mos*',
+    timeUnit: 'months',
+    medianValue: 7.5,
+    axisMax: 9,
+    physioRate: '90% – 95%',
+    physioRateNum: 93,
+    noTreatment: 'N/A (surgical)',
+    noTreatNum: 30,
+    sustained: '95% / 90% / 85%',
+    manualRole: 'Early scar release & ROM recovery.',
+    exerciseRole: 'Neuromuscular control & plyometric training.',
+    speedUp: [
+      {
+        title: 'Milestone-Based Progression',
+        desc: '• Strength, hop quality and control should progress in phases.\n• Following the right sequence protects long-term outcome.',
+      },
+      {
+        title: 'Consistent Strength Work',
+        desc: '• Regular lower-limb loading is essential for return to sport.\n• Small, consistent gains matter more than random big sessions.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'Rushing Return to Sport',
+        desc: '• Returning too early can create major setbacks or reinjury risk.\n• Function must match the demands of the sport.',
+      },
+      {
+        title: 'Persistent Quad Inhibition',
+        desc: '• When quad strength lags, gait and landing mechanics suffer.\n• That slows higher-level recovery.',
+      },
+    ],
+  },
+  {
+    id: 'anklesprain',
+    name: 'Lateral Ankle Sprain',
+    time: '2–12 wks',
     timeUnit: 'weeks',
-    medianValue: 3,
-    axisMax: 4,
-    tcmRate: '75% – 85%',
-    tcmRateNum: 80,
+    medianValue: 4,
+    axisMax: 6,
+    physioRate: '85% – 95%',
+    physioRateNum: 90,
     noTreatment: '~25%',
     noTreatNum: 25,
-    sustained: '92% / 85% / 78%',
-    acuRole: 'Unbeatable for muscle release.',
-    herbRole: 'Best for joint inflammation.',
+    sustained: '90% / 88% / 82%',
+    manualRole: 'Lymphatic drainage & early mobilization.',
+    exerciseRole: 'Proprioception (balance) training to prevent recurrence.',
+    speedUp: [
+      {
+        title: 'Early Mobility + Compression',
+        desc: '• Managing swelling early often helps range return faster.\n• Better mobility supports a smoother walking pattern.',
+      },
+      {
+        title: 'Balance Retraining',
+        desc: '• Proprioception work reduces instability and recurrence risk.\n• It is often the difference between recovery and repeat sprains.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'Skipping Balance Work',
+        desc: '• Pain may improve before stability does.\n• Without retraining, recurrence risk stays high.',
+      },
+      {
+        title: 'Returning to Sport Too Soon',
+        desc: '• A fast pain drop can be misleading.\n• Unready ligaments and poor control often cause re-injury.',
+      },
+    ],
   },
   {
-    id: 'cough',
-    name: 'Chronic Cough',
-    time: '1–3 wks',
-    timeUnit: 'weeks',
-    medianValue: 2,
-    axisMax: 3,
-    tcmRate: '72% – 84%',
-    tcmRateNum: 78,
-    noTreatment: '~30%',
-    noTreatNum: 30,
-    sustained: '85% / 78% / 72%',
-    acuRole: 'Stops the cough reflex.',
-    herbRole: 'Moistens the lung tissue.',
-  },
-  {
-    id: 'fertility',
-    name: 'Fertility Support',
-    time: '3–6 mo',
+    id: 'achilles',
+    name: 'Achilles Tendinopathy',
+    time: '2–6.5 months',
     timeUnit: 'months',
-    medianValue: 4.5,
+    medianValue: 4,
+    axisMax: 6.5,
+    physioRate: '70% – 85%',
+    physioRateNum: 78,
+    noTreatment: '<5%',
+    noTreatNum: 5,
+    sustained: '85% / 78% / 72%',
+    manualRole: 'Deep calf muscle release.',
+    exerciseRole: 'HSR (heavy slow resistance) & eccentric loading.',
+    speedUp: [
+      {
+        title: 'Heavy Slow Resistance',
+        desc: '• The Achilles usually responds well to progressive calf strengthening.\n• Tissue capacity improves when loading is gradual and regular.',
+      },
+      {
+        title: 'Activity Modification',
+        desc: '• Adjusting hills, sprinting and jumping load helps symptoms settle.\n• Smart training edits keep progress moving.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'Under-Recovery Between Sessions',
+        desc: '• Repeated overload without recovery can keep the tendon reactive.\n• The result is often a stop-start rehab pattern.',
+      },
+      {
+        title: 'Ignoring Morning Stiffness Trends',
+        desc: '• Morning pain is a useful load marker.\n• If ignored, training often overshoots tolerance.',
+      },
+    ],
+  },
+  {
+    id: 'plantarfasciitis',
+    name: 'Plantar Fasciitis',
+    time: '1.5–6 months',
+    timeUnit: 'months',
+    medianValue: 3.5,
     axisMax: 6,
-    tcmRate: '+15%–20% Rate',
-    tcmRateNum: 75,
-    noTreatment: 'Baseline',
-    noTreatNum: 40,
-    sustained: 'Target: Healthy Birth',
-    acuRole: 'Blood flow.',
-    herbRole: 'Follicle & lining quality.',
+    physioRate: '75% – 90%',
+    physioRateNum: 84,
+    noTreatment: '~15%',
+    noTreatNum: 15,
+    sustained: '88% / 85% / 80%',
+    manualRole: 'Shockwave or plantar fascia release.',
+    exerciseRole: 'Intrinsic foot strengthening & calf stretching.',
+    speedUp: [
+      {
+        title: 'Foot Load Redistribution',
+        desc: '• Footwear, taping and calf flexibility can reduce early strain.\n• That often makes walking more tolerable quite quickly.',
+      },
+      {
+        title: 'Intrinsic Foot Strength',
+        desc: '• Better local foot support improves long-term resilience.\n• It helps reduce repeated morning pain patterns.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'Long Standing on Hard Floors',
+        desc: '• Prolonged hard-surface loading can keep symptoms persistent.\n• The fascia often needs smarter load exposure.',
+      },
+      {
+        title: 'No Calf Flexibility Work',
+        desc: '• Tight calf mechanics can maintain higher plantar stress.\n• Ignoring this driver often slows progress.',
+      },
+    ],
+  },
+  {
+    id: 'pfps',
+    name: 'Patellofemoral Pain Syndrome',
+    time: '1.5–5 months',
+    timeUnit: 'months',
+    medianValue: 3,
+    axisMax: 5,
+    physioRate: '80% – 90%',
+    physioRateNum: 85,
+    noTreatment: 'Variable',
+    noTreatNum: 22,
+    sustained: '90% / 85% / 75%',
+    manualRole: 'Reduces patellar tracking stress.',
+    exerciseRole: 'Hip & knee alignment strengthening.',
+    speedUp: [
+      {
+        title: 'Hip-Knee Alignment Work',
+        desc: '• Better glute and quadriceps control improves tracking mechanics.\n• It usually reduces stair and squat discomfort.',
+      },
+      {
+        title: 'Gradual Reloading of Squats / Stairs',
+        desc: '• Controlled exposure helps rebuild knee tolerance.\n• That is often more effective than total avoidance.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'High Repetition Knee Irritation',
+        desc: '• Too many stairs, jumps or deep squats too early can keep symptoms active.\n• Repeated irritation slows adaptation.',
+      },
+      {
+        title: 'Poor Movement Strategy',
+        desc: '• Dynamic valgus and poor landing control can maintain pain.\n• Mechanics matter a lot in this condition.',
+      },
+    ],
   },
 ]
 
-const selectedId = ref(tcmConditions[0].id)
+const selectedId = ref(physioConditions[0].id)
 
 const selectedData = computed(() => {
-  return tcmConditions.find((c) => c.id === selectedId.value) || tcmConditions[0]
+  return physioConditions.find((c) => c.id === selectedId.value) || physioConditions[0]
 })
 
 const sustainedData = computed(() => {
@@ -572,7 +517,6 @@ const chartInteractivePoints = computed(() => {
   const condition = selectedData.value
   const { p0, p1, p2, p3 } = getCurveControlPoints(condition)
   const max = condition.axisMax || 4
-
   const pointCount = 25
   const points = []
 
@@ -584,11 +528,8 @@ const chartInteractivePoints = computed(() => {
 
     points.push({
       id: `${condition.id}-${i}`,
-      t,
-      xValue: rawXValue,
       xLabel: formatAxisTick(rawXValue, condition.timeUnit),
       yLabel: `${Math.round(percent)}%`,
-      percentValue: Math.round(percent),
       xPercent: point.x,
       yPercent: (point.y / 50) * 100,
     })
@@ -639,9 +580,7 @@ const tooltipPlacementClass = computed(() => {
 
 const activeGuideStyle = computed(() => {
   if (!activeChartPoint.value) return {}
-  return {
-    left: `${activeChartPoint.value.xPercent}%`,
-  }
+  return { left: `${activeChartPoint.value.xPercent}%` }
 })
 
 const activeDotStyle = computed(() => {
@@ -653,7 +592,7 @@ const activeDotStyle = computed(() => {
 })
 
 const theoryNoteTooltipText =
-  'Please note, these theories are hypotheses based on Chinese medicine theories.'
+  'These explanations are simplified physiotherapy-informed summaries for education and visualisation only. They are not a diagnosis or a substitute for individual clinical assessment.'
 
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value
@@ -722,13 +661,13 @@ onUnmounted(() => {
 
 <template>
   <div class="app-container">
-    <main class="main-content tcm-page-main" :style="{ backgroundColor: currentBgColor }">
+    <main class="main-content physio-page-main" :style="{ backgroundColor: currentBgColor }">
       <NavBar />
 
       <section class="vis-hero" :ref="setSectionRef" data-bgcolor="#E2E8DF">
         <div class="container text-center">
-          <p class="text-uppercase text-teal tracking-wide">TCM Clinical Outcomes</p>
-          <h1 class="hero-headline">Visualise Your Healing Trajectory</h1>
+          <p class="text-uppercase text-teal tracking-wide">PHYSIO CLINICAL OUTCOMES</p>
+          <h1 class="hero-headline">Visualise Your Recovery Trajectory</h1>
 
           <div class="select-filter-container">
             <span class="filter-label">CHOOSE A CONDITION</span>
@@ -750,7 +689,7 @@ onUnmounted(() => {
             <Transition name="dropdown">
               <ul v-if="isDropdownOpen" class="select-options">
                 <li
-                  v-for="cond in tcmConditions"
+                  v-for="cond in physioConditions"
                   :key="cond.id"
                   :class="{ active: cond.id === selectedId }"
                   @click.stop="selectCondition(cond.id)"
@@ -801,10 +740,11 @@ onUnmounted(() => {
                         stroke-width="1.2"
                         stroke-linecap="round"
                       />
-                      <circle cx="4" cy="12" r="1.2" fill="#D68BA2" />
+                      <circle cx="4" cy="12" r="1.2" fill="#D8C2A8" />
                       <circle cx="12" cy="12" r="1.5" fill="#325B49" />
                     </svg>
                   </div>
+
                   <div>
                     <h3>Time to Initial Symptom Relief</h3>
                     <p class="sub-text">{{ selectedData.time }} typical</p>
@@ -954,19 +894,6 @@ onUnmounted(() => {
                       <rect x="4" y="12" width="3.2" height="6" rx="1.6" fill="#D8C2A8" />
                       <rect x="10.2" y="8.5" width="3.2" height="9.5" rx="1.6" fill="#325B49" />
                       <rect x="16.4" y="6" width="3.2" height="12" rx="1.6" fill="#5E8B73" />
-                      <path
-                        d="M15.8 5.8C15.8 3.9 17.3 2.8 19.2 2.8C19.2 4.7 18.1 6.2 16.2 6.5"
-                        stroke="#325B49"
-                        stroke-width="1.4"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                      <path
-                        d="M16.2 6.4L18.4 3.9"
-                        stroke="#325B49"
-                        stroke-width="1.1"
-                        stroke-linecap="round"
-                      />
                       <line
                         x1="3"
                         y1="19.5"
@@ -978,22 +905,23 @@ onUnmounted(() => {
                       />
                     </svg>
                   </div>
+
                   <div>
                     <h3>Results Comparison</h3>
-                    <p class="sub-text">Recovery Rate (%)</p>
+                    <p class="sub-text">Physio Recovery Rate</p>
                   </div>
                 </div>
 
                 <div class="comparison-bars">
                   <div class="bar-group hover-info-block">
                     <div class="bar-info">
-                      <span class="bar-title">With TCM</span>
-                      <span class="bar-value teal-text">{{ selectedData.tcmRate }}</span>
+                      <span class="bar-title">With Physio</span>
+                      <span class="bar-value teal-text">{{ selectedData.physioRate }}</span>
                     </div>
                     <div class="bar-track">
                       <div
                         class="bar-fill teal-fill animate-grow"
-                        :style="{ '--target-width': selectedData.tcmRateNum + '%' }"
+                        :style="{ '--target-width': selectedData.physioRateNum + '%' }"
                       ></div>
                     </div>
                   </div>
@@ -1026,10 +954,9 @@ onUnmounted(() => {
                         class="Notion theory-note-btn"
                         @click.stop="showTheoryNoteTooltip = !showTheoryNoteTooltip"
                         @focus="showTheoryNoteTooltip = true"
-                        aria-label="Show theory note"
+                        aria-label="Show physio note"
                       >
-                        (Please note, these theories are hypotheses based on Chinese medicine
-                        theories.)
+                        (Please note, these explanations are simplified clinical summaries.)
                       </button>
 
                       <Transition name="note-fade">
@@ -1041,98 +968,106 @@ onUnmounted(() => {
                   </div>
 
                   <div class="split-box hover-info-block">
-                    <span class="split-label">
+                    <span class="split-label split-label-with-icon">
                       <svg
-                        width="26"
-                        height="26"
+                        width="24"
+                        height="24"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="#000000"
                         xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
                       >
-                        <line
-                          x1="12"
-                          y1="4"
-                          x2="12"
-                          y2="18"
-                          stroke="#000000"
-                          stroke-width="1.6"
-                          stroke-linecap="round"
-                        />
-                        <circle cx="12" cy="4" r="1.6" fill="#000000" />
+                        <circle cx="8" cy="9" r="2.4" fill="#D8C2A8" />
                         <path
-                          d="M6 12C7.5 10.5 9 10.5 10.5 12C12 13.5 13.5 13.5 15 12C16.5 10.5 18 10.5 19 12"
-                          stroke="#000000"
-                          stroke-width="1.4"
+                          d="M5.5 19V16.8C5.5 14.9 6.9 13.5 8.8 13.5H11.2"
+                          stroke="#325B49"
+                          stroke-width="1.7"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                        <path
+                          d="M14 8.5L18.5 4"
+                          stroke="#325B49"
+                          stroke-width="1.8"
                           stroke-linecap="round"
                         />
+                        <path
+                          d="M13 11L19.5 17.5"
+                          stroke="#325B49"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        />
+                        <circle cx="19.5" cy="17.5" r="1.1" fill="#325B49" />
                       </svg>
-                      Acupuncture
+                      Manual Therapy
                     </span>
-                    <span class="split-text">{{ selectedData.acuRole }}</span>
+                    <span class="split-text">{{ selectedData.manualRole }}</span>
                   </div>
 
                   <div class="split-box mt-10 hover-info-block">
-                    <span class="split-label">
+                    <span class="split-label split-label-with-icon">
                       <svg
-                        width="26"
-                        height="26"
+                        width="24"
+                        height="24"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
                       >
+                        <circle cx="8" cy="6.8" r="2.2" fill="#D8C2A8" />
                         <path
-                          d="M5 14C5 17 7.5 19 12 19C16.5 19 19 17 19 14"
+                          d="M8 9.8V14.6"
                           stroke="#325B49"
-                          stroke-width="1.6"
-                          stroke-linecap="round"
-                        />
-                        <line
-                          x1="4"
-                          y1="14"
-                          x2="20"
-                          y2="14"
-                          stroke="#325B49"
-                          stroke-width="1.4"
+                          stroke-width="1.8"
                           stroke-linecap="round"
                         />
                         <path
-                          d="M10 11C10 9.5 11.2 8.5 12.7 8.5C12.7 10 11.8 11.2 10.3 11.5"
+                          d="M8 11.8L4.8 13.8"
                           stroke="#325B49"
-                          stroke-width="1.4"
+                          stroke-width="1.8"
                           stroke-linecap="round"
-                          stroke-linejoin="round"
                         />
                         <path
-                          d="M14 11C14 9.5 15.2 8.5 16.7 8.5C16.7 10 15.8 11.2 14.3 11.5"
+                          d="M8 11.8L11.6 10.2"
                           stroke="#325B49"
-                          stroke-width="1.4"
+                          stroke-width="1.8"
                           stroke-linecap="round"
-                          stroke-linejoin="round"
                         />
                         <path
-                          d="M11 6C11 5 12 5 12 4"
+                          d="M8 14.6L5.2 18.8"
+                          stroke="#325B49"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        />
+                        <path
+                          d="M8 14.6L13.8 18.2"
+                          stroke="#325B49"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        />
+                        <path
+                          d="M14.8 6.5H20"
                           stroke="#5E8B73"
-                          stroke-width="1.2"
+                          stroke-width="1.8"
                           stroke-linecap="round"
                         />
                         <path
-                          d="M13 6C13 5 14 5 14 4"
+                          d="M17.4 3.9V9.1"
                           stroke="#5E8B73"
-                          stroke-width="1.2"
+                          stroke-width="1.8"
                           stroke-linecap="round"
                         />
                       </svg>
-                      Herbal Medicine
+                      Exercise Rehab
                     </span>
-                    <span class="split-text">{{ selectedData.herbRole }}</span>
+                    <span class="split-text">{{ selectedData.exerciseRole }}</span>
                   </div>
                 </div>
 
                 <div class="sustain-block mt-30 hover-info-block">
                   <div class="sustain-header">
-                    <h4>Sustainability of TCM Treatment Outcomes (%)</h4>
-                    <span class="sub-text">Sustained Relief (3 / 6 / 12 months)</span>
+                    <h4>Sustained Relief (%)</h4>
+                    <span class="sub-text">3 / 6 / 12 months</span>
                   </div>
 
                   <template v-if="sustainedData.mode === 'bars'">
@@ -1157,9 +1092,7 @@ onUnmounted(() => {
                   </template>
 
                   <template v-else>
-                    <div class="sustain-note">
-                      {{ selectedData.sustained }}
-                    </div>
+                    <div class="sustain-note">{{ selectedData.sustained }}</div>
                   </template>
                 </div>
               </div>
@@ -1177,7 +1110,7 @@ onUnmounted(() => {
               <div class="factors-grid">
                 <div class="factor-col">
                   <h4 class="factor-heading teal-text">
-                    <span class="arrow-up">↑</span> What can speed recovery
+                    <span class="arrow-up">↑</span> What speeds up recovery
                   </h4>
 
                   <div
@@ -1187,13 +1120,13 @@ onUnmounted(() => {
                     :style="{ '--factor-index': i }"
                   >
                     <h5>{{ item.title }}</h5>
-                    <p>{{ item.desc }}</p>
+                    <p class="factor-desc">{{ item.desc }}</p>
                   </div>
                 </div>
 
                 <div class="factor-col">
                   <h4 class="factor-heading pink-text">
-                    <span class="arrow-down">↓</span> What can slow down recovery
+                    <span class="arrow-down">↓</span> What slows down recovery
                   </h4>
 
                   <div
@@ -1203,7 +1136,7 @@ onUnmounted(() => {
                     :style="{ '--factor-index': i }"
                   >
                     <h5>{{ item.title }}</h5>
-                    <p>{{ item.desc }}</p>
+                    <p class="factor-desc">{{ item.desc }}</p>
                   </div>
                 </div>
               </div>
@@ -1217,87 +1150,26 @@ onUnmounted(() => {
           <div class="disclaimer-grid">
             <div class="disclaimer-box">
               <div class="disclaimer-head">
-                <span class="disclaimer-icon">
-                  <svg
-                    width="28"
-                    height="28"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="12" cy="12" r="8" stroke="#D68BA2" stroke-width="1.5" />
-                    <line
-                      x1="12"
-                      y1="8"
-                      x2="12"
-                      y2="12.2"
-                      stroke="#325B49"
-                      stroke-width="1.7"
-                      stroke-linecap="round"
-                    />
-                    <circle cx="12" cy="15.2" r="1.1" fill="#325B49" />
-                    <path
-                      d="M15.4 8.4C15.4 7.3 16.3 6.5 17.4 6.5C17.4 7.6 16.7 8.5 15.6 8.6"
-                      stroke="#325B49"
-                      stroke-width="1.1"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </span>
+                <span class="disclaimer-icon">ⓘ</span>
                 <h4>How do we estimate outcomes?</h4>
               </div>
               <p>
-                We combine insights from published research, our own experience and that of our
-                peers, along with typical treatment timelines and conservative modelling
-                assumptions, to map out common trajectories. The ranges presented reflect our
-                experience only.
+                We combine published physiotherapy guidance, conservative rehabilitation timelines
+                and practical modelling assumptions to visualise common recovery trajectories. The
+                ranges shown represent broad patterns only.
               </p>
             </div>
 
             <div class="disclaimer-box warning">
               <div class="disclaimer-head">
-                <span class="disclaimer-icon">
-                  <svg
-                    width="28"
-                    height="28"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="12" cy="12" r="8" stroke="#D68BA2" stroke-width="1.5" />
-                    <line
-                      x1="12"
-                      y1="8"
-                      x2="12"
-                      y2="12.2"
-                      stroke="#325B49"
-                      stroke-width="1.7"
-                      stroke-linecap="round"
-                    />
-                    <circle cx="12" cy="15.2" r="1.1" fill="#325B49" />
-                    <path
-                      d="M15.4 8.4C15.4 7.3 16.3 6.5 17.4 6.5C17.4 7.6 16.7 8.5 15.6 8.6"
-                      stroke="#325B49"
-                      stroke-width="1.1"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </span>
+                <span class="disclaimer-icon">!</span>
                 <h4>Important Disclaimer</h4>
               </div>
               <p>
-                This tool is intended for visualisation and general educational purposes only, to
-                help clients gain a broad understanding of some common conditions managed by our
-                practitioners. It is based on practitioner experience and selected published
-                research. <br />It does not account for individual circumstances, including your
-                specific condition, medical history, medications, or other personal factors. Health
-                conditions are complex, and outcomes can vary significantly between individuals.<br />
-                Our treatments are not a substitute for medical care provided by your healthcare
-                professional. You should always follow the advice and treatment plan recommended by
-                your medical practitioner, and consult them directly for guidance specific to your
-                situation.
+                This tool provides general educational information only. It is not a diagnosis and
+                cannot replace an assessment by a qualified physiotherapist, GP or specialist.
+                Individual outcomes vary depending on diagnosis, severity, training load, imaging
+                findings, surgical history and adherence to rehab.
               </p>
             </div>
           </div>
@@ -1318,7 +1190,7 @@ onUnmounted(() => {
   padding-bottom: 0;
 }
 
-.tcm-page-main {
+.physio-page-main {
   opacity: 1 !important;
   animation: pageFadeIn 0.8s ease-out forwards;
 }
@@ -1380,7 +1252,7 @@ onUnmounted(() => {
   background: white;
   border-radius: 20px;
   padding: 25px 40px;
-  max-width: 600px;
+  max-width: 640px;
   margin: 0 auto;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.04);
   position: relative;
@@ -1441,7 +1313,7 @@ onUnmounted(() => {
   padding: 10px 0;
   margin: 0;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  max-height: 350px;
+  max-height: 360px;
   overflow-y: auto;
 }
 
@@ -1541,7 +1413,7 @@ onUnmounted(() => {
   background: var(--primary-teal);
   color: white;
   padding: 4px 12px;
-  border-radius: 12px;
+  border-radius: 999px;
   font-size: 12px;
 }
 
@@ -1620,7 +1492,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #aaa;
+  color: #8e9a92;
   margin-top: 10px;
   font-weight: 600;
   transition: color 0.25s ease;
@@ -1677,7 +1549,7 @@ onUnmounted(() => {
 
 .chart-hotspot:hover::before,
 .chart-hotspot:focus-visible::before {
-  background: rgba(17, 51, 48, 0.18);
+  background: rgba(47, 181, 168, 0.18);
   transform: scale(1.18);
   box-shadow: 0 0 0 6px rgba(47, 181, 168, 0.08);
 }
@@ -1925,10 +1797,10 @@ onUnmounted(() => {
 .split-box {
   background: #f9fbf9;
   border-radius: 12px;
-  padding: 15px;
+  padding: 18px 18px 16px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   transition:
     transform 0.28s ease,
     box-shadow 0.28s ease,
@@ -1946,10 +1818,14 @@ onUnmounted(() => {
   gap: 8px;
 }
 
+.split-label-with-icon svg {
+  flex-shrink: 0;
+}
+
 .split-text {
   font-size: 15px;
   color: var(--text-dark);
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .sustain-block {
@@ -2094,10 +1970,10 @@ onUnmounted(() => {
   transition: color 0.25s ease;
 }
 
-.factor-card p {
+.factor-desc {
   margin: 0;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
   color: #555;
   white-space: pre-line;
 }
@@ -2124,17 +2000,47 @@ onUnmounted(() => {
   gap: 40px;
 }
 
+.disclaimer-box {
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.disclaimer-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.disclaimer-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(50, 91, 73, 0.08);
+  color: var(--primary-teal);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
 .disclaimer-box h4 {
   font-size: 16px;
   color: var(--text-dark);
-  margin: 0 0 10px;
+  margin: 0;
 }
 
 .disclaimer-box p {
   font-size: 13px;
   color: #666;
-  line-height: 1.6;
+  line-height: 1.7;
   margin: 0;
+}
+
+.disclaimer-box.warning .disclaimer-icon {
+  background: rgba(214, 139, 162, 0.12);
+  color: var(--accent-pink);
 }
 
 .disclaimer-box.warning h4 {
@@ -2446,26 +2352,6 @@ onUnmounted(() => {
 .fade-leave-to {
   opacity: 0;
   transform: translateY(-15px);
-}
-
-.disclaimer-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.disclaimer-icon {
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.disclaimer-box h4 {
-  margin: 0;
 }
 
 @media (max-width: 768px) {

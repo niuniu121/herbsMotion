@@ -8,7 +8,7 @@ const socialIcons = ['📱', '📷']
       <div class="footer-left">
         <div class="logo-area footer-logo">
           <span class="logo-icon"
-            ><img class="logo" src="../assets/logo.png" style="width: 28px; height: auto"
+            ><img class="logo" src="../assets/logo_green.svg" style="width: 28px; height: auto"
           /></span>
           <span class="logo-text">Herbs & Motion</span>
         </div>

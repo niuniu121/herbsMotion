@@ -3,31 +3,28 @@ import { ref, onMounted, onUnmounted } from 'vue'
 
 const isScrolled = ref(false)
 const isMobileMenuOpen = ref(false)
-const isDropdownOpen = ref(false) // 控制移动端下拉菜单
+const isDropdownOpen = ref(false)
 
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 50
 }
 
-// 切换移动端抽屉菜单
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
   if (isMobileMenuOpen.value) {
     document.body.style.overflow = 'hidden'
   } else {
     document.body.style.overflow = ''
-    isDropdownOpen.value = false // 关闭菜单时重置下拉状态
+    isDropdownOpen.value = false
   }
 }
 
-// 点击链接后关闭整个菜单
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false
   isDropdownOpen.value = false
   document.body.style.overflow = ''
 }
 
-// 控制移动端下拉菜单的展开/收起
 const toggleDropdownMobile = () => {
   if (window.innerWidth <= 768) {
     isDropdownOpen.value = !isDropdownOpen.value
@@ -47,7 +44,9 @@ onUnmounted(() => {
   <header :class="['page-header', { 'is-scrolled': isScrolled }]">
     <div class="container header-inner">
       <div class="logo-area">
-        <span class="logo-icon"><img class="logo" src="../assets/logo.png" alt="logo" /></span>
+        <span class="logo-icon"
+          ><img class="logo" src="../assets/logo_green.svg" alt="logo"
+        /></span>
         <span class="logo-text">Herbs & Motion</span>
       </div>
 
@@ -58,7 +57,7 @@ onUnmounted(() => {
 
           <div class="dropdown-wrapper" @click="toggleDropdownMobile">
             <a href="#" class="dropdown-trigger" @click.prevent>
-              Visualization
+              Focussed Healing
               <svg
                 :class="['chevron-icon', { rotate: isDropdownOpen }]"
                 viewBox="0 0 24 24"
@@ -73,13 +72,12 @@ onUnmounted(() => {
             </a>
             <div :class="['dropdown-menu', { 'show-mobile': isDropdownOpen }]">
               <RouterLink to="/tcm" @click="closeMobileMenu">TCM</RouterLink>
-              <a href="#" @click="closeMobileMenu">Physio</a>
+              <RouterLink to="/physio" @click="closeMobileMenu">Physio</RouterLink>
             </div>
           </div>
 
           <a href="#" @click="closeMobileMenu">Our Services</a>
-          <a href="#" @click="closeMobileMenu">What to Expect</a>
-          <a href="#" @click="closeMobileMenu">Focused Healing</a>
+          <RouterLink to="/faq" @click="closeMobileMenu">FQA</RouterLink>
           <a href="#" class="mobile-only-link" @click="closeMobileMenu">Location</a>
         </nav>
       </div>
@@ -99,7 +97,6 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* 继承全局变量 (Ensure these are defined in your main.css or App.vue) */
 .page-header {
   position: sticky;
   top: 0;
@@ -118,8 +115,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* Added to ensure the container stretches to the max-width if necessary, 
-     though usually handled by the global .container class */
   width: 100%;
 }
 .logo-area {
@@ -156,35 +151,32 @@ onUnmounted(() => {
   color: var(--accent-pink);
 }
 
-/* --- Added/Fixed Button Styles for the Auth/Action Area --- */
 .auth-buttons {
   display: flex;
   align-items: center;
-  gap: 15px; /* Adjust spacing between Location and Button */
+  gap: 15px;
   position: relative;
   z-index: 1600;
 }
 
-/* Style for the Location link */
 .btn-login {
   color: var(--text-dark);
   text-decoration: none;
   font-weight: 500;
-  padding: 10px 15px; /* Give it some padding for a better click area */
+  padding: 10px 15px;
   transition: color 0.3s;
 }
 .btn-login:hover {
   color: var(--accent-pink);
 }
 
-/* Style for the Book a Consultation button */
 .btn-get-started {
   background-color: var(--primary-teal);
   color: white;
   border: none;
   border-radius: 20px;
   padding: 10px 20px;
-  font-family: inherit; /* Inherit font from body */
+  font-family: inherit;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -201,7 +193,6 @@ onUnmounted(() => {
   display: none;
 }
 
-/* --- 桌面端下拉菜单样式 --- */
 .dropdown-wrapper {
   position: relative;
 }
@@ -233,7 +224,7 @@ onUnmounted(() => {
   flex-direction: column;
   text-align: center;
 }
-/* 桌面端 hover 展开 */
+
 @media (min-width: 769px) {
   .dropdown-wrapper:hover .dropdown-menu {
     opacity: 1;
@@ -250,12 +241,12 @@ onUnmounted(() => {
   display: block;
 }
 .dropdown-menu a:hover {
-  background: rgba(207, 218, 200, 0.3); /* 浅绿背景 */
+  background: rgba(207, 218, 200, 0.3);
   color: var(--primary-teal);
 }
 
 /* ==========================================================================
-   H5 移动端响应式适配 (Mobile Responsive & Hamburger Menu)
+   H5 
    ========================================================================== */
 @media (max-width: 768px) {
   .desktop-only {
@@ -331,7 +322,6 @@ onUnmounted(() => {
     color: var(--primary-teal) !important;
   }
 
-  /* 移动端下拉菜单覆盖样式 */
   .dropdown-wrapper {
     display: flex;
     flex-direction: column;
@@ -348,7 +338,7 @@ onUnmounted(() => {
     min-width: auto;
     height: 0;
     overflow: hidden;
-    transition: none; /* 移动端用 vue 控制显隐即可 */
+    transition: none;
   }
   .dropdown-menu.show-mobile {
     opacity: 1;

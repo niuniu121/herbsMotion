@@ -1,18 +1,18 @@
+<template>
+  <RouterView />
+  <HerbsieBot />
+</template>
 <script setup>
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import HerbsieBot from '@/component/HerbsieBot.vue'
-import PageLoader from '@/component/PageLoader.vue'
-
-const route = useRoute()
-
-const isAdminPage = computed(() => {
-  return route.name === 'AdminLogin' || route.name === 'AdminPromotion'
-})
+import { RouterView } from 'vue-router'
+import HerbsieBot from './component/HerbsieBot.vue'
 </script>
 
-<template>
-  <PageLoader v-if="!isAdminPage" />
-  <router-view />
-  <HerbsieBot v-if="!isAdminPage" />
-</template>
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+* {
+  box-sizing: border-box;
+}
+</style>

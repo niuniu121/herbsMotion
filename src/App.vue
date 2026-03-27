@@ -6,13 +6,13 @@ import PageLoader from '@/component/PageLoader.vue'
 
 const route = useRoute()
 
-const isAdminPage = computed(() => route.path.startsWith('/admin'))
+const isAdminPage = computed(() => {
+  return route.name === 'AdminLogin' || route.name === 'AdminPromotion'
+})
 </script>
 
 <template>
-  <PageLoader />
-
+  <PageLoader v-if="!isAdminPage" />
   <router-view />
-
   <HerbsieBot v-if="!isAdminPage" />
 </template>

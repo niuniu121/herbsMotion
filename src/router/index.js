@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import HomePage from '../views/HomePage.vue'
 import TCMVisualization from '../views/TCMVisualization.vue'
 import PhysioOutcomeView from '../views/PhysioOutcomeView.vue'
@@ -8,7 +8,7 @@ import AdminLogin from '@/views/AdminLogin.vue'
 import AdminPromotion from '@/views/AdminPromotion.vue'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(),
   routes: [
     {
       path: '/',

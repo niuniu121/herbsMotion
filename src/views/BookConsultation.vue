@@ -12,31 +12,6 @@
         </p>
       </section>
 
-      <section class="top-info-grid">
-        <div class="info-card">
-          <div class="card-icon">👨‍⚕️</div>
-          <div>
-            <p class="card-label">Practitioner</p>
-            <h3>Mr Geng H (Jay) Zheng</h3>
-            <p class="card-text">
-              Please select your preferred consultation type and available booking time through the
-              booking system below.
-            </p>
-          </div>
-        </div>
-
-        <div class="info-card">
-          <div class="card-icon">📍</div>
-          <div>
-            <p class="card-label">Clinic Address</p>
-            <h3>696 Burke Rd, Camberwell</h3>
-            <p class="card-text">
-              Conveniently located for your in-person consultation and ongoing care.
-            </p>
-          </div>
-        </div>
-      </section>
-
       <section v-if="promotion.visible" class="promotion-section">
         <div class="promotion-card">
           <div class="promotion-left">
@@ -83,7 +58,7 @@
               <li>Select your treatment or consultation type</li>
               <li>Choose an available practitioner and time</li>
               <li>Enter your details and confirm the booking</li>
-              <li>Receive your booking confirmation online</li>
+              <li>Receive a confirmation email</li>
             </ul>
           </div>
 
@@ -102,14 +77,53 @@
               we will help guide you.
             </p>
             <div class="contact-mini">
-              <span>Practitioner: Mr Geng H (Jay) Zheng</span>
-              <span>Address: 696 Burke Rd, Camberwell</span>
+              <span>Email: info@herbsmotion.com.au</span>
+              <span>Phone: 0433644931</span>
             </div>
           </div>
         </aside>
       </section>
     </main>
+    <section class="location-section">
+      <div class="location-card">
+        <div class="location-head">
+          <div class="location-copy">
+            <div class="location-badge-row">
+              <span class="location-pin">📍</span>
+              <p class="card-label">Visit Our Clinic</p>
+            </div>
+            <h2>696 Burke Rd, Camberwell VIC 3124</h2>
+            <p class="location-text">
+              Conveniently located for your in-person consultation and ongoing care.
+            </p>
+          </div>
 
+          <a
+            class="map-link"
+            href="https://www.google.com/maps?q=696+Burke+Rd,+Camberwell+VIC+3124"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open in Google Maps
+          </a>
+        </div>
+
+        <div class="map-shell">
+          <iframe
+            title="Herbs & Motion clinic location"
+            class="location-map"
+            src="https://www.google.com/maps?q=696%20Burke%20Rd,%20Camberwell%20VIC%203124&z=17&output=embed"
+            loading="lazy"
+            allowfullscreen
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
+
+          <div class="map-note">
+            Tap or click the map pin to view the full address in the popup.
+          </div>
+        </div>
+      </div>
+    </section>
     <PageFooter />
   </div>
 </template>
@@ -289,7 +303,7 @@ onBeforeUnmount(() => {
 }
 
 .hero-section,
-.top-info-grid,
+.location-section,
 .promotion-section,
 .booking-layout {
   max-width: 1320px;
@@ -334,38 +348,54 @@ onBeforeUnmount(() => {
   color: #5f6f66;
 }
 
-.top-info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px;
+/* =========================
+   Location
+   ========================= */
+.location-section {
   margin-bottom: 28px;
 }
 
-.info-card {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  padding: 24px;
-  border-radius: 24px;
+.location-card {
+  padding: 28px;
+  border-radius: 30px;
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(56, 92, 71, 0.08);
   backdrop-filter: blur(12px);
-  box-shadow: 0 14px 35px rgba(47, 91, 67, 0.08);
+  box-shadow: 0 16px 38px rgba(47, 91, 67, 0.08);
 }
 
-.card-icon {
-  width: 52px;
-  height: 52px;
-  flex-shrink: 0;
+.location-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.location-copy {
+  max-width: 760px;
+}
+
+.location-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.location-pin {
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
   border-radius: 16px;
-  background: rgba(47, 91, 67, 0.1);
-  font-size: 1.42rem;
+  background: rgba(47, 91, 67, 0.08);
+  font-size: 1.3rem;
+  flex-shrink: 0;
 }
 
 .card-label {
-  margin: 0 0 6px;
+  margin: 0;
   font-size: 0.88rem;
   font-weight: 700;
   color: #79907f;
@@ -373,19 +403,76 @@ onBeforeUnmount(() => {
   letter-spacing: 0.05em;
 }
 
-.info-card h3 {
-  margin: 0 0 8px;
+.location-card h2 {
+  margin: 0 0 10px;
   color: #2d5a42;
-  font-size: 1.2rem;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
   font-weight: 800;
+  line-height: 1.15;
 }
 
-.card-text {
+.location-text {
   margin: 0;
   color: #66786d;
-  line-height: 1.7;
+  line-height: 1.75;
+  font-size: 1.02rem;
 }
 
+.map-link {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: rgba(47, 91, 67, 0.1);
+  color: #2f5b43;
+  font-size: 0.94rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+.map-link:hover {
+  background: #2f5b43;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.map-shell {
+  position: relative;
+  overflow: hidden;
+  border-radius: 26px;
+  border: 1px solid rgba(47, 91, 67, 0.08);
+  background: #f6f9f5;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.location-map {
+  display: block;
+  width: 100%;
+  height: 460px;
+  border: 0;
+}
+
+.map-note {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #5b6f63;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 24px rgba(47, 91, 67, 0.08);
+}
+
+/* =========================
+   Promotion
+   ========================= */
 .promotion-section {
   margin-bottom: 30px;
 }
@@ -444,6 +531,9 @@ onBeforeUnmount(() => {
   font-weight: 700;
 }
 
+/* =========================
+   Booking
+   ========================= */
 .booking-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.78fr);
@@ -567,11 +657,17 @@ onBeforeUnmount(() => {
   font-weight: 600;
 }
 
+/* =========================
+   Responsive
+   ========================= */
 @media (max-width: 1100px) {
-  .top-info-grid,
   .promotion-card,
   .booking-layout {
     grid-template-columns: 1fr;
+  }
+
+  .location-map {
+    height: 400px;
   }
 }
 
@@ -593,7 +689,7 @@ onBeforeUnmount(() => {
     line-height: 1.72;
   }
 
-  .info-card,
+  .location-card,
   .promotion-card,
   .booking-card,
   .side-card {
@@ -601,8 +697,25 @@ onBeforeUnmount(() => {
     border-radius: 20px;
   }
 
-  .info-card {
+  .location-head {
     flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+
+  .location-card h2 {
+    font-size: 1.8rem;
+  }
+
+  .location-map {
+    height: 320px;
+  }
+
+  .map-note {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    font-size: 0.84rem;
   }
 
   .booking-head {
@@ -646,15 +759,19 @@ onBeforeUnmount(() => {
     font-size: 1.8rem;
   }
 
-  .card-icon {
-    width: 46px;
-    height: 46px;
-    font-size: 1.2rem;
+  .location-pin {
+    width: 44px;
+    height: 44px;
+    font-size: 1.16rem;
   }
 
-  .info-card h3,
+  .location-card h2,
   .side-card h3 {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
+  }
+
+  .location-map {
+    height: 280px;
   }
 
   .booking-head h2 {

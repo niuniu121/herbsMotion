@@ -1,7 +1,7 @@
 <template>
   <div class="herbsie-container">
-    <button v-if="!isOpen" class="floating-ball" @click="isOpen = true">
-      <span class="icon"><img src="../assets/logo_opacity.svg" /></span>
+    <button v-if="!isOpen" class="floating-ball" @click="openChat">
+      <span class="icon"><img src="../assets/logo_opacity.svg" alt="Herbsie" /></span>
     </button>
 
     <div v-else class="chat-window">
@@ -13,7 +13,7 @@
             <div class="status">Clinic Assistant</div>
           </div>
         </div>
-        <button class="close-btn" @click="isOpen = false">×</button>
+        <button class="close-btn" @click="closeChat">×</button>
       </div>
 
       <div class="chat-content" ref="scrollBox">
@@ -23,12 +23,18 @@
       </div>
 
       <div class="options-area">
+        <div class="tags-header">
+          <span>Quick FAQ</span>
+        </div>
+
         <div class="tags-scroll">
           <button
             v-for="(item, index) in faqDatabase"
             :key="index"
             @click="handleSelect(item)"
             class="tag-btn"
+            type="button"
+            :disabled="isSubmitting"
           >
             {{ item.q }}
           </button>
@@ -36,24 +42,107 @@
       </div>
 
       <div class="input-area">
-        <input v-model="userInput" @keyup.enter="handleSend" placeholder="Type your question..." />
-        <button @click="handleSend" class="send-btn">➤</button>
+        <input
+          v-model="userInput"
+          @keyup.enter="handleSend"
+          placeholder="Type your question..."
+          :disabled="isSubmitting"
+        />
+        <button @click="handleSend" class="send-btn" :disabled="isSubmitting">
+          <span v-if="!isSubmitting">➤</span>
+          <span v-else>...</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Lead Popup -->
+    <div v-if="showLeadModal" class="lead-modal-overlay" @click.self="handleLeadBack">
+      <div class="lead-modal">
+        <div class="lead-modal-header">
+          <div>
+            <p class="lead-kicker">Contact our team</p>
+            <h3>Leave your details</h3>
+          </div>
+          <button class="lead-close-btn" @click="handleLeadBack">×</button>
+        </div>
+
+        <p class="lead-desc">
+          We could not find a close FAQ match for your question. Please leave your details below and
+          our team will get back to you.
+        </p>
+
+        <div class="lead-question-box">
+          <span class="lead-question-label">Your question</span>
+          <p>{{ pendingQuestion }}</p>
+        </div>
+
+        <form class="lead-form" @submit.prevent="submitLead">
+          <div class="lead-field">
+            <label for="lead-name">Name</label>
+            <input
+              id="lead-name"
+              v-model.trim="leadForm.name"
+              type="text"
+              placeholder="Your full name"
+              :disabled="isSubmitting"
+            />
+            <span v-if="fieldErrors.name" class="field-error">{{ fieldErrors.name }}</span>
+          </div>
+
+          <div class="lead-field">
+            <label for="lead-email">Email</label>
+            <input
+              id="lead-email"
+              v-model.trim="leadForm.email"
+              type="email"
+              placeholder="your@email.com"
+              :disabled="isSubmitting"
+            />
+            <span v-if="fieldErrors.email" class="field-error">{{ fieldErrors.email }}</span>
+          </div>
+
+          <div class="lead-field">
+            <label for="lead-phone">Phone</label>
+            <input
+              id="lead-phone"
+              v-model.trim="leadForm.phone"
+              type="text"
+              placeholder="Your phone number"
+              :disabled="isSubmitting"
+            />
+            <span v-if="fieldErrors.phone" class="field-error">{{ fieldErrors.phone }}</span>
+          </div>
+
+          <div class="lead-actions">
+            <button type="button" class="back-btn" @click="handleLeadBack" :disabled="isSubmitting">
+              Back
+            </button>
+            <button type="submit" class="submit-btn" :disabled="isSubmitting">
+              <span v-if="!isSubmitting">Submit</span>
+              <span v-else>Sending...</span>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { nextTick, ref } from 'vue'
 
 const isOpen = ref(false)
 const userInput = ref('')
 const scrollBox = ref(null)
+const isSubmitting = ref(false)
+
 const messages = ref([
-  { role: 'bot', text: "Hi! I'm Herbsie. Please select a question below, or type your own!" },
+  {
+    role: 'bot',
+    text: "Hi! I'm Herbsie. Please select a question below, or type your own.",
+  },
 ])
 
-// 包含所有文档内容的完整数据库 (已去除 cite 引用)
 const faqDatabase = [
   {
     q: 'Do you have parking?',
@@ -136,54 +225,196 @@ const faqDatabase = [
   },
 ]
 
-// 点击按钮发送
-const handleSelect = (item) => {
-  messages.value.push({ role: 'user', text: item.q })
-  setTimeout(() => {
-    messages.value.push({ role: 'bot', text: item.a })
-    scrollToBottom()
-  }, 300)
+const showLeadModal = ref(false)
+const pendingQuestion = ref('')
+
+const leadForm = ref({
+  name: '',
+  email: '',
+  phone: '',
+})
+
+const fieldErrors = ref({
+  name: '',
+  email: '',
+  phone: '',
+})
+
+function openChat() {
+  isOpen.value = true
+  scrollToBottom()
 }
 
-// 手动输入发送与模糊匹配
-const handleSend = () => {
-  const text = userInput.value.trim().toLowerCase()
-  if (!text) return
+function closeChat() {
+  isOpen.value = false
+  showLeadModal.value = false
+}
 
-  messages.value.push({ role: 'user', text: userInput.value })
-  userInput.value = ''
+function normalize(text) {
+  return text.trim().toLowerCase()
+}
+
+function findFaqMatch(rawText) {
+  const text = normalize(rawText)
+
+  for (const item of faqDatabase) {
+    const keywordHit = item.keywords.some((k) => text.includes(k.toLowerCase()))
+    const questionHit = text.includes(item.q.toLowerCase())
+    if (keywordHit || questionHit) return item
+  }
+
+  return null
+}
+
+function pushUserMessage(text) {
+  messages.value.push({ role: 'user', text })
+}
+
+function pushBotMessage(text) {
+  messages.value.push({ role: 'bot', text })
+}
+
+const handleSelect = (item) => {
+  if (isSubmitting.value) return
+
+  pushUserMessage(item.q)
 
   setTimeout(() => {
-    let matchedItem = null
-    // 遍历所有关键词，找匹配项
-    for (const item of faqDatabase) {
-      if (item.keywords.some((k) => text.includes(k))) {
-        matchedItem = item
-        break // 找到第一个匹配的就跳出
-      }
+    pushBotMessage(item.a)
+    scrollToBottom()
+  }, 250)
+}
+
+const handleSend = async () => {
+  const raw = userInput.value.trim()
+  if (!raw || isSubmitting.value) return
+
+  pushUserMessage(raw)
+  userInput.value = ''
+
+  const matchedItem = findFaqMatch(raw)
+
+  setTimeout(async () => {
+    if (matchedItem) {
+      pushBotMessage(matchedItem.a)
+    } else {
+      pendingQuestion.value = raw
+      resetLeadForm()
+      pushBotMessage(
+        `I couldn't find a close FAQ match for that question.<br><br>
+         Please leave your details in the form and our team will contact you directly.`,
+      )
+      showLeadModal.value = true
     }
 
-    if (matchedItem) {
-      messages.value.push({ role: 'bot', text: matchedItem.a })
-    } else {
-      // 兜底话术 (Fallback)
-      messages.value.push({
-        role: 'bot',
-        text: "I'm not quite sure. Please check the FAQ options to see if you can find the information you need. For more details, please contact us by phone!",
-      })
+    await scrollToBottom()
+  }, 250)
+}
+
+function handleLeadBack() {
+  showLeadModal.value = false
+  resetLeadForm()
+}
+
+function resetLeadForm() {
+  leadForm.value = {
+    name: '',
+    email: '',
+    phone: '',
+  }
+
+  fieldErrors.value = {
+    name: '',
+    email: '',
+    phone: '',
+  }
+}
+
+function validateLeadForm() {
+  const errors = {
+    name: '',
+    email: '',
+    phone: '',
+  }
+
+  if (!leadForm.value.name || leadForm.value.name.length < 2) {
+    errors.name = 'Please enter your full name.'
+  }
+
+  if (!isValidEmail(leadForm.value.email)) {
+    errors.email = 'Please enter a valid email address.'
+  }
+
+  if (!isValidPhone(leadForm.value.phone)) {
+    errors.phone = 'Please enter a valid phone number.'
+  }
+
+  fieldErrors.value = errors
+
+  return !errors.name && !errors.email && !errors.phone
+}
+
+async function submitLead() {
+  if (!validateLeadForm()) return
+
+  try {
+    isSubmitting.value = true
+
+    const response = await fetch('/api/chatbot-lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: leadForm.value.name,
+        email: leadForm.value.email,
+        phone: leadForm.value.phone,
+        question: pendingQuestion.value,
+      }),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Failed to send enquiry.')
     }
-    scrollToBottom()
-  }, 400)
+
+    showLeadModal.value = false
+
+    pushBotMessage(
+      `Thank you — your enquiry has been sent successfully.<br><br>
+       Our team will contact you soon via email or phone.`,
+    )
+
+    pendingQuestion.value = ''
+    resetLeadForm()
+    await scrollToBottom()
+  } catch (error) {
+    pushBotMessage(
+      `Sorry, something went wrong while sending your enquiry.<br><br>
+       Please try again, or contact us directly at <strong>info@herbsmotion.com.au</strong>.`,
+    )
+    await scrollToBottom()
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+}
+
+function isValidPhone(value) {
+  return /^[+\d\s()-]{6,20}$/.test(value)
 }
 
 const scrollToBottom = async () => {
   await nextTick()
-  if (scrollBox.value) scrollBox.value.scrollTop = scrollBox.value.scrollHeight
+  if (scrollBox.value) {
+    scrollBox.value.scrollTop = scrollBox.value.scrollHeight
+  }
 }
 </script>
 
 <style scoped>
-/* 容器及悬浮球 */
 .herbsie-container {
   position: fixed;
   bottom: 20px;
@@ -191,6 +422,7 @@ const scrollToBottom = async () => {
   z-index: 1000;
   font-family: 'Helvetica Neue', Arial, sans-serif;
 }
+
 .floating-ball {
   width: 60px;
   height: 60px;
@@ -199,14 +431,29 @@ const scrollToBottom = async () => {
   border: none;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  font-size: 24px;
   transition: transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
+
 .floating-ball:hover {
   transform: scale(1.05);
 }
 
-/* 聊天窗口主框架 */
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-ball img {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
+
 .chat-window {
   width: 360px;
   height: 550px;
@@ -218,7 +465,6 @@ const scrollToBottom = async () => {
   overflow: hidden;
 }
 
-/* 优化后的头部 & 高级感头像 */
 .chat-header {
   background: #325b49;
   color: white;
@@ -227,15 +473,16 @@ const scrollToBottom = async () => {
   justify-content: space-between;
   align-items: center;
 }
+
 .bot-info {
   display: flex;
   align-items: center;
   gap: 12px;
 }
+
 .avatar-elegant {
   width: 40px;
   height: 40px;
-  /* 基于主色调衍生出的高级感渐变 */
   background: linear-gradient(135deg, #478067, #1e382d);
   border-radius: 50%;
   display: flex;
@@ -248,19 +495,23 @@ const scrollToBottom = async () => {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .header-text {
   display: flex;
   flex-direction: column;
 }
+
 .name {
   font-weight: 600;
   font-size: 16px;
   letter-spacing: 0.5px;
 }
+
 .status {
   font-size: 12px;
   color: #aebdb6;
 }
+
 .close-btn {
   background: none;
   border: none;
@@ -269,27 +520,31 @@ const scrollToBottom = async () => {
   cursor: pointer;
   transition: color 0.2s;
 }
+
 .close-btn:hover {
   color: white;
 }
 
-/* 聊天内容区 */
 .chat-content {
   flex: 1;
   padding: 15px;
   overflow-y: auto;
   background: #f7f9f8;
 }
+
 .msg-row {
   margin-bottom: 12px;
   display: flex;
 }
+
 .msg-row.bot {
   justify-content: flex-start;
 }
+
 .msg-row.user {
   justify-content: flex-end;
 }
+
 .bubble {
   max-width: 85%;
   padding: 10px 14px;
@@ -297,24 +552,38 @@ const scrollToBottom = async () => {
   font-size: 14px;
   line-height: 1.5;
 }
+
 .bot .bubble {
   background: white;
   color: #325b49;
   border-bottom-left-radius: 2px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
+
 .user .bubble {
   background: #325b49;
   color: white;
   border-bottom-right-radius: 2px;
 }
 
-/* 滚动选项区 (上下滚动) */
 .options-area {
   padding: 10px 15px;
   border-top: 1px solid #eee;
   background: white;
 }
+
+.tags-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  color: #72856e;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .tags-scroll {
   display: flex;
   flex-direction: column;
@@ -323,18 +592,21 @@ const scrollToBottom = async () => {
   overflow-y: auto;
   padding-right: 5px;
 }
-/* 美化滚动条 */
+
 .tags-scroll::-webkit-scrollbar {
   width: 4px;
 }
+
 .tags-scroll::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 4px;
 }
+
 .tags-scroll::-webkit-scrollbar-thumb {
   background: #c1c1c1;
   border-radius: 4px;
 }
+
 .tags-scroll::-webkit-scrollbar-thumb:hover {
   background: #325b49;
 }
@@ -350,18 +622,24 @@ const scrollToBottom = async () => {
   text-align: left;
   transition: all 0.2s;
 }
+
 .tag-btn:hover {
   background: #325b49;
   color: white;
 }
 
-/* 输入框 */
+.tag-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .input-area {
   padding: 12px 15px;
   border-top: 1px solid #eee;
   display: flex;
   background: white;
 }
+
 .input-area input {
   flex: 1;
   border: 1px solid #e0e5e4;
@@ -371,9 +649,16 @@ const scrollToBottom = async () => {
   font-size: 14px;
   transition: border-color 0.2s;
 }
+
 .input-area input:focus {
   border-color: #325b49;
 }
+
+.input-area input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
 .send-btn {
   background: #325b49;
   border: none;
@@ -388,37 +673,212 @@ const scrollToBottom = async () => {
   justify-content: center;
 }
 
-/* 1. 替换原有的 .floating-ball 样式 */
-.floating-ball {
-  width: 60px;
-  height: 60px;
-  background: #325b49;
-  border-radius: 50%;
+.send-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Modal */
+.lead-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(19, 31, 25, 0.34);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 20px;
+}
+
+.lead-modal {
+  width: min(420px, 100%);
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(20, 39, 31, 0.22);
+  overflow: hidden;
+  border: 1px solid rgba(50, 91, 73, 0.08);
+}
+
+.lead-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 22px 22px 12px;
+}
+
+.lead-kicker {
+  margin: 0 0 6px;
+  color: #7a8f83;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lead-modal-header h3 {
+  margin: 0;
+  color: #244436;
+  font-size: 26px;
+  line-height: 1.1;
+}
+
+.lead-close-btn {
   border: none;
+  background: #f3f6f4;
+  color: #325b49;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 24px;
+  line-height: 1;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s;
+  flex-shrink: 0;
+}
 
-  /* 添加下面这三行：让内部元素绝对居中 */
+.lead-desc {
+  margin: 0;
+  padding: 0 22px 16px;
+  color: #617368;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.lead-question-box {
+  margin: 0 22px 18px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #f7faf8;
+  border: 1px solid #e4ece7;
+}
+
+.lead-question-label {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #7a8f83;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lead-question-box p {
+  margin: 0;
+  color: #325b49;
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.lead-form {
+  padding: 0 22px 22px;
+}
+
+.lead-field {
+  margin-bottom: 14px;
+}
+
+.lead-field label {
+  display: block;
+  margin-bottom: 6px;
+  color: #274639;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.lead-field input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d9e3dd;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 14px;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.lead-field input:focus {
+  border-color: #325b49;
+  box-shadow: 0 0 0 4px rgba(50, 91, 73, 0.08);
+}
+
+.field-error {
+  display: inline-block;
+  margin-top: 6px;
+  color: #c05252;
+  font-size: 12px;
+}
+
+.lead-actions {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0; /* 清除 button 默认的内边距 */
-}
-.floating-ball:hover {
-  transform: scale(1.05);
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
 }
 
-/* 2. 新增下面这两段，控制图标和图片的尺寸 */
-.icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.back-btn,
+.submit-btn {
+  flex: 1;
+  height: 46px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    opacity 0.2s,
+    background 0.2s,
+    color 0.2s;
 }
 
-.floating-ball img {
-  width: 35px; /* 这里控制 logo 的大小，如果觉得太大可以改成 30px */
-  height: 35px;
-  object-fit: contain; /* 保证 logo 比例不变形 */
+.back-btn {
+  border: 1px solid #d6e0da;
+  background: #fff;
+  color: #325b49;
+}
+
+.submit-btn {
+  border: none;
+  background: #325b49;
+  color: #fff;
+}
+
+.back-btn:hover,
+.submit-btn:hover {
+  transform: translateY(-1px);
+}
+
+.back-btn:disabled,
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 480px) {
+  .herbsie-container {
+    bottom: 16px;
+    right: 16px;
+  }
+
+  .chat-window {
+    width: calc(100vw - 24px);
+    height: min(550px, calc(100vh - 32px));
+  }
+
+  .lead-modal {
+    border-radius: 20px;
+  }
+
+  .lead-modal-header h3 {
+    font-size: 22px;
+  }
+
+  .lead-actions {
+    flex-direction: column;
+  }
 }
 </style>

@@ -90,7 +90,6 @@ onUnmounted(() => {
       </div>
 
       <div class="auth-buttons">
-        <a href="#" class="btn-login desktop-only">Location</a>
         <router-link to="/book" class="btn-get-started"> Book a Consultation </router-link>
         <button
           class="hamburger"

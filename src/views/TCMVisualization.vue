@@ -8,277 +8,86 @@ const sectionRefs = ref([])
 const isDropdownOpen = ref(false)
 const activeChartPoint = ref(null)
 const showTheoryNoteTooltip = ref(false)
+const isResearchOpen = ref(false)
 let observer = null
 
 const tcmConditions = [
   {
-    id: 'insomnia',
-    name: 'Insomnia',
-    time: '2–4 wks',
-    timeUnit: 'weeks',
-    medianValue: 3,
-    axisMax: 4,
-    tcmRate: '78% – 85%',
-    tcmRateNum: 82,
-    noTreatment: '~15%',
-    noTreatNum: 15,
-    sustained: '92% / 85% / 78%',
-    acuRole: 'Best for falling asleep.',
-    herbRole: 'Best for sleep depth.',
-    speedUp: [
-      {
-        title: 'Consistent Circadian Rhythm',
-        desc: ' • Going to bed and waking at the same time stabilizes "Heart Shen" (spirit). \n • Early morning sunlight exposure helps reset the biological clock.',
-      },
-      {
-        title: 'Evening "Wind-Down" Ritual',
-        desc: ' • Reducing screen time 1 hour before bed prevents "Liver Fire" from rising. \n• Warm foot soaks draw energy down from the head.',
-      },
-    ],
-    slowDown: [
-      {
-        title: 'Late Night "Active" Digestion',
-        desc: ' • Eating heavy meals late forces the body to stay "Yang" (active) to digest. \n• Stomach disharmony leads to disturbed sleep.',
-      },
-      {
-        title: 'Inconsistent Treatment',
-        desc: ' • Missing acupuncture sessions prevents the cumulative calming of the nervous system. \n• The body "forgets" the relaxed state and reverts to hyper-arousal.',
-      },
-    ],
-  },
-  {
-    id: 'stress',
-    name: 'Stress/Anxiety',
-    time: '2–4 wks',
-    timeUnit: 'weeks',
-    medianValue: 3,
-    axisMax: 4,
-    tcmRate: '68% – 76%',
-    tcmRateNum: 72,
-    noTreatment: 'Variable',
-    noTreatNum: 20,
-    sustained: '88% / 80% / 72%',
-    acuRole: 'Rapid "reset" of nerves.',
-    herbRole: 'Emotional resilience.',
-  },
-  {
-    id: 'eczema',
-    name: 'Eczema',
+    id: 'acne',
+    name: 'Acne',
+    expectTitle: 'What to Expect When You Visit Us for Acne',
+    expect:
+      'When you visit us for acne, we assess your skin alongside factors such as digestion, hormones, stress, and lifestyle. Using a holistic approach, we create a personalised treatment plan that may include acupuncture, herbal medicine, and dietary guidance to support clearer skin and reduce breakouts.',
     time: '4–8 wks',
     timeUnit: 'weeks',
     medianValue: 6,
     axisMax: 8,
-    tcmRate: '65% – 75%',
-    tcmRateNum: 70,
-    noTreatment: '~15%',
-    noTreatNum: 15,
-    sustained: '85% / 70% / 62%',
-    acuRole: 'Stops the itch.',
-    herbRole: 'Heals skin barrier & redness.',
-    speedUp: [
-      {
-        title: 'Moisture Management',
-        desc: ' • No Moisture Treatment" in specific phases helps skin dry and regenerate. \n • Using TCM herbal washes reduces Damp-Heat inflammation.',
-      },
-      {
-        title: 'Anti-Inflammatory Diet',
-        desc: ' • Focusing on cooling foods like mung beans or cucumber. \n • Avoiding trigger foods such as dairy, sugar and alcohol.',
-      },
-    ],
-    slowDown: [
-      {
-        title: 'Chronic Scratching',
-        desc: ' • Scratching breaks the skin barrier, invites irritation, and prolongs healing. \n • Physical damage causes the skin to thicken (lichenification), which takes longer to heal.',
-      },
-      {
-        title: 'Topical Steroid Overuse',
-        desc: ' • Prolonged use can thin the skin significantly. \n • Withdrawal from steroids (TSW) can result in a recovery timeline 5x longer than standard eczema.',
-      },
-    ],
-  },
-  {
-    id: 'weight',
-    name: 'Weight Loss',
-    time: '8–12 wks',
-    timeUnit: 'weeks',
-    medianValue: 10,
-    axisMax: 12,
-    tcmRate: '5% – 10% BMI',
-    tcmRateNum: 60,
-    noTreatment: '<2% net',
-    noTreatNum: 10,
-    sustained: '75% / 60% / 45%',
-    acuRole: 'Controls appetite.',
-    herbRole: 'Boosts metabolic rate.',
-  },
-  {
-    id: 'pms',
-    name: 'PMS',
-    time: '2–3 cycles',
-    timeUnit: 'cycles',
-    medianValue: 2.5,
-    axisMax: 3,
-    tcmRate: '75% – 88%',
-    tcmRateNum: 82,
-    noTreatment: '<10%',
-    noTreatNum: 10,
-    sustained: '94% / 88% / 80%',
-    acuRole: 'Best for mood/cramps.',
-    herbRole: 'Best for breast pain.',
-  },
-  {
-    id: 'ivf',
-    name: 'IVF Support',
-    time: '3 months*',
-    timeUnit: 'months',
-    medianValue: 3,
-    axisMax: 3,
-    tcmRate: '+15%–20%',
-    tcmRateNum: 75,
-    noTreatment: 'Baseline',
-    noTreatNum: 40,
-    sustained: 'N/A (Goal is Live Birth)',
-    acuRole: 'Uterine blood flow.',
-    herbRole: 'Egg & lining quality.',
-  },
-  {
-    id: 'bloating',
-    name: 'Bloating/Reflux',
-    time: '1–2 wks',
-    timeUnit: 'weeks',
-    medianValue: 1.5,
-    axisMax: 2,
-    tcmRate: '72% – 84%',
-    tcmRateNum: 78,
-    noTreatment: '20%',
-    noTreatNum: 20,
-    sustained: '90% / 82% / 75%',
-    acuRole: 'Relieves pressure.',
-    herbRole: 'Repairs digestive lining.',
-    speedUp: [
-      {
-        title: 'Mindful Eating',
-        desc: ' •	Chewing each bite 20-30 times reduces the mechanical load on the Spleen. \n• Saliva enzymes start the "TCM transformation" process early.',
-      },
-      {
-        title: 'Warm, Cooked Foods',
-        desc: ' • The stomach needs a "fire" to digest; warm food preserves "Digestive Qi. \n• Soups and stews are "pre-digested" and heal the esophageal lining faster.',
-      },
-    ],
-    slowDown: [
-      {
-        title: 'Cold/Raw Food Intake',
-        desc: ' • Iced drinks and raw salads "extinguish" digestive fire. \n• This leads to "Dampness," causing the heavy, sunken feeling of bloating.',
-      },
-      {
-        title: 'Late Night Eating',
-        desc: ' • Lying down with a full stomach allows acid to travel upward via gravity. \n• Digestion slows significantly during sleep, leading to fermentation and gas.',
-      },
-    ],
-  },
-  {
-    id: 'hayfever',
-    name: 'Hay Fever',
-    time: '1–2 wks',
-    timeUnit: 'weeks',
-    medianValue: 1.5,
-    axisMax: 2,
-    tcmRate: '70% – 88%',
-    tcmRateNum: 79,
-    noTreatment: 'Seasonal',
-    noTreatNum: 30,
-    sustained: '95% / 80% / 65%',
-    acuRole: 'Clears sinuses fast.',
-    herbRole: 'Prevents the next flare.',
-  },
-  {
-    id: 'cold',
-    name: 'Frequent Cold',
-    time: '3 months*',
-    timeUnit: 'months',
-    medianValue: 3,
-    axisMax: 3,
-    tcmRate: '~55% Fewer',
-    tcmRateNum: 55,
-    noTreatment: 'No change',
-    noTreatNum: 5,
-    sustained: '90% / 85% / 80%',
-    acuRole: 'Quick recovery.',
-    herbRole: 'Builds "Wei Qi" (Immunity).',
-  },
-  {
-    id: 'fatigue',
-    name: 'Chronic Fatigue',
-    time: '6–8 wks',
-    timeUnit: 'weeks',
-    medianValue: 7,
-    axisMax: 8,
-    tcmRate: '62% – 72%',
-    tcmRateNum: 67,
-    noTreatment: '<8%',
-    noTreatNum: 8,
-    sustained: '82% / 75% / 68%',
-    acuRole: 'Clears brain fog.',
-    herbRole: 'Rebuilds core stamina.',
-    speedUp: [
-      {
-        title: 'Pacing (Relative Rest)',
-        desc: ' • Staying within your "energy envelope" prevents the "crash" (post-exertional malaise). \n• Gradual, modified activity is better than complete bed rest for maintaining muscle Qi.',
-      },
-      {
-        title: 'Building "Wei Qi"',
-        desc: ' • Consistent use of tonifying herbs like Astragalus (Huang Qi). \n• Acupuncture at "Zusanli" (ST36) to boost white blood cell production.',
-      },
-    ],
-    slowDown: [
-      {
-        title: 'Boom and Bust Cycles',
-        desc: ' • Over-exerting on a "good day" depletes your remaining Kidney Essence (Jing). \n• This creates a "debt" that requires days or weeks of recovery.',
-      },
-      {
-        title: 'Mental Over-Exertion',
-        desc: ' • Intense screen work or emotional stress drains "Heart Blood." \n• In TCM, mental fatigue is just as physically draining as manual labor.',
-      },
-    ],
-  },
-  {
-    id: 'gout',
-    name: 'Gout (Acute/Chronic)',
-    time: '3–7 days',
-    timeUnit: 'days',
-    medianValue: 5,
-    axisMax: 7,
-    tcmRate: '70% – 82%',
-    tcmRateNum: 76,
-    noTreatment: '~15% (slow)',
-    noTreatNum: 15,
+    tcmRate: '70% – 85%',
+    tcmRateNum: 77,
+    noTreatment: 'Variable',
+    noTreatNum: 25,
     sustained: '88% / 75% / 60%',
-    acuRole: 'Best for acute pain.',
-    herbRole: 'Best for lowering Uric Acid.',
+    acuRole: 'Reduces redness.',
+    herbRole: 'Clears internal "Damp-Heat."',
+    research: {
+      summary:
+        'Emerging studies suggest acupuncture and herbal medicine may help reduce acne severity by addressing inflammation and hormonal balance, though more research is needed.',
+      references: [
+        'Cao, H., Yang, G., Wang, Y., Liu, J., & Smith, C. A. (2015). Complementary therapies for acne vulgaris. Cochrane Database of Systematic Reviews, (1).',
+      ],
+    },
+  },
+  {
+    id: 'acidreflux',
+    name: 'Acid Reflux / GERD',
+    expectTitle: 'What to Expect When You Visit Us for Acid Reflux / GERD',
+    expect:
+      'When you visit us for reflux or upper digestive discomfort, we assess your digestion, eating habits, stress levels, and symptom patterns to understand what may be aggravating the problem. Your treatment plan may include acupuncture, herbal medicine, and gentle dietary guidance aimed at reducing irritation, settling reflux, and improving digestive comfort over time.',
+    time: '2–4 wks',
+    timeUnit: 'weeks',
+    medianValue: 3,
+    axisMax: 4,
+    tcmRate: '66% – 78%',
+    tcmRateNum: 72,
+    noTreatment: '~12% (Drug dependent)',
+    noTreatNum: 12,
+    sustained: '85% / 78% / 70%',
+    acuRole: 'Helps settle upper digestive discomfort.',
+    herbRole: 'Supports smoother stomach function.',
     speedUp: [
       {
-        title: 'Hydration & Alkalization',
-        desc: ' • Drinking 2.5L+ water helps the "Kidneys" flush uric acid crystals. \n• Lemon water or celery juice acts as a natural diuretic in TCM.',
+        title: 'Smaller, Regular Meals',
+        desc: '• Eating lighter meals reduces pressure on the stomach.\n• More regular eating patterns often reduce reflux episodes.',
       },
       {
-        title: 'Anti-Inflammatory Loading',
-        desc: ' • TCM herbs like Phellodendron (Huang Bai) clear "Damp-Heat" from joints. \n• Applying herbal poultices directly to the joint reduces local swelling.',
+        title: 'Early Evening Meals',
+        desc: '• Finishing dinner earlier gives digestion more time before lying down.\n• This often reduces night-time reflux and throat irritation.',
       },
     ],
     slowDown: [
       {
-        title: 'High-Purine Trigger Foods',
-        desc: ' • Alcohol (especially beer) and shellfish fuel "Internal Heat." \n• Fructose/High-sugar drinks interfere with uric acid excretion.',
+        title: 'Late Heavy Eating',
+        desc: '• Heavy meals late at night increase reflux risk.\n• Symptoms often persist when digestion is repeatedly overloaded before sleep.',
       },
       {
-        title: 'Sudden Extreme Exercise',
-        desc: ' • Over-exerting an inflamed joint causes micro-trauma. \n• "Relative Rest" is required to allow the joint capsule to heal.',
+        title: 'Trigger Foods and Drinks',
+        desc: '• Alcohol, greasy food, strong coffee, and spicy meals may aggravate symptoms.\n• Frequent triggering slows progress and increases flare-ups.',
       },
     ],
+    research: {
+      summary:
+        'Research suggests acupuncture may help regulate digestive function and reduce symptoms such as bloating and reflux.',
+      references: [
+        'Zhou, W., Benharash, P., & Vaziri, N. D. (2016). Acupuncture for chronic pain and related disorders. Current Opinion in Anaesthesiology, 29(5), 583–589.',
+      ],
+    },
   },
   {
     id: 'bells',
     name: 'Bell’s Palsy',
+    expectTitle: 'What to Expect When You Visit Us for Bell’s Palsy',
+    expect:
+      'When you visit us for Bell’s palsy, we focus on supporting nerve recovery and improving facial muscle function. We assess your condition using traditional diagnostic methods and develop a personalised treatment plan that may include acupuncture to stimulate circulation and nerve healing. Our goal is to support recovery and improve facial movement.',
     time: '2–6 wks',
     timeUnit: 'weeks',
     medianValue: 4,
@@ -293,42 +102,291 @@ const tcmConditions = [
     speedUp: [
       {
         title: 'Early Intervention',
-        desc: ' • Starting acupuncture within 3 days significantly prevents nerve atrophy. \n• "Electro-acupuncture" at low frequencies encourages nerve regeneration.',
+        desc: '• Starting acupuncture within 3 days may help prevent further nerve weakness.\n• Early care often supports better recovery of facial movement.',
       },
       {
         title: 'Facial Warmth',
-        desc: ' • Keeping the face covered and warm prevents "Wind-Cold" from worsening the paralysis. \n• Gentle facial massage (Gua Sha) maintains muscle tone while the nerve is dormant.',
+        desc: '• Keeping the face warm may help maintain circulation.\n• Gentle massage can support comfort and muscle tone.',
       },
     ],
     slowDown: [
       {
         title: 'Cold Exposure',
-        desc: ' • Cold wind or air conditioning constricts blood flow to the facial nerve. \n• In TCM, "Cold" causes "Stagnation," which blocks the nerve is "Qi".',
+        desc: '• Wind and cold can aggravate local stiffness and discomfort.\n• Repeated exposure may slow visible recovery.',
       },
       {
         title: 'High Stress Levels',
-        desc: ' • Stress raises cortisol, which inhibits the body’s natural inflammatory repair. \n• Poor sleep prevents the deep tissue repair that happens during REM cycles.',
+        desc: '• Poor sleep and persistent stress can reduce overall recovery capacity.\n• Recovery often feels slower when the nervous system stays overloaded.',
+      },
+    ],
+    research: {
+      summary:
+        'Research suggests acupuncture may help improve recovery rates and facial nerve function in Bell’s palsy, particularly when treatment is started early.',
+      references: [
+        'Kim, J. I., Lee, M. S., Choi, T. Y., Lee, H., & Ernst, E. (2012). Acupuncture for Bell’s palsy. Cochrane Database of Systematic Reviews, (4).',
+      ],
+    },
+  },
+  {
+    id: 'bloating',
+    name: 'Bloating/Reflux',
+    expectTitle: 'What to Expect When You Visit Us for Bloating or Reflux',
+    expect:
+      'When you visit us for bloating or reflux, we assess your digestion, eating habits, and stress levels to understand the root causes of your symptoms. Using a holistic approach, we create a personalised plan that may include acupuncture, herbal medicine, and dietary guidance. Our goal is to improve digestive function, reduce discomfort, and restore balance.',
+    time: '1–2 wks',
+    timeUnit: 'weeks',
+    medianValue: 1.5,
+    axisMax: 2,
+    tcmRate: '72% – 84%',
+    tcmRateNum: 78,
+    noTreatment: '20%',
+    noTreatNum: 20,
+    sustained: '90% / 82% / 75%',
+    acuRole: 'Relieves pressure.',
+    herbRole: 'Repairs digestive lining.',
+    speedUp: [
+      {
+        title: 'Mindful Eating',
+        desc: '• Chewing slowly often reduces digestive load.\n• More mindful eating can improve bloating and post-meal discomfort.',
+      },
+      {
+        title: 'Warm, Cooked Foods',
+        desc: '• Warm meals are often easier to tolerate.\n• Simpler cooked foods may reduce irritation and heaviness.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'Cold/Raw Food Intake',
+        desc: '• Cold drinks and large raw meals may worsen digestive discomfort.\n• Repeated irritation can prolong bloating and reflux patterns.',
+      },
+      {
+        title: 'Late Night Eating',
+        desc: '• Eating too close to bedtime often worsens reflux.\n• Overnight digestion may feel heavier and slower.',
+      },
+    ],
+    research: {
+      summary:
+        'Research suggests acupuncture may help regulate digestive function and reduce symptoms such as bloating and reflux.',
+      references: [
+        'Zhou, W., Benharash, P., & Vaziri, N. D. (2016). Acupuncture for chronic pain and related disorders. Current Opinion in Anaesthesiology, 29(5), 583–589.',
+      ],
+    },
+  },
+  {
+    id: 'bloatinggas',
+    name: 'Bloating & Gas',
+    expectTitle: 'What to Expect When You Visit Us for Bloating & Gas',
+    expect:
+      'When you visit us for bloating and gas, we take the time to understand your digestion, meal timing, food triggers, and stress patterns. We use a holistic assessment to build a personalised treatment plan that may include acupuncture, herbal medicine, and simple dietary guidance. Our focus is to reduce pressure, improve digestive rhythm, and help you feel more comfortable day to day.',
+    time: '1–2 wks',
+    timeUnit: 'weeks',
+    medianValue: 1.5,
+    axisMax: 2,
+    tcmRate: '72% – 84%',
+    tcmRateNum: 78,
+    noTreatment: '~20% (Wax & wane)',
+    noTreatNum: 20,
+    sustained: '90% / 82% / 75%',
+    acuRole: 'Helps ease pressure and abdominal fullness.',
+    herbRole: 'Supports smoother digestion and gut balance.',
+    speedUp: [
+      {
+        title: 'Consistency in Meal Timing',
+        desc: '• Eating at regular times helps regulate digestion.\n• A steadier rhythm often reduces bloating and irregular gut symptoms.',
+      },
+      {
+        title: 'Warm, Easy-to-Digest Meals',
+        desc: '• Simple cooked meals are often better tolerated than heavy mixed meals.\n• Warm soups and stews may feel easier on the gut.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'Raw/Cold Food Overload',
+        desc: '• Large salads, iced drinks, and cold foods may aggravate digestive discomfort.\n• This often increases bloating, heaviness, and gas.',
+      },
+      {
+        title: 'Stress Eating',
+        desc: '• Eating while rushed, stressed, or upset often worsens digestive symptoms.\n• Symptoms may flare more easily when the gut stays tense.',
       },
     ],
   },
   {
-    id: 'sweating',
-    name: 'Excessive Sweating',
-    time: '4–6 wks',
+    id: 'cancerpain',
+    name: 'Cancer Pain',
+    expectTitle: 'What to Expect When You Visit Us for Cancer Pain',
+    expect:
+      'When you visit us for cancer-related pain, we provide supportive care alongside your medical treatment. We focus on reducing pain, promoting relaxation, and improving overall quality of life using gentle acupuncture techniques tailored to your condition.',
+    time: '1–2 wks',
     timeUnit: 'weeks',
-    medianValue: 5,
-    axisMax: 6,
-    tcmRate: '65% – 78%',
-    tcmRateNum: 71,
-    noTreatment: '<10%',
-    noTreatNum: 10,
-    sustained: '85% / 78% / 70%',
-    acuRole: 'Regulates ANS.',
-    herbRole: '"Astringes" the pores.',
+    medianValue: 1.5,
+    axisMax: 2,
+    tcmRate: '~50% Reduction',
+    tcmRateNum: 50,
+    noTreatment: 'Baseline',
+    noTreatNum: 5,
+    sustained: 'Dependent on illness',
+    acuRole: 'Best for neuropathic pain.',
+    herbRole: 'General palliative support.',
+    research: {
+      summary:
+        'Research suggests acupuncture may help reduce cancer-related pain and improve quality of life when used as a complementary therapy.',
+      references: [
+        'Zhou, W., Benharash, P., & Vaziri, N. D. (2016). Acupuncture for chronic pain and related disorders. Current Opinion in Anaesthesiology, 29(5), 583–589.',
+      ],
+    },
   },
   {
-    id: 'hives',
+    id: 'chronicconstipation',
+    name: 'Chronic Constipation',
+    expectTitle: 'What to Expect When You Visit Us for Chronic Constipation',
+    expect:
+      'When you visit us for chronic constipation, we look beyond the bowel symptoms alone and assess digestion, hydration, meal rhythm, stress, and general health. Your personalised treatment plan may include acupuncture, herbal medicine, and practical dietary guidance aimed at improving bowel regularity, reducing discomfort, and restoring more comfortable day-to-day digestion.',
+    time: '1–2 wks',
+    timeUnit: 'weeks',
+    medianValue: 1.5,
+    axisMax: 2,
+    tcmRate: '72% – 84%',
+    tcmRateNum: 78,
+    noTreatment: '~20%',
+    noTreatNum: 20,
+    sustained: '88% / 80% / 75%',
+    acuRole: 'Helps stimulate bowel movement rhythm.',
+    herbRole: 'Supports stool softness and gut flow.',
+    speedUp: [
+      {
+        title: 'Consistency in Meal Timing',
+        desc: '• Regular meal timing can support more consistent bowel movement patterns.\n• Daily rhythm often matters as much as food choice.',
+      },
+      {
+        title: 'Gentle Hydration + Warm Foods',
+        desc: '• Adequate fluids and warm, soft meals can reduce strain.\n• Gentle digestive support often improves comfort more quickly.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'Raw/Cold Food Overload',
+        desc: '• Too much cold, dry, or difficult-to-digest food may slow bowel movement patterns.\n• Symptoms often persist when digestion feels sluggish.',
+      },
+      {
+        title: 'Emotional Stress',
+        desc: '• Stress can disrupt normal bowel rhythm.\n• Irregular routines often make constipation more stubborn.',
+      },
+    ],
+  },
+  {
+    id: 'chroniccough',
+    name: 'Chronic Cough',
+    expectTitle: 'What to Expect When You Visit Us for Chronic Cough',
+    expect:
+      'When you visit us for chronic cough, we assess your respiratory health, immune function, and contributing factors such as allergies or digestion. Using a holistic approach, we create a personalised treatment plan that may include acupuncture and herbal medicine to support lung function and reduce irritation.',
+    time: '1–3 wks',
+    timeUnit: 'weeks',
+    medianValue: 2,
+    axisMax: 3,
+    tcmRate: '72% – 84%',
+    tcmRateNum: 78,
+    noTreatment: '~30%',
+    noTreatNum: 30,
+    sustained: '85% / 78% / 72%',
+    acuRole: 'Stops the cough reflex.',
+    herbRole: 'Moistens the lung tissue.',
+    research: {
+      summary:
+        'Some evidence suggests acupuncture may help improve chronic cough symptoms by supporting respiratory regulation, although more research is needed.',
+      references: [
+        'Lee, M. S., & Ernst, E. (2011). Acupuncture for cough: A systematic review. Respiratory Medicine, 105(3), 331–337.',
+      ],
+    },
+  },
+  {
+    id: 'chronicdiarrhea',
+    name: 'Chronic Diarrhea',
+    expectTitle: 'What to Expect When You Visit Us for Chronic Diarrhea',
+    expect:
+      'When you visit us for chronic diarrhoea, we assess your digestion, food triggers, stress patterns, and general health to understand the wider picture of your symptoms. Your treatment plan may include acupuncture, herbal medicine, and gentle lifestyle guidance designed to calm urgency, support digestive stability, and help restore more predictable bowel habits.',
+    time: '1–2 wks',
+    timeUnit: 'weeks',
+    medianValue: 1.5,
+    axisMax: 2,
+    tcmRate: '70% – 80%',
+    tcmRateNum: 75,
+    noTreatment: '~15%',
+    noTreatNum: 15,
+    sustained: '85% / 78% / 72%',
+    acuRole: 'Helps calm urgency and gut reactivity.',
+    herbRole: 'Supports stool regulation and digestive stability.',
+    speedUp: [
+      {
+        title: 'Consistency in Meal Timing',
+        desc: '• Eating at more regular times can support steadier digestion.\n• Predictable eating routines may reduce urgency and gut irritability.',
+      },
+      {
+        title: 'Simple, Warm Foods',
+        desc: '• Gentle cooked foods are often easier to tolerate during recovery.\n• A simpler diet can help the gut settle more quickly.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'Raw/Cold Food Overload',
+        desc: '• Cold drinks, greasy meals, and hard-to-digest foods may worsen loose stools.\n• Repeated irritation can prolong flare-ups.',
+      },
+      {
+        title: 'Emotional Eating',
+        desc: '• Stress and rushed meals may aggravate bowel urgency.\n• Symptoms often improve more slowly when the gut stays reactive.',
+      },
+    ],
+  },
+  {
+    id: 'chronicfatigue',
+    name: 'Chronic Fatigue',
+    expectTitle: 'What to Expect When You Visit Us for Chronic Fatigue',
+    expect:
+      'When you visit us for chronic fatigue, we take a holistic approach to understand your energy levels, sleep quality, stress, and overall health. Using traditional diagnostic methods, we identify underlying imbalances contributing to fatigue. Your treatment may include acupuncture, herbal medicine, and supportive lifestyle guidance aimed at restoring energy, improving sleep, and supporting long-term recovery.',
+    time: '6–8 wks',
+    timeUnit: 'weeks',
+    medianValue: 7,
+    axisMax: 8,
+    tcmRate: '62% – 72%',
+    tcmRateNum: 67,
+    noTreatment: '<8%',
+    noTreatNum: 8,
+    sustained: '82% / 75% / 68%',
+    acuRole: 'Clears brain fog.',
+    herbRole: 'Rebuilds core stamina.',
+    speedUp: [
+      {
+        title: 'Pacing (Relative Rest)',
+        desc: '• Staying within a manageable energy range can reduce crashes.\n• Gradual recovery often works better than forcing activity too early.',
+      },
+      {
+        title: 'Consistent Recovery Routine',
+        desc: '• Sleep, food, and treatment consistency often matter more than intensity.\n• A stable rhythm usually supports steadier progress.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'Boom and Bust Cycles',
+        desc: '• Overdoing it on a good day can lead to a bigger setback afterward.\n• Recovery often stalls when energy use is too uneven.',
+      },
+      {
+        title: 'Mental Over-Exertion',
+        desc: '• Long periods of stress, screen time, or emotional overload can worsen fatigue.\n• Cognitive strain can feel as draining as physical effort.',
+      },
+    ],
+    research: {
+      summary:
+        'Research suggests acupuncture may help improve fatigue and energy levels by supporting nervous system regulation and overall balance, although more high-quality studies are needed.',
+      references: [
+        'Zhou, W., Benharash, P., & Vaziri, N. D. (2016). Acupuncture for chronic pain and related disorders. Current Opinion in Anaesthesiology, 29(5), 583–589.',
+      ],
+    },
+  },
+  {
+    id: 'chronichives',
     name: 'Hives (Chronic)',
+    expectTitle: 'What to Expect When You Visit Us for Chronic Hives',
+    expect:
+      'When you visit us for chronic hives, we take a holistic approach to understand underlying triggers such as immune imbalance, stress, and environmental factors. Using traditional diagnostic methods, we develop a personalised treatment plan that may include acupuncture and herbal medicine to help reduce inflammation and support long-term skin health.',
     time: '2–4 wks',
     timeUnit: 'weeks',
     medianValue: 3,
@@ -340,25 +398,185 @@ const tcmConditions = [
     sustained: '82% / 72% / 65%',
     acuRole: 'Immediate itch relief.',
     herbRole: 'Stabilizes the immune system.',
+    research: {
+      summary:
+        'Some evidence suggests that TCM approaches may help reduce the frequency and severity of chronic hives, although further research is needed.',
+      references: [
+        'Gu, S., Yang, A. W., Xue, C. C., Li, C. G., & Da Costa, C. (2015). Chinese herbal medicine for chronic urticaria. Cochrane Database of Systematic Reviews, (5).',
+      ],
+    },
   },
   {
-    id: 'acne',
-    name: 'Acne',
+    id: 'eczema',
+    name: 'Eczema',
+    expectTitle: 'What to Expect When You Visit Us for Eczema',
+    expect:
+      'When you visit us for eczema, we take a holistic approach to understand not only your skin symptoms but also your digestion, stress levels, and immune health. Using traditional diagnostic methods, we identify underlying patterns contributing to inflammation and irritation. Treatment may include acupuncture, herbal medicine, and lifestyle advice to help soothe the skin and reduce flare-ups. Our focus is to support long-term skin health by addressing the root causes of imbalance.',
     time: '4–8 wks',
     timeUnit: 'weeks',
     medianValue: 6,
     axisMax: 8,
-    tcmRate: '70% – 85%',
-    tcmRateNum: 77,
-    noTreatment: 'Variable',
-    noTreatNum: 25,
+    tcmRate: '65% – 75%',
+    tcmRateNum: 70,
+    noTreatment: '~15%',
+    noTreatNum: 15,
+    sustained: '85% / 70% / 62%',
+    acuRole: 'Stops the itch.',
+    herbRole: 'Heals skin barrier & redness.',
+    speedUp: [
+      {
+        title: 'Moisture Management',
+        desc: '• Skin barrier care and irritation control may reduce flare intensity.\n• Consistent skin support often improves comfort over time.',
+      },
+      {
+        title: 'Anti-Inflammatory Diet',
+        desc: '• A calmer, less reactive diet may support recovery.\n• Avoiding known triggers often reduces repeated flare-ups.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'Chronic Scratching',
+        desc: '• Scratching can damage the skin barrier further.\n• Repeated irritation often extends recovery time.',
+      },
+      {
+        title: 'Topical Steroid Overuse',
+        desc: '• Prolonged dependence can complicate skin recovery in some cases.\n• The overall picture may become harder to stabilise.',
+      },
+    ],
+    research: {
+      summary:
+        'Emerging research suggests that TCM treatments, including acupuncture and herbal medicine, may help reduce the severity and frequency of eczema symptoms.',
+      references: [
+        'Zhang, C. S., Yu, J. J., Parker, S., Zhang, A. L., May, B., Lu, C., & Xue, C. C. (2015). Oral Chinese herbal medicine combined with pharmacotherapy for eczema. Cochrane Database of Systematic Reviews, (4).',
+      ],
+    },
+  },
+  {
+    id: 'excessivesweating',
+    name: 'Excessive Sweating',
+    expectTitle: 'What to Expect When You Visit Us for Excessive Sweating',
+    expect:
+      'When you visit us for excessive sweating, we assess patterns such as triggers, stress levels, and overall body balance. Using a holistic approach, we create a personalised treatment plan that may include acupuncture and herbal medicine to help regulate the body’s temperature and nervous system.',
+    time: '4–6 wks',
+    timeUnit: 'weeks',
+    medianValue: 5,
+    axisMax: 6,
+    tcmRate: '65% – 78%',
+    tcmRateNum: 71,
+    noTreatment: '<10%',
+    noTreatNum: 10,
+    sustained: '85% / 78% / 70%',
+    acuRole: 'Regulates ANS.',
+    herbRole: '"Astringes" the pores.',
+    research: {
+      summary:
+        'Limited research suggests acupuncture may help regulate sweating by influencing the autonomic nervous system, though more studies are needed.',
+      references: [
+        'Kim, K. H., Kim, T. H., Kang, J. W., & Lee, M. S. (2011). Acupuncture for hyperhidrosis: A systematic review. Autonomic Neuroscience, 164(1–2), 1–5.',
+      ],
+    },
+  },
+  {
+    id: 'fertility',
+    name: 'Fertility Support',
+    expectTitle: 'What to Expect When You Visit Us for Fertility Support',
+    expect:
+      'When you visit us for fertility support, we take a holistic approach to optimise your overall health, hormonal balance, and menstrual cycle. We assess factors such as stress, lifestyle, and reproductive health to develop a personalised treatment plan that may include acupuncture, herbal medicine, and supportive guidance. Our goal is to support natural fertility or complement assisted reproductive treatments.',
+    time: '3–6 mo',
+    timeUnit: 'months',
+    medianValue: 4.5,
+    axisMax: 6,
+    tcmRate: '+15%–20% Rate',
+    tcmRateNum: 75,
+    noTreatment: 'Baseline',
+    noTreatNum: 40,
+    sustained: 'Target: Healthy Birth',
+    acuRole: 'Blood flow.',
+    herbRole: 'Follicle & lining quality.',
+    research: {
+      summary:
+        'Research suggests acupuncture may support fertility by improving blood flow, regulating hormones, and reducing stress, particularly when used alongside conventional care.',
+      references: [
+        'Smith, C. A., Armour, M., Shewamene, Z., Tan, H. Y., Norman, R. J., & Johnson, N. P. (2018). Acupuncture for infertility. Cochrane Database of Systematic Reviews, (4).',
+      ],
+    },
+  },
+  {
+    id: 'frequentcold',
+    name: 'Frequent Cold',
+    expectTitle: 'What to Expect When You Visit Us for Frequent Colds',
+    expect:
+      'When you visit us for frequent colds, we focus on strengthening your immune system and identifying underlying patterns that may make you more susceptible to illness. We take the time to understand your energy levels, recovery time, stress, and overall health, using traditional diagnostic methods such as pulse and tongue assessment. Your treatment plan may include acupuncture, herbal medicine, and lifestyle guidance to support resilience and reduce the frequency of infections.',
+    time: '3 months*',
+    timeUnit: 'months',
+    medianValue: 3,
+    axisMax: 3,
+    tcmRate: '~55% Fewer',
+    tcmRateNum: 55,
+    noTreatment: 'No change',
+    noTreatNum: 5,
+    sustained: '90% / 85% / 80%',
+    acuRole: 'Quick recovery.',
+    herbRole: 'Builds "Wei Qi" (Immunity).',
+    research: {
+      summary:
+        'Some research suggests that acupuncture may support immune function and help reduce the frequency of respiratory infections by regulating the body’s natural defence systems.',
+      references: [
+        'Zhou, W., Benharash, P., & Vaziri, N. D. (2016). Acupuncture for chronic pain and related disorders. Current Opinion in Anaesthesiology, 29(5), 583–589.',
+      ],
+    },
+  },
+  {
+    id: 'gout',
+    name: 'Gout (Acute/Chronic)',
+    expectTitle: 'What to Expect When You Visit Us for Gout',
+    expect:
+      'When you visit us for gout, we assess your symptoms, diet, and overall health to understand contributing factors such as inflammation and metabolic balance. Using a holistic approach, we develop a personalised treatment plan that may include acupuncture and herbal medicine to help reduce pain, manage flare-ups, and support long-term joint health.',
+    time: '3–7 days',
+    timeUnit: 'days',
+    medianValue: 5,
+    axisMax: 7,
+    tcmRate: '70% – 82%',
+    tcmRateNum: 76,
+    noTreatment: '~15% (slow)',
+    noTreatNum: 15,
     sustained: '88% / 75% / 60%',
-    acuRole: 'Reduces redness.',
-    herbRole: 'Clears internal "Damp-Heat."',
+    acuRole: 'Best for acute pain.',
+    herbRole: 'Best for lowering Uric Acid.',
+    speedUp: [
+      {
+        title: 'Hydration',
+        desc: '• Adequate fluids may support better uric acid clearance.\n• Good hydration often helps joints feel less reactive during flares.',
+      },
+      {
+        title: 'Anti-Inflammatory Recovery',
+        desc: '• Calmer eating patterns and joint protection often support faster settling.\n• Short-term flare management matters a lot.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'High-Purine Trigger Foods',
+        desc: '• Alcohol, shellfish, and high-sugar drinks may worsen flare-ups.\n• Repeated triggers often prolong pain and swelling.',
+      },
+      {
+        title: 'Sudden Extreme Exercise',
+        desc: '• Overloading an inflamed joint can aggravate symptoms.\n• Recovery is often smoother with relative rest first.',
+      },
+    ],
+    research: {
+      summary:
+        'Some studies suggest acupuncture may help reduce pain and inflammation associated with gout, although more high-quality research is needed to confirm these effects.',
+      references: [
+        'Lee, M. S., Pittler, M. H., & Ernst, E. (2008). Acupuncture for gouty arthritis: A systematic review. Rheumatology, 47(11), 1747–1752.',
+      ],
+    },
   },
   {
     id: 'hairloss',
     name: 'Hair Loss (AGA)',
+    expectTitle: 'What to Expect When You Visit Us for Hair Loss',
+    expect:
+      'When you visit us for hair loss, we assess factors such as stress, hormonal balance, circulation, and overall health. Treatment focuses on improving blood flow to the scalp and supporting internal balance through acupuncture and herbal medicine.',
     time: '3–6 mo',
     timeUnit: 'months',
     medianValue: 4.5,
@@ -373,42 +591,228 @@ const tcmConditions = [
     speedUp: [
       {
         title: 'Blood Nourishment',
-        desc: ' • Eating iron-rich and "dark" foods (black sesame, goji) nourishes "Liver Blood." \n• Improved blood quality leads to stronger hair follicles and clearer skin.',
+        desc: '• Better overall nutrition and sleep may support healthier scalp conditions.\n• Consistency usually matters more than intensity.',
       },
       {
         title: 'Scalp Stimulation',
-        desc: ' • Daily "comb-tapping" or Plum Blossom needling increases local Qi flow. \n• Consistent use of sulfur-based herbal washes clears fungal/bacterial load.',
+        desc: '• Gentle local stimulation may support circulation.\n• Routine scalp care is usually more helpful than sporadic effort.',
       },
     ],
     slowDown: [
       {
         title: 'Chronic Sleep Deprivation',
-        desc: ' • Hair and skin repair occurs between 11 PM and 3 AM (Liver/Gallbladder time). \n• Missing this window results in "Yin Deficiency," leading to dry skin and brittle hair.',
+        desc: '• Poor sleep can worsen overall recovery and stress load.\n• Hair shedding often feels more noticeable when rest is poor.',
       },
       {
         title: 'High-Glycemic Diet',
-        desc: ' • Sugar spikes insulin, which triggers sebum (oil) production and acne. \n• Excess sugar glydates collagen, making skin less resilient to dermatitis.',
+        desc: '• Frequent sugar spikes may worsen inflammation and oil imbalance.\n• Long-term scalp health can become harder to stabilise.',
       },
     ],
+    research: {
+      summary:
+        'Some research suggests acupuncture may support hair regrowth and reduce hair loss, though stronger evidence is still needed.',
+      references: [
+        'Kim, T. H., Lee, M. S., Kim, K. H., Kang, J. W., & Choi, T. Y. (2013). Acupuncture for alopecia. Journal of Dermatological Treatment, 24(3), 229–233.',
+      ],
+    },
   },
   {
-    id: 'cancerpain',
-    name: 'Cancer Pain',
+    id: 'hayfever',
+    name: 'Hay Fever',
+    expectTitle: 'What to Expect When You Visit Us for Hay Fever',
+    expect:
+      'When you visit us for hay fever, we focus on supporting your immune system and reducing sensitivity to allergens. We assess your overall health and patterns of symptoms to create a personalised treatment plan, which may include acupuncture and herbal medicine. Our aim is to reduce the severity and frequency of your symptoms.',
     time: '1–2 wks',
     timeUnit: 'weeks',
     medianValue: 1.5,
     axisMax: 2,
-    tcmRate: '~50% Reduction',
-    tcmRateNum: 50,
+    tcmRate: '70% – 88%',
+    tcmRateNum: 79,
+    noTreatment: 'Seasonal',
+    noTreatNum: 30,
+    sustained: '95% / 80% / 65%',
+    acuRole: 'Clears sinuses fast.',
+    herbRole: 'Prevents the next flare.',
+    research: {
+      summary:
+        'Clinical studies suggest that acupuncture may help relieve symptoms of allergic rhinitis, including sneezing and congestion.',
+      references: [
+        'Xue, C. C., English, R., Zhang, J. J., Da Costa, C., Li, C. G., & Story, D. F. (2007). Effect of acupuncture in the treatment of allergic rhinitis. Annals of Allergy, Asthma & Immunology, 99(3), 237–243.',
+      ],
+    },
+  },
+  {
+    id: 'ibs',
+    name: 'IBS (Cramps/Pain)',
+    expectTitle: 'What to Expect When You Visit Us for IBS',
+    expect:
+      'When you visit us for support with IBS, you will receive a personalised, holistic consultation that looks beyond just your digestive symptoms. We take the time to understand your digestion, stress levels, diet, and overall health, using traditional diagnostic methods such as pulse and tongue assessment. From there, we create a tailored treatment plan that may include acupuncture, herbal medicine, and gentle guidance around diet and lifestyle. Our focus is to regulate your digestion, reduce discomfort such as bloating or pain, and address the underlying causes so you can experience lasting improvements in your gut health and wellbeing.',
+    time: '2–4 wks',
+    timeUnit: 'weeks',
+    medianValue: 3,
+    axisMax: 4,
+    tcmRate: '75% – 85%',
+    tcmRateNum: 80,
+    noTreatment: '<10% (Chronic cycles)',
+    noTreatNum: 10,
+    sustained: '94% / 85% / 78%',
+    acuRole: 'Best for cramping and gut tension.',
+    herbRole: 'Supports digestive regulation.',
+    speedUp: [
+      {
+        title: 'Consistency in Meal Timing',
+        desc: '• Eating at regular times may support steadier digestive rhythm.\n• Predictability often helps reduce bowel sensitivity and cramping.',
+      },
+      {
+        title: 'Probiotic-Rich Herbal Support',
+        desc: '• Gentle digestive support may help gut balance feel more stable.\n• Warm digestive teas before meals may improve comfort for some people.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'Raw/Cold Food Overload',
+        desc: '• Too much cold, raw, or difficult-to-digest food may aggravate IBS patterns.\n• This often increases bloating, cramping, or alternation in bowel habit.',
+      },
+      {
+        title: 'Emotional Eating',
+        desc: '• Stress eating can worsen bowel reactivity.\n• Symptoms often flare faster when digestion and stress patterns overlap.',
+      },
+    ],
+    research: {
+      summary:
+        'Research suggests that Traditional Chinese Medicine (TCM) may help improve symptoms of IBS, including abdominal pain, bloating, and irregular bowel movements. Studies have found that acupuncture can help regulate gut function and reduce sensitivity, while herbal medicine may support digestive balance.',
+      references: [
+        'Manheimer, E., Cheng, K., Wieland, L. S., Min, L. S., Shen, X., Berman, B. M., & Lao, L. (2012). Acupuncture for irritable bowel syndrome. American Journal of Gastroenterology, 107(6), 835–847.',
+      ],
+    },
+  },
+  {
+    id: 'insomnia',
+    name: 'Insomnia',
+    expectTitle: 'What to Expect When You Visit Us for Insomnia',
+    expect:
+      'When you visit us for support with insomnia, you will receive a personalised, holistic consultation that looks beyond just your sleep concerns. We take the time to understand your sleep patterns, stress levels, lifestyle, and overall health, using traditional diagnostic methods such as pulse and tongue assessment. From there, we create a tailored treatment plan that may include acupuncture, herbal medicine, and gentle guidance around diet and relaxation. Our focus is to help you sleep more deeply while addressing the root causes of your insomnia, so you can experience lasting improvements in your wellbeing.',
+    time: '2–4 wks',
+    timeUnit: 'weeks',
+    medianValue: 3,
+    axisMax: 4,
+    tcmRate: '78% – 85%',
+    tcmRateNum: 82,
+    noTreatment: '~15%',
+    noTreatNum: 15,
+    sustained: '92% / 85% / 78%',
+    acuRole: 'Best for falling asleep.',
+    herbRole: 'Best for sleep depth.',
+    speedUp: [
+      {
+        title: 'Consistent Circadian Rhythm',
+        desc: '• Going to bed and waking up at consistent times often improves sleep rhythm.\n• Early daylight exposure may help reset the body clock.',
+      },
+      {
+        title: 'Evening Wind-Down Ritual',
+        desc: '• Reduced screen time before bed can support deeper rest.\n• A calmer pre-sleep routine often helps the nervous system settle.',
+      },
+    ],
+    slowDown: [
+      {
+        title: 'Late Night Heavy Eating',
+        desc: '• Heavy late meals may worsen restlessness and overnight waking.\n• Digestion can compete with the body’s natural sleep drive.',
+      },
+      {
+        title: 'Inconsistent Treatment',
+        desc: '• Sleep often improves best with continuity.\n• Stop-start treatment may reduce cumulative benefit.',
+      },
+    ],
+    research: {
+      summary:
+        'Research suggests that Traditional Chinese Medicine (TCM) may help improve sleep quality and reduce symptoms of insomnia, especially when treatments like acupuncture and herbal medicine are used consistently. Studies have found that acupuncture can help regulate the body’s sleep–wake cycle and calm the nervous system, while certain herbal formulas may support relaxation and reduce nighttime waking.',
+      references: [
+        'Cao, H., Pan, X., Li, H., & Liu, J. (2009). Acupuncture for treatment of insomnia: A systematic review of randomized controlled trials. Journal of Alternative and Complementary Medicine, 15(11), 1171–1186.',
+        'Cheuk, D. K. L., Yeung, W. F., Chung, K. F., & Wong, V. (2012). Acupuncture for insomnia. Cochrane Database of Systematic Reviews, (9), CD005472.',
+      ],
+    },
+  },
+  {
+    id: 'ivf',
+    name: 'IVF Support',
+    expectTitle: 'What to Expect When You Visit Us for IVF Support',
+    expect:
+      'When you visit us for IVF support, we work alongside your medical treatment to support your body and wellbeing throughout the process. We take a holistic view of your health, including stress levels, cycle health, and overall vitality. Treatment may include acupuncture and lifestyle support to help optimise your body’s environment. Our focus is to support you physically and emotionally during your fertility journey.',
+    time: '3 months*',
+    timeUnit: 'months',
+    medianValue: 3,
+    axisMax: 3,
+    tcmRate: '+15%–20%',
+    tcmRateNum: 75,
     noTreatment: 'Baseline',
-    noTreatNum: 5,
-    sustained: 'Dependent on illness',
-    acuRole: 'Best for neuropathic pain.',
-    herbRole: 'General palliative support.',
+    noTreatNum: 40,
+    sustained: 'N/A (Goal is Live Birth)',
+    acuRole: 'Uterine blood flow.',
+    herbRole: 'Egg & lining quality.',
+    research: {
+      summary:
+        'Some studies suggest acupuncture may improve IVF outcomes and reduce stress during treatment.',
+      references: [
+        'Smith, C. A., Armour, M., Shewamene, Z., Tan, H. Y., Norman, R. J., & Johnson, N. P. (2018). Acupuncture for infertility. Cochrane Database of Systematic Reviews, (4).',
+      ],
+    },
+  },
+  {
+    id: 'pms',
+    name: 'PMS',
+    expectTitle: 'What to Expect When You Visit Us for PMS',
+    expect:
+      'When you visit us for PMS, we take the time to understand your menstrual cycle, hormonal patterns, and associated symptoms such as pain, mood changes, and bloating. Using a holistic assessment, we develop a personalised treatment plan that may include acupuncture, herbal medicine, and lifestyle guidance. Our aim is to regulate your cycle, reduce symptoms, and support overall hormonal balance.',
+    time: '2–3 cycles',
+    timeUnit: 'cycles',
+    medianValue: 2.5,
+    axisMax: 3,
+    tcmRate: '75% – 88%',
+    tcmRateNum: 82,
+    noTreatment: '<10%',
+    noTreatNum: 10,
+    sustained: '94% / 88% / 80%',
+    acuRole: 'Best for mood/cramps.',
+    herbRole: 'Best for breast pain.',
+    research: {
+      summary:
+        'Research suggests that acupuncture may help reduce PMS symptoms, including pain and emotional changes.',
+      references: [
+        'Armour, M., Ee, C. C., Hao, J., Wilson, T. M., Yao, S. S., Smith, C. A., & Song, J. (2018). Acupuncture and women’s health. Journal of Alternative and Complementary Medicine, 24(10), 965–976.',
+      ],
+    },
+  },
+  {
+    id: 'stress',
+    name: 'Stress/Anxiety',
+    expectTitle: 'What to Expect When You Visit Us for Stress and Anxiety',
+    expect:
+      'When you visit us for support with stress or anxiety, you will receive a personalised, holistic consultation that considers both your emotional wellbeing and physical health. We explore factors such as sleep, digestion, lifestyle, and stress patterns, using traditional diagnostic methods to understand your body’s balance. Your treatment plan may include acupuncture, herbal medicine, and practical guidance to support relaxation and resilience. Our goal is to calm the nervous system, improve emotional balance, and support long-term wellbeing.',
+    time: '2–4 wks',
+    timeUnit: 'weeks',
+    medianValue: 3,
+    axisMax: 4,
+    tcmRate: '68% – 76%',
+    tcmRateNum: 72,
+    noTreatment: 'Variable',
+    noTreatNum: 20,
+    sustained: '88% / 80% / 72%',
+    acuRole: 'Rapid "reset" of nerves.',
+    herbRole: 'Emotional resilience.',
+    research: {
+      summary:
+        'Research suggests that acupuncture may help reduce symptoms of stress and anxiety by regulating the nervous system and lowering stress hormone levels.',
+      references: [
+        'Zhou, W., Benharash, P., & Vaziri, N. D. (2016). Acupuncture for chronic pain and related disorders. Current Opinion in Anaesthesiology, 29(5), 583–589.',
+      ],
+    },
   },
   {
     id: 'tmj',
     name: 'TMJ (Jaw Pain)',
+    expectTitle: 'What to Expect When You Visit Us for TMJ',
+    expect:
+      'When you visit us for TMJ or jaw pain, we assess muscle tension, stress, and alignment contributing to your symptoms. Treatment may include acupuncture to relieve tension, reduce pain, and improve jaw function, along with guidance on managing contributing factors.',
     time: '2–4 wks',
     timeUnit: 'weeks',
     medianValue: 3,
@@ -420,40 +824,48 @@ const tcmConditions = [
     sustained: '92% / 85% / 78%',
     acuRole: 'Unbeatable for muscle release.',
     herbRole: 'Best for joint inflammation.',
+    research: {
+      summary:
+        'Studies suggest acupuncture may help reduce TMJ pain and improve function, though further research is needed.',
+      references: [
+        'La Touche, R., Angulo-Díaz-Parreño, S., De-La-Hoz, J. L., Fernández-Carnero, J., & Ge, H. Y. (2010). Acupuncture in temporomandibular disorders. Journal of Oral Rehabilitation, 37(8), 553–561.',
+      ],
+    },
   },
   {
-    id: 'cough',
-    name: 'Chronic Cough',
-    time: '1–3 wks',
+    id: 'weight',
+    name: 'Weight Loss',
+    expectTitle: 'What to Expect When You Visit Us for Weight Loss',
+    expect:
+      'When you visit us for weight management, we take a personalised and holistic approach that considers your metabolism, digestion, lifestyle, and overall health. We aim to understand factors such as appetite, energy levels, and stress, using traditional diagnostic methods. Your treatment plan may include acupuncture, herbal medicine, and practical guidance around diet and lifestyle. Our goal is to support healthy, sustainable weight loss while improving your overall wellbeing.',
+    time: '8–12 wks',
     timeUnit: 'weeks',
-    medianValue: 2,
-    axisMax: 3,
-    tcmRate: '72% – 84%',
-    tcmRateNum: 78,
-    noTreatment: '~30%',
-    noTreatNum: 30,
-    sustained: '85% / 78% / 72%',
-    acuRole: 'Stops the cough reflex.',
-    herbRole: 'Moistens the lung tissue.',
-  },
-  {
-    id: 'fertility',
-    name: 'Fertility Support',
-    time: '3–6 mo',
-    timeUnit: 'months',
-    medianValue: 4.5,
-    axisMax: 6,
-    tcmRate: '+15%–20% Rate',
-    tcmRateNum: 75,
-    noTreatment: 'Baseline',
-    noTreatNum: 40,
-    sustained: 'Target: Healthy Birth',
-    acuRole: 'Blood flow.',
-    herbRole: 'Follicle & lining quality.',
+    medianValue: 10,
+    axisMax: 12,
+    tcmRate: '5% – 10% BMI',
+    tcmRateNum: 60,
+    noTreatment: '<2% net',
+    noTreatNum: 10,
+    sustained: '75% / 60% / 45%',
+    acuRole: 'Controls appetite.',
+    herbRole: 'Boosts metabolic rate.',
+    research: {
+      summary:
+        'Some research suggests that acupuncture may support weight loss by helping regulate appetite, metabolism, and energy balance.',
+      references: [
+        'Cho, S. H., Lee, J. S., Thabane, L., & Lee, J. (2009). Acupuncture for obesity. International Journal of Obesity, 33(2), 183–196.',
+      ],
+    },
   },
 ]
 
-const selectedId = ref(tcmConditions[0].id)
+const sortedConditions = computed(() => {
+  return [...tcmConditions].sort((a, b) =>
+    a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }),
+  )
+})
+
+const selectedId = ref('insomnia')
 
 const selectedData = computed(() => {
   return tcmConditions.find((c) => c.id === selectedId.value) || tcmConditions[0]
@@ -480,10 +892,13 @@ const sustainedData = computed(() => {
   }
 })
 
+const hasExpect = computed(() => Boolean(selectedData.value?.expect))
+const hasResearch = computed(() => Boolean(selectedData.value?.research))
+
 const unitShortMap = {
   days: 'd',
   weeks: 'w',
-  months: 'moths',
+  months: 'mo',
   cycles: 'cy',
 }
 
@@ -559,7 +974,6 @@ const cubicBezierPoint = (t, p0, p1, p2, p3) => {
   const mt = 1 - t
   const x = mt * mt * mt * p0.x + 3 * mt * mt * t * p1.x + 3 * mt * t * t * p2.x + t * t * t * p3.x
   const y = mt * mt * mt * p0.y + 3 * mt * mt * t * p1.y + 3 * mt * t * t * p2.y + t * t * t * p3.y
-
   return { x, y }
 }
 
@@ -572,7 +986,6 @@ const chartInteractivePoints = computed(() => {
   const condition = selectedData.value
   const { p0, p1, p2, p3 } = getCurveControlPoints(condition)
   const max = condition.axisMax || 4
-
   const pointCount = 25
   const points = []
 
@@ -584,11 +997,8 @@ const chartInteractivePoints = computed(() => {
 
     points.push({
       id: `${condition.id}-${i}`,
-      t,
-      xValue: rawXValue,
       xLabel: formatAxisTick(rawXValue, condition.timeUnit),
       yLabel: `${Math.round(percent)}%`,
-      percentValue: Math.round(percent),
       xPercent: point.x,
       yPercent: (point.y / 50) * 100,
     })
@@ -639,9 +1049,7 @@ const tooltipPlacementClass = computed(() => {
 
 const activeGuideStyle = computed(() => {
   if (!activeChartPoint.value) return {}
-  return {
-    left: `${activeChartPoint.value.xPercent}%`,
-  }
+  return { left: `${activeChartPoint.value.xPercent}%` }
 })
 
 const activeDotStyle = computed(() => {
@@ -653,10 +1061,14 @@ const activeDotStyle = computed(() => {
 })
 
 const theoryNoteTooltipText =
-  'Please note, these theories are hypotheses based on Chinese medicine theories.'
+  'These explanations are simplified traditional Chinese medicine-informed summaries for education and visualisation only. They are not a diagnosis and should not replace individual medical advice.'
 
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value
+}
+
+const toggleResearch = () => {
+  isResearchOpen.value = !isResearchOpen.value
 }
 
 const selectCondition = (id) => {
@@ -664,6 +1076,7 @@ const selectCondition = (id) => {
   isDropdownOpen.value = false
   activeChartPoint.value = null
   showTheoryNoteTooltip.value = false
+  isResearchOpen.value = false
 }
 
 const closeDropdown = (e) => {
@@ -750,7 +1163,7 @@ onUnmounted(() => {
             <Transition name="dropdown">
               <ul v-if="isDropdownOpen" class="select-options">
                 <li
-                  v-for="cond in tcmConditions"
+                  v-for="cond in sortedConditions"
                   :key="cond.id"
                   :class="{ active: cond.id === selectedId }"
                   @click.stop="selectCondition(cond.id)"
@@ -766,6 +1179,19 @@ onUnmounted(() => {
       <section class="vis-dashboard" :ref="setSectionRef" data-bgcolor="#FAF7F2">
         <div class="container">
           <h2 class="dashboard-title">{{ selectedData.name }}</h2>
+
+          <Transition name="fade" mode="out-in">
+            <div
+              v-if="hasExpect"
+              :key="'expect-' + selectedId"
+              class="expect-section shimmer-effect"
+            >
+              <div class="expect-inner">
+                <h3 class="expect-title">{{ selectedData.expectTitle }}</h3>
+                <p class="expect-copy">{{ selectedData.expect }}</p>
+              </div>
+            </div>
+          </Transition>
 
           <Transition name="fade" mode="out-in">
             <div :key="selectedId" class="dashboard-grid">
@@ -980,7 +1406,7 @@ onUnmounted(() => {
                   </div>
                   <div>
                     <h3>Results Comparison</h3>
-                    <p class="sub-text">Recovery Rate (%)</p>
+                    <p class="sub-text">Recovery Rate (TCM)</p>
                   </div>
                 </div>
 
@@ -1028,8 +1454,7 @@ onUnmounted(() => {
                         @focus="showTheoryNoteTooltip = true"
                         aria-label="Show theory note"
                       >
-                        (Please note, these theories are hypotheses based on Chinese medicine
-                        theories.)
+                        (Please note, these explanations are simplified clinical summaries.)
                       </button>
 
                       <Transition name="note-fade">
@@ -1047,7 +1472,6 @@ onUnmounted(() => {
                         height="26"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="#000000"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <line
@@ -1131,8 +1555,8 @@ onUnmounted(() => {
 
                 <div class="sustain-block mt-30 hover-info-block">
                   <div class="sustain-header">
-                    <h4>Sustainability of TCM Treatment Outcomes (%)</h4>
-                    <span class="sub-text">Sustained Relief (3 / 6 / 12 months)</span>
+                    <h4>Sustained Relief (%)</h4>
+                    <span class="sub-text">3 / 6 / 12 months</span>
                   </div>
 
                   <template v-if="sustainedData.mode === 'bars'">
@@ -1157,9 +1581,7 @@ onUnmounted(() => {
                   </template>
 
                   <template v-else>
-                    <div class="sustain-note">
-                      {{ selectedData.sustained }}
-                    </div>
+                    <div class="sustain-note">{{ selectedData.sustained }}</div>
                   </template>
                 </div>
               </div>
@@ -1187,7 +1609,7 @@ onUnmounted(() => {
                     :style="{ '--factor-index': i }"
                   >
                     <h5>{{ item.title }}</h5>
-                    <p>{{ item.desc }}</p>
+                    <p class="factor-desc">{{ item.desc }}</p>
                   </div>
                 </div>
 
@@ -1203,10 +1625,54 @@ onUnmounted(() => {
                     :style="{ '--factor-index': i }"
                   >
                     <h5>{{ item.title }}</h5>
-                    <p>{{ item.desc }}</p>
+                    <p class="factor-desc">{{ item.desc }}</p>
                   </div>
                 </div>
               </div>
+            </div>
+          </Transition>
+
+          <Transition name="fade" mode="out-in">
+            <div
+              v-if="hasResearch"
+              :key="'research-' + selectedId"
+              class="research-section shimmer-effect"
+            >
+              <button class="research-toggle" type="button" @click="toggleResearch">
+                <span>What does the Evidence say?</span>
+                <svg
+                  :class="{ rotate: isResearchOpen }"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#325B49"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+
+              <Transition name="dropdown">
+                <div v-if="isResearchOpen" class="research-panel">
+                  <p class="research-copy">{{ selectedData.research.intro }}</p>
+                  <p class="research-copy">{{ selectedData.research.summary }}</p>
+
+                  <div
+                    v-if="
+                      selectedData.research.references && selectedData.research.references.length
+                    "
+                    class="research-refs"
+                  >
+                    <h4>References</h4>
+                    <ul>
+                      <li v-for="(refItem, index) in selectedData.research.references" :key="index">
+                        {{ refItem }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </Transition>
             </div>
           </Transition>
         </div>
@@ -1215,7 +1681,7 @@ onUnmounted(() => {
       <section class="disclaimer-section" :ref="setSectionRef" data-bgcolor="#CFDAC8">
         <div class="container">
           <div class="disclaimer-grid">
-            <div class="disclaimer-box">
+            <div class="disclaimer-box info-box">
               <div class="disclaimer-head">
                 <span class="disclaimer-icon">
                   <svg
@@ -1380,7 +1846,7 @@ onUnmounted(() => {
   background: white;
   border-radius: 20px;
   padding: 25px 40px;
-  max-width: 600px;
+  max-width: 620px;
   margin: 0 auto;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.04);
   position: relative;
@@ -1441,7 +1907,7 @@ onUnmounted(() => {
   padding: 10px 0;
   margin: 0;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  max-height: 350px;
+  max-height: 360px;
   overflow-y: auto;
 }
 
@@ -1471,6 +1937,28 @@ onUnmounted(() => {
   margin-bottom: 30px;
 }
 
+.expect-section {
+  background: white;
+  border-radius: 24px;
+  padding: 34px 38px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  margin-bottom: 30px;
+}
+
+.expect-title {
+  font-size: 28px;
+  line-height: 1.2;
+  color: var(--text-primary);
+  margin: 0 0 18px;
+}
+
+.expect-copy {
+  font-size: 17px;
+  line-height: 1.75;
+  color: #444;
+  margin: 0;
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1479,7 +1967,8 @@ onUnmounted(() => {
 }
 
 .dash-card,
-.factors-dashboard {
+.factors-dashboard,
+.research-section {
   background: white;
   border-radius: 24px;
   padding: 40px;
@@ -1541,7 +2030,7 @@ onUnmounted(() => {
   background: var(--primary-teal);
   color: white;
   padding: 4px 12px;
-  border-radius: 12px;
+  border-radius: 999px;
   font-size: 12px;
 }
 
@@ -1620,10 +2109,9 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #aaa;
+  color: #8e9a92;
   margin-top: 10px;
   font-weight: 600;
-  transition: color 0.25s ease;
 }
 
 .chart-guide-line {
@@ -1677,7 +2165,7 @@ onUnmounted(() => {
 
 .chart-hotspot:hover::before,
 .chart-hotspot:focus-visible::before {
-  background: rgba(17, 51, 48, 0.18);
+  background: rgba(47, 181, 168, 0.18);
   transform: scale(1.18);
   box-shadow: 0 0 0 6px rgba(47, 181, 168, 0.08);
 }
@@ -1713,8 +2201,6 @@ onUnmounted(() => {
   left: 50%;
   bottom: -7px;
   transform: translateX(-50%) rotate(45deg);
-  border-right: 1px solid rgba(122, 133, 179, 0.14);
-  border-bottom: 1px solid rgba(122, 133, 179, 0.14);
 }
 
 .chart-tooltip.tooltip-left {
@@ -1725,8 +2211,6 @@ onUnmounted(() => {
   right: -7px;
   top: 50%;
   transform: translateY(-50%) rotate(45deg);
-  border-top: 1px solid rgba(122, 133, 179, 0.14);
-  border-right: 1px solid rgba(122, 133, 179, 0.14);
 }
 
 .chart-tooltip.tooltip-right {
@@ -1737,8 +2221,6 @@ onUnmounted(() => {
   left: -7px;
   top: 50%;
   transform: translateY(-50%) rotate(45deg);
-  border-left: 1px solid rgba(122, 133, 179, 0.14);
-  border-bottom: 1px solid rgba(122, 133, 179, 0.14);
 }
 
 .chart-tooltip.tooltip-bottom {
@@ -1749,15 +2231,12 @@ onUnmounted(() => {
   left: 50%;
   top: -7px;
   transform: translateX(-50%) rotate(45deg);
-  border-left: 1px solid rgba(122, 133, 179, 0.14);
-  border-top: 1px solid rgba(122, 133, 179, 0.14);
 }
 
 .tooltip-title {
   font-size: 18px;
   font-weight: 700;
   color: #325b49;
-  line-height: 1.2;
 }
 
 .tooltip-value {
@@ -1765,16 +2244,27 @@ onUnmounted(() => {
   font-size: 24px;
   font-weight: 800;
   color: #325b49;
-  line-height: 1.2;
 }
 
 .tooltip-fade-enter-active,
-.tooltip-fade-leave-active {
-  transition: opacity 0.18s ease;
+.tooltip-fade-leave-active,
+.fade-enter-active,
+.fade-leave-active,
+.dropdown-enter-active,
+.dropdown-leave-active,
+.note-fade-enter-active,
+.note-fade-leave-active {
+  transition: all 0.2s ease;
 }
 
 .tooltip-fade-enter-from,
-.tooltip-fade-leave-to {
+.tooltip-fade-leave-to,
+.fade-enter-from,
+.fade-leave-to,
+.dropdown-enter-from,
+.dropdown-leave-to,
+.note-fade-enter-from,
+.note-fade-leave-to {
   opacity: 0;
 }
 
@@ -1808,10 +2298,6 @@ onUnmounted(() => {
   background: #f0f0f0;
   border-radius: 999px;
   overflow: hidden;
-  transition:
-    transform 0.28s ease,
-    box-shadow 0.28s ease,
-    background-color 0.28s ease;
 }
 
 .bar-fill {
@@ -1875,15 +2361,11 @@ onUnmounted(() => {
   cursor: help;
 }
 
-.theory-note-btn:hover {
-  color: #7f7f7f;
-}
-
 .theory-note-tooltip {
   position: absolute;
   left: 0;
   top: calc(100% + 10px);
-  width: 260px;
+  width: 280px;
   padding: 14px 16px;
   background: rgba(255, 255, 255, 0.98);
   border: 1px solid rgba(50, 91, 73, 0.1);
@@ -1893,48 +2375,15 @@ onUnmounted(() => {
   font-size: 13px;
   line-height: 1.65;
   z-index: 40;
-  backdrop-filter: blur(6px);
-}
-
-.theory-note-tooltip::before {
-  content: '';
-  position: absolute;
-  left: 18px;
-  top: -7px;
-  width: 14px;
-  height: 14px;
-  background: rgba(255, 255, 255, 0.98);
-  border-left: 1px solid rgba(50, 91, 73, 0.08);
-  border-top: 1px solid rgba(50, 91, 73, 0.08);
-  transform: rotate(45deg);
-}
-
-.note-fade-enter-active,
-.note-fade-leave-active {
-  transition:
-    opacity 0.18s ease,
-    transform 0.18s ease;
-}
-
-.note-fade-enter-from,
-.note-fade-leave-to {
-  opacity: 0;
-  transform: translateY(6px);
 }
 
 .split-box {
   background: #f9fbf9;
   border-radius: 12px;
-  padding: 15px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  transition:
-    transform 0.28s ease,
-    box-shadow 0.28s ease,
-    background-color 0.28s ease,
-    border-color 0.28s ease;
-  border: 1px solid transparent;
+  gap: 8px;
 }
 
 .split-label {
@@ -1949,19 +2398,13 @@ onUnmounted(() => {
 .split-text {
   font-size: 15px;
   color: var(--text-dark);
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .sustain-block {
   background: #f9fbf9;
   border-radius: 14px;
   padding: 16px;
-  transition:
-    transform 0.28s ease,
-    box-shadow 0.28s ease,
-    background-color 0.28s ease,
-    border-color 0.28s ease;
-  border: 1px solid transparent;
 }
 
 .sustain-header {
@@ -2072,13 +2515,6 @@ onUnmounted(() => {
   margin-bottom: 15px;
   border-left: 4px solid var(--primary-teal);
   text-align: left;
-  opacity: 0;
-  animation: factorSlideUp 0.6s ease-out forwards calc(var(--factor-index) * 0.15s + 0.2s);
-  transition:
-    transform 0.28s ease,
-    box-shadow 0.28s ease,
-    background-color 0.28s ease,
-    border-left-color 0.28s ease;
 }
 
 .pink-card {
@@ -2091,26 +2527,81 @@ onUnmounted(() => {
   font-size: 16px;
   color: var(--text-dark);
   font-weight: 700;
-  transition: color 0.25s ease;
 }
 
-.factor-card p {
+.factor-desc {
   margin: 0;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
   color: #555;
   white-space: pre-line;
 }
 
-@keyframes factorSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.research-section {
+  margin-top: 32px;
+}
+
+.research-toggle {
+  width: 100%;
+  border: none;
+  background: #f4f7f4;
+  border-radius: 16px;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary-teal);
+  cursor: pointer;
+}
+
+.research-toggle svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+}
+
+.research-toggle svg.rotate {
+  transform: rotate(180deg);
+}
+
+.research-panel {
+  margin-top: 18px;
+  background: #f9fbf9;
+  border-radius: 16px;
+  padding: 22px;
+  border: 1px solid rgba(50, 91, 73, 0.08);
+}
+
+.research-copy {
+  font-size: 15px;
+  color: var(--text-dark);
+  line-height: 1.7;
+  margin: 0 0 14px;
+}
+
+.research-copy:last-child {
+  margin-bottom: 0;
+}
+
+.research-refs h4 {
+  margin: 8px 0 10px;
+  font-size: 14px;
+  color: var(--primary-teal);
+}
+
+.research-refs ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.research-refs li {
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: #555;
 }
 
 .disclaimer-section {
@@ -2124,21 +2615,56 @@ onUnmounted(() => {
   gap: 40px;
 }
 
+.disclaimer-box {
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.disclaimer-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.disclaimer-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.info-icon {
+  background: rgba(50, 91, 73, 0.08);
+}
+
+.warning-icon {
+  background: rgba(214, 139, 162, 0.12);
+}
+
 .disclaimer-box h4 {
   font-size: 16px;
   color: var(--text-dark);
-  margin: 0 0 10px;
+  margin: 0;
+}
+
+.disclaimer-box.info-box h4 {
+  color: var(--primary-teal);
+}
+
+.disclaimer-box.warning h4 {
+  color: var(--accent-pink);
 }
 
 .disclaimer-box p {
   font-size: 13px;
   color: #666;
-  line-height: 1.6;
+  line-height: 1.7;
   margin: 0;
-}
-
-.disclaimer-box.warning h4 {
-  color: var(--accent-pink);
 }
 
 .curve-glow {
@@ -2197,59 +2723,12 @@ onUnmounted(() => {
 }
 
 .sweep-card-strong::after {
-  width: 52%;
-  height: 165%;
-  top: -32%;
-  left: -170%;
-  opacity: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.1) 16%,
-    rgba(255, 255, 255, 0.42) 38%,
-    rgba(255, 255, 255, 0.72) 50%,
-    rgba(255, 255, 255, 0.42) 62%,
-    rgba(255, 255, 255, 0.1) 84%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  filter: blur(3px);
   animation: cardSweepStrong 9s ease-out infinite;
-}
-
-.line-sheen {
-  position: relative;
-  overflow: hidden;
-}
-
-.line-sheen::after {
-  content: '';
-  position: absolute;
-  top: -10%;
-  left: -120%;
-  width: 30%;
-  height: 120%;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.08) 25%,
-    rgba(255, 255, 255, 0.28) 50%,
-    rgba(255, 255, 255, 0.08) 75%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  transform: skewX(-18deg);
-  pointer-events: none;
-  z-index: 4;
-  opacity: 0;
-  animation: lineSweep 8.5s ease-out infinite;
-  animation-delay: 1.8s;
 }
 
 @keyframes cardSweep {
   0% {
     left: -160%;
-    opacity: 0;
-  }
-  5% {
     opacity: 0;
   }
   8% {
@@ -2259,9 +2738,7 @@ onUnmounted(() => {
     left: 120%;
     opacity: 0.95;
   }
-  16% {
-    opacity: 0;
-  }
+  16%,
   100% {
     opacity: 0;
   }
@@ -2272,9 +2749,6 @@ onUnmounted(() => {
     left: -170%;
     opacity: 0;
   }
-  6% {
-    opacity: 0;
-  }
   9% {
     opacity: 0.95;
   }
@@ -2282,257 +2756,52 @@ onUnmounted(() => {
     left: 130%;
     opacity: 0.95;
   }
-  16% {
-    opacity: 0;
-  }
+  16%,
   100% {
     opacity: 0;
   }
 }
 
-@keyframes lineSweep {
-  0% {
-    left: -120%;
-    opacity: 0;
-  }
-  10% {
-    opacity: 0;
-  }
-  13% {
-    opacity: 0.8;
-  }
-  19% {
-    left: 125%;
-    opacity: 0.8;
-  }
-  21% {
-    opacity: 0;
-  }
-  100% {
-    left: 125%;
-    opacity: 0;
-  }
-}
-
-.dash-card {
-  position: relative;
-  transition:
-    transform 0.32s ease,
-    box-shadow 0.32s ease,
-    border-color 0.32s ease,
-    background-color 0.32s ease;
-  border: 1px solid transparent;
-}
-
-.dash-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.34) 0%,
-    rgba(255, 255, 255, 0.1) 22%,
-    rgba(255, 255, 255, 0.03) 100%
-  );
-  z-index: 1;
-}
-
-.dash-card > * {
-  position: relative;
-  z-index: 2;
-}
-
-.hover-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 22px 44px rgba(50, 91, 73, 0.12);
-  border-color: rgba(50, 91, 73, 0.08);
-}
-
-.hover-card:hover .icon-circle {
-  transform: scale(1.05);
-}
-
-.icon-circle {
-  transition:
-    transform 0.28s ease,
-    box-shadow 0.28s ease;
-}
-
-.hover-chart:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 14px 28px rgba(50, 91, 73, 0.08);
-  background: rgba(50, 91, 73, 0.02);
-  border-left-color: rgba(50, 91, 73, 0.22);
-}
-
-.hover-card:hover .growth-curve {
-  transform: scale(1.01);
-}
-
-.hover-card:hover .chart-x-axis,
-.hover-card:hover .y-axis {
-  color: #8d9a92;
-}
-
-.hover-info-block {
-  transition:
-    transform 0.28s ease,
-    box-shadow 0.28s ease,
-    background-color 0.28s ease,
-    border-color 0.28s ease;
-  border-radius: 14px;
-}
-
-.hover-info-block:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 14px 28px rgba(50, 91, 73, 0.08);
-}
-
-.hover-info-block:hover.split-box,
-.hover-info-block:hover.sustain-block {
-  background: #fbfdfb;
-  border-color: rgba(50, 91, 73, 0.1);
-}
-
-.hover-info-block:hover .bar-track {
-  transform: scaleY(1.04);
-  box-shadow: inset 0 0 0 1px rgba(50, 91, 73, 0.04);
-}
-
-.hover-factor-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 30px rgba(50, 91, 73, 0.1);
-  background: #f7fbf7;
-  border-left-color: #4f7b67;
-}
-
-.hover-factor-card:hover h5 {
-  color: var(--primary-teal);
-}
-
-.pink-card.hover-factor-card:hover {
-  background: rgba(214, 139, 162, 0.1);
-  border-left-color: #d68ba2;
-  box-shadow: 0 16px 30px rgba(214, 139, 162, 0.12);
-}
-
-.dropdown-enter-active,
-.dropdown-leave-active {
-  transition:
-    opacity 0.2s,
-    transform 0.2s;
-}
-
-.dropdown-enter-from,
-.dropdown-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition:
-    opacity 0.4s ease,
-    transform 0.4s ease;
-}
-
-.fade-enter-from {
-  opacity: 0;
-  transform: translateY(15px);
-}
-
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(-15px);
-}
-
-.disclaimer-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.disclaimer-icon {
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.disclaimer-box h4 {
-  margin: 0;
-}
-
-@media (max-width: 768px) {
-  .hero-headline {
-    font-size: 32px;
-  }
-
-  .select-filter-container {
-    padding: 20px;
-    border-radius: 16px;
-  }
-
-  .custom-select {
-    padding: 12px 15px;
-  }
-
-  .selected-text {
-    font-size: 16px;
-  }
-
+@media (max-width: 1024px) {
   .dashboard-grid,
   .factors-grid,
   .disclaimer-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .vis-hero {
+    padding: 40px 0 18px;
   }
 
+  .hero-headline {
+    font-size: 30px;
+  }
+
+  .select-filter-container,
   .dash-card,
-  .factors-dashboard {
-    padding: 25px;
+  .factors-dashboard,
+  .research-section,
+  .expect-section {
+    padding: 24px;
+  }
+
+  .expect-title {
+    font-size: 24px;
+  }
+
+  .expect-copy {
+    font-size: 15px;
   }
 
   .chart-body {
-    height: 200px;
+    height: 220px;
   }
 
-  .chart-tooltip {
-    min-width: 92px;
-    padding: 12px 14px;
-    border-radius: 16px;
-  }
-
-  .tooltip-title {
+  .research-toggle {
     font-size: 16px;
-  }
-
-  .tooltip-value {
-    font-size: 21px;
-  }
-
-  .chart-hotspot {
-    width: 26px;
-    height: 26px;
-  }
-
-  .theory-note-tooltip {
-    width: min(260px, 78vw);
-  }
-
-  .bar-info,
-  .sustain-row-top {
-    gap: 8px;
-  }
-
-  .sustain-header {
-    flex-direction: column;
-    align-items: flex-start;
+    padding: 16px 18px;
   }
 }
 </style>

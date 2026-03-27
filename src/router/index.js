@@ -3,6 +3,9 @@ import HomePage from '../views/HomePage.vue'
 import TCMVisualization from '../views/TCMVisualization.vue'
 import PhysioOutcomeView from '../views/PhysioOutcomeView.vue'
 import FAQPage from '../views/FAQPage.vue'
+import BookConsultation from '@/views/BookConsultation.vue'
+import AdminLogin from '@/views/AdminLogin.vue'
+import AdminPromotion from '@/views/AdminPromotion.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,6 +30,21 @@ const router = createRouter({
       name: 'FAQPage',
       component: FAQPage,
     },
+    {
+      path: '/book',
+      name: 'BookConsultation',
+      component: BookConsultation,
+    },
+    {
+      path: '/admin/login',
+      name: 'AdminLogin',
+      component: AdminLogin,
+    },
+    {
+      path: '/admin/promotion',
+      name: 'AdminPromotion',
+      component: AdminPromotion,
+    }
   ],
   // 🌟 修复版：使用 Promise 延迟滚动
   scrollBehavior(to, from, savedPosition) {

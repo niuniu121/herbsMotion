@@ -15,7 +15,7 @@ const props = defineProps({
     <div v-if="isLoading" class="loading-overlay">
       <div class="loader-logo-container">
         <span class="logo-icon-wrap">
-          <img class="logo-img" src="../assets/logo.png" alt="Herbs & Motion Logo" />
+          <img class="logo-img" src="../assets/logo_green.svg" alt="Herbs & Motion Logo" />
         </span>
       </div>
     </div>

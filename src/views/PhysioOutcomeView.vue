@@ -10,6 +10,12 @@ const activeChartPoint = ref(null)
 const showTheoryNoteTooltip = ref(false)
 let observer = null
 
+const sortedConditions = computed(() => {
+  return [...physioConditions].sort((a, b) =>
+    a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }),
+  )
+})
+
 const physioConditions = [
   {
     id: 'lowbackpain',
@@ -223,7 +229,7 @@ const physioConditions = [
   },
   {
     id: 'acl',
-    name: 'ACL Reconstruction',
+    name: 'Rehabilitation post ACL Reconstruction',
     time: '6–9 mos*',
     timeUnit: 'months',
     medianValue: 7.5,
@@ -689,7 +695,7 @@ onUnmounted(() => {
             <Transition name="dropdown">
               <ul v-if="isDropdownOpen" class="select-options">
                 <li
-                  v-for="cond in physioConditions"
+                  v-for="cond in sortedConditions"
                   :key="cond.id"
                   :class="{ active: cond.id === selectedId }"
                   @click.stop="selectCondition(cond.id)"
@@ -746,7 +752,7 @@ onUnmounted(() => {
                   </div>
 
                   <div>
-                    <h3>Time to Initial Symptom Relief</h3>
+                    <h3>Time to favourable outcome</h3>
                     <p class="sub-text">{{ selectedData.time }} typical</p>
                   </div>
                 </div>

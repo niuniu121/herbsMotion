@@ -1,8 +1,10 @@
 <template>
   <RouterView />
+  <HerbsieBot />
 </template>
 <script setup>
 import { RouterView } from 'vue-router'
+import HerbsieBot from './component/HerbsieBot.vue'
 </script>
 
 <style>

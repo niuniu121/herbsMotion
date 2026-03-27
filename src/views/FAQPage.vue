@@ -46,8 +46,8 @@
                 </svg>
               </div>
               <div>
-                <h2>Before you visit</h2>
-                <p>Please read through the information below before attending your appointment.</p>
+                <h2>Got questions?</h2>
+                <p>Check out our FAQs below</p>
               </div>
             </div>
 
@@ -194,9 +194,7 @@ const faqs = [
     question: 'Do you have parking?',
     type: 'parking',
     intro:
-      'There are 3 onsite parking bays at the front of the building and 2 at the rear. Additional public parking is available on Canterbury Road and adjoining streets.',
-    noteOne:
-      'Paid street parking is also available directly in front of the clinic for your convenience. Please always check parking signs carefully, as clearway restrictions may apply at certain times.',
+      'Paid street parking is available directly in front of the clinic for your convenience. Please always check parking signs carefully, as clearway restrictions may apply at certain times.',
     noteTwo:
       'There are several free 2-hour parking options just a few minutes’ walk from the clinic:',
     parkingList: [

@@ -52,7 +52,7 @@ onUnmounted(() => {
         </span>
 
         <span class="logo-wordmark-wrap">
-          <img class="logo-wordmark" src="../assets/logo_Name.svg" alt="Herbs & Motion" />
+          <img class="logo-wordmark" src="../assets/Logo_Name.svg" alt="Herbs & Motion" />
         </span>
       </RouterLink>
 

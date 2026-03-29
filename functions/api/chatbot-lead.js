@@ -17,6 +17,7 @@ export async function onRequestPost(context) {
             )
         }
 
+        // 1) 发邮件（保留你原来的功能）
         const resend = new Resend(env.RESEND_API_KEY)
 
         const { data, error } = await resend.emails.send({
@@ -43,7 +44,62 @@ export async function onRequestPost(context) {
             )
         }
 
-        return json({ success: true, data }, 200)
+        // 2) 发 Telegram 通知（新增）
+        const botToken = env.TELEGRAM_BOT_TOKEN
+        const chatId = env.TELEGRAM_CHAT_ID
+
+        if (!botToken || !chatId) {
+            return json(
+                {
+                    success: false,
+                    message: 'Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID.',
+                },
+                500
+            )
+        }
+
+        const telegramText =
+            `🌿 New HerbsBo enquiry\n\n` +
+            `Name: ${escapeTelegram(name)}\n` +
+            `Email: ${escapeTelegram(email)}\n` +
+            `Phone: ${escapeTelegram(phone)}\n\n` +
+            `Question:\n${escapeTelegram(question)}`
+
+        const telegramResponse = await fetch(
+            `https://api.telegram.org/bot${botToken}/sendMessage`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: telegramText,
+                }),
+            }
+        )
+
+        const telegramResult = await telegramResponse.json()
+
+        if (!telegramResponse.ok || !telegramResult.ok) {
+            return json(
+                {
+                    success: false,
+                    message:
+                        telegramResult.description || 'Failed to send Telegram message.',
+                },
+                500
+            )
+        }
+
+        return json(
+            {
+                success: true,
+                data,
+                telegram: true,
+            },
+            200
+        )
     } catch (error) {
         return json(
             { success: false, message: error.message || 'Server error.' },
@@ -62,10 +118,17 @@ function json(data, status = 200) {
 }
 
 function escapeHtml(str) {
-    return str
+    return String(str)
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#39;')
+}
+
+function escapeTelegram(str) {
+    return String(str)
+        .replaceAll('&', '&')
+        .replaceAll('<', '<')
+        .replaceAll('>', '>')
 }

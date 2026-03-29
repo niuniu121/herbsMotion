@@ -1,9 +1,31 @@
 <template>
   <div class="herbsie-container">
-    <button v-if="!isOpen" class="floating-ball" @click="openChat">
-      <span class="icon"><img src="../assets/logo_opacity.svg" alt="Herbsie" /></span>
-    </button>
+    <!-- Floating launcher -->
+    <div v-if="!isOpen" class="floating-entry">
+      <!-- rotating mini prompt bubble -->
+      <transition name="prompt-fade" mode="out-in">
+        <div
+          v-if="showPromptBubble"
+          :key="currentPromptIndex"
+          class="floating-prompt"
+          @click="openChatFromPrompt"
+        >
+          <div class="prompt-text">{{ rotatingPrompts[currentPromptIndex] }}</div>
+          <button class="prompt-close" @click.stop="dismissPrompt">×</button>
+        </div>
+      </transition>
 
+      <button class="floating-ball" @click="openChat" aria-label="Open Herbsie chat">
+        <span class="icon">
+          <img src="../assets/logo_opacity.svg" alt="Herbsie" />
+        </span>
+
+        <!-- optional small status badge -->
+        <span class="floating-badge">❤</span>
+      </button>
+    </div>
+
+    <!-- Chat window -->
     <div v-else class="chat-window">
       <div class="chat-header">
         <div class="bot-info">
@@ -129,7 +151,7 @@
 </template>
 
 <script setup>
-import { nextTick, ref } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const isOpen = ref(false)
 const userInput = ref('')
@@ -225,6 +247,21 @@ const faqDatabase = [
   },
 ]
 
+/** floating prompt */
+const rotatingPrompts = [
+  "G'day — I’m HerbsBo® 👋",
+  'Need help with parking or bookings?',
+  'Ask me about sessions, rebates or referrals.',
+  'Quick help for common clinic questions.',
+  'Need to know what to bring to your visit?',
+]
+
+const currentPromptIndex = ref(0)
+const showPromptBubble = ref(true)
+
+let promptInterval = null
+let promptAutoHideTimeout = null
+
 const showLeadModal = ref(false)
 const pendingQuestion = ref('')
 
@@ -240,14 +277,64 @@ const fieldErrors = ref({
   phone: '',
 })
 
+function startPromptRotation() {
+  stopPromptRotation()
+
+  promptInterval = setInterval(() => {
+    if (!isOpen.value && showPromptBubble.value) {
+      currentPromptIndex.value = (currentPromptIndex.value + 1) % rotatingPrompts.length
+    }
+  }, 3500)
+}
+
+function stopPromptRotation() {
+  if (promptInterval) {
+    clearInterval(promptInterval)
+    promptInterval = null
+  }
+}
+
+function resetPromptAutoShow() {
+  if (promptAutoHideTimeout) {
+    clearTimeout(promptAutoHideTimeout)
+    promptAutoHideTimeout = null
+  }
+
+  showPromptBubble.value = true
+
+  promptAutoHideTimeout = setTimeout(() => {
+    if (!isOpen.value) {
+      showPromptBubble.value = true
+    }
+  }, 12000)
+}
+
+function dismissPrompt() {
+  showPromptBubble.value = false
+
+  if (promptAutoHideTimeout) clearTimeout(promptAutoHideTimeout)
+
+  promptAutoHideTimeout = setTimeout(() => {
+    if (!isOpen.value) {
+      showPromptBubble.value = true
+    }
+  }, 9000)
+}
+
+function openChatFromPrompt() {
+  openChat()
+}
+
 function openChat() {
   isOpen.value = true
+  showPromptBubble.value = false
   scrollToBottom()
 }
 
 function closeChat() {
   isOpen.value = false
   showLeadModal.value = false
+  resetPromptAutoShow()
 }
 
 function normalize(text) {
@@ -412,6 +499,16 @@ const scrollToBottom = async () => {
     scrollBox.value.scrollTop = scrollBox.value.scrollHeight
   }
 }
+
+onMounted(() => {
+  startPromptRotation()
+  resetPromptAutoShow()
+})
+
+onBeforeUnmount(() => {
+  stopPromptRotation()
+  if (promptAutoHideTimeout) clearTimeout(promptAutoHideTimeout)
+})
 </script>
 
 <style scoped>
@@ -420,26 +517,113 @@ const scrollToBottom = async () => {
   bottom: 20px;
   right: 20px;
   z-index: 1000;
-  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-family: Inter, 'Helvetica Neue', Arial, sans-serif;
 }
 
+.floating-entry {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+/* ========== floating prompt bubble ========== */
+.floating-prompt {
+  position: absolute;
+  right: 14px;
+  bottom: 78px;
+  min-width: 250px;
+  max-width: 300px;
+  background: #2ca56f;
+  color: #ffffff;
+  border-radius: 24px;
+  padding: 16px 48px 16px 22px;
+  box-shadow:
+    0 18px 34px rgba(16, 69, 44, 0.22),
+    0 6px 16px rgba(10, 62, 46, 0.1);
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid rgba(10, 45, 32, 0.08);
+  backdrop-filter: blur(6px);
+}
+
+.floating-prompt::after {
+  content: '';
+  position: absolute;
+  right: 34px;
+  bottom: -10px;
+  width: 18px;
+  height: 18px;
+  background: #2ca56f;
+  transform: rotate(45deg);
+  border-radius: 4px;
+}
+
+.prompt-text {
+  font-size: 16px;
+  line-height: 1.35;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: normal;
+}
+
+.prompt-close {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(230, 237, 251, 0.35);
+  color: #ffffff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 8px 18px rgba(17, 55, 35, 0.2);
+}
+
+/* ========== floating logo ========== */
 .floating-ball {
-  width: 60px;
-  height: 60px;
-  background: #325b49;
+  position: relative;
+  width: 66px;
+  height: 66px;
+  background: #2f5b43;
   border-radius: 50%;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s;
+  box-shadow:
+    0 14px 26px rgba(19, 61, 38, 0.28),
+    0 4px 12px rgba(0, 0, 0, 0.16);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  animation: herbsieFloat 3.2s ease-in-out infinite;
 }
 
 .floating-ball:hover {
-  transform: scale(1.05);
+  transform: scale(1.06);
+  box-shadow:
+    0 18px 34px rgba(44, 87, 194, 0.34),
+    0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+@keyframes herbsieFloat {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 .icon {
@@ -449,11 +633,30 @@ const scrollToBottom = async () => {
 }
 
 .floating-ball img {
-  width: 35px;
-  height: 35px;
+  width: 38px;
+  height: 38px;
   object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.15));
 }
 
+.floating-badge {
+  position: absolute;
+  top: -4px;
+  right: -3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #2ca56f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.16);
+  border: 2px solid #d9f5e5;
+}
+
+/* ========== chat window ========== */
 .chat-window {
   width: 360px;
   height: 550px;
@@ -858,10 +1061,36 @@ const scrollToBottom = async () => {
   transform: none;
 }
 
+/* prompt transitions */
+.prompt-fade-enter-active,
+.prompt-fade-leave-active {
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+.prompt-fade-enter-from,
+.prompt-fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
 @media (max-width: 480px) {
   .herbsie-container {
     bottom: 16px;
     right: 16px;
+  }
+
+  .floating-prompt {
+    right: 0;
+    bottom: 82px;
+    min-width: 220px;
+    max-width: min(280px, calc(100vw - 32px));
+    padding: 14px 42px 14px 18px;
+  }
+
+  .prompt-text {
+    font-size: 14px;
   }
 
   .chat-window {

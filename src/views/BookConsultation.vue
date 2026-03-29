@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="book-page" :style="pageBgStyle">
     <NavBar />
 
@@ -782,4 +782,24 @@ onBeforeUnmount(() => {
     min-height: 820px;
   }
 }
-</style>
+</style> -->
+
+<template>
+  <div>
+    <NavBar />
+    <div>1111111</div>
+  </div>
+</template>
+
+<script>
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+
+import NavBar from '../component/NavBar.vue'
+export default {
+  components: {
+    NavBar,
+  },
+}
+</script>
+
+<style></style>

@@ -1181,16 +1181,20 @@ onUnmounted(() => {
           <h2 class="dashboard-title">{{ selectedData.name }}</h2>
 
           <Transition name="fade" mode="out-in">
-            <div
+            <section
               v-if="hasExpect"
               :key="'expect-' + selectedId"
-              class="expect-section shimmer-effect"
+              class="info-panel expect-panel shimmer-effect top-expect-panel"
             >
-              <div class="expect-inner">
-                <h3 class="expect-title">{{ selectedData.expectTitle }}</h3>
-                <p class="expect-copy">{{ selectedData.expect }}</p>
+              <div class="info-panel-header">
+                <div class="info-icon teal-soft">✦</div>
+                <h3>{{ selectedData.expectTitle }}</h3>
               </div>
-            </div>
+
+              <p class="info-panel-text">
+                {{ selectedData.expect }}
+              </p>
+            </section>
           </Transition>
 
           <Transition name="fade" mode="out-in">
@@ -2802,6 +2806,86 @@ onUnmounted(() => {
   .research-toggle {
     font-size: 16px;
     padding: 16px 18px;
+  }
+}
+
+.top-expect-panel {
+  margin-bottom: 32px;
+  padding: 42px 56px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(50, 91, 73, 0.08);
+  border-radius: 32px;
+  box-shadow: 0 18px 48px rgba(50, 91, 73, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.info-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.info-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.info-icon.teal-soft {
+  background: rgba(50, 91, 73, 0.1);
+  color: #325b49;
+}
+
+.info-panel-header h3 {
+  margin: 0;
+  font-size: 2.2rem;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #1f2a24;
+  letter-spacing: -0.02em;
+}
+
+.info-panel-text {
+  margin: 0;
+  font-size: 1.18rem;
+  line-height: 1.9;
+  color: #2f3a35;
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  .top-expect-panel {
+    padding: 28px 22px;
+    border-radius: 24px;
+  }
+
+  .info-panel-header {
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .info-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    font-size: 20px;
+  }
+
+  .info-panel-header h3 {
+    font-size: 1.7rem;
+  }
+
+  .info-panel-text {
+    font-size: 1.02rem;
+    line-height: 1.8;
   }
 }
 </style>

@@ -8,18 +8,23 @@ const sectionRefs = ref([])
 const isDropdownOpen = ref(false)
 const activeChartPoint = ref(null)
 const showTheoryNoteTooltip = ref(false)
+const isResearchOpen = ref(false)
 let observer = null
-
-const sortedConditions = computed(() => {
-  return [...physioConditions].sort((a, b) =>
-    a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }),
-  )
-})
 
 const physioConditions = [
   {
     id: 'lowbackpain',
     name: 'Low Back Pain (Non-specific)',
+    expectTitle: 'What to Expect When You Visit Us for Low Back Pain',
+    expect:
+      'When you visit us for low back pain, you will receive a thorough assessment to understand your movement patterns, posture, lifestyle, and contributing factors such as work or activity levels. We focus on identifying the source of your pain and any underlying dysfunction. Your treatment plan may include hands-on therapy, targeted exercises, and education to help you move with confidence. Our goal is to reduce pain, improve function, and support long-term recovery and prevention.',
+    research: {
+      summary:
+        'Research strongly supports physiotherapy for non-specific low back pain. Exercise therapy, manual therapy, and education have been shown to reduce pain and improve function, especially when combined with an active, movement-based approach (Maher et al., 2017).',
+      references: [
+        'Maher, C., Underwood, M., & Buchbinder, R. (2017). Non-specific low back pain. The Lancet, 389(10070), 736–747.',
+      ],
+    },
     time: '2–12 wks',
     timeUnit: 'weeks',
     medianValue: 4,
@@ -55,6 +60,16 @@ const physioConditions = [
   {
     id: 'neckpain',
     name: 'Neck Pain (Non-specific)',
+    expectTitle: 'What to Expect When You Visit Us for Neck Pain',
+    expect:
+      'When you visit us for neck pain, we assess your posture, movement, muscle tension, and daily activities such as desk work or phone use. Treatment may include manual therapy, mobility exercises, and strengthening to reduce stiffness and improve movement. We also provide practical advice to prevent recurrence.',
+    research: {
+      summary:
+        'Physiotherapy, including exercise and manual therapy, is recommended for neck pain and has been shown to improve pain and function (Blanpied et al., 2017).',
+      references: [
+        'Blanpied, P. R., Gross, A. R., Elliott, J. M., et al. (2017). Neck pain clinical practice guidelines. Journal of Orthopaedic & Sports Physical Therapy, 47(7), A1–A83.',
+      ],
+    },
     time: '2–12 wks',
     timeUnit: 'weeks',
     medianValue: 3,
@@ -90,6 +105,16 @@ const physioConditions = [
   {
     id: 'rotatorcufftendinopathy',
     name: 'Rotator Cuff Tendinopathy',
+    expectTitle: 'What to Expect When You Visit Us for Rotator Cuff Tendinopathy',
+    expect:
+      'When you visit us for shoulder pain related to rotator cuff tendinopathy, we assess your shoulder movement, strength, and contributing factors such as posture and activity. Treatment focuses on progressive strengthening, improving movement patterns, and reducing pain through targeted exercises and manual therapy.',
+    research: {
+      summary:
+        'Exercise-based physiotherapy is considered a first-line treatment and has been shown to improve pain and shoulder function (Littlewood et al., 2013).',
+      references: [
+        'Littlewood, C., Ashton, J., Chance-Larsen, K., May, S., & Sturrock, B. (2013). Exercise for rotator cuff tendinopathy. British Journal of Sports Medicine, 47(2), 1–7.',
+      ],
+    },
     time: '1.5–6 months',
     timeUnit: 'months',
     medianValue: 3,
@@ -125,6 +150,16 @@ const physioConditions = [
   {
     id: 'rotatorcufftear',
     name: 'Rotator Cuff Tear (Conservative)',
+    expectTitle: 'What to Expect When You Visit Us for a Rotator Cuff Tear',
+    expect:
+      'When you visit us for a rotator cuff tear being managed conservatively, we assess your shoulder strength, movement, and function. Treatment focuses on strengthening surrounding muscles, improving joint stability, and restoring functional movement through a structured rehabilitation program.',
+    research: {
+      summary:
+        'Research suggests that many rotator cuff tears can be successfully managed with physiotherapy, improving pain and function without surgery (Kuhn et al., 2013).',
+      references: [
+        'Kuhn, J. E., Dunn, W. R., Sanders, R., et al. (2013). Effectiveness of physical therapy in treating rotator cuff tears. Journal of Shoulder and Elbow Surgery, 22(10), 1371–1379.',
+      ],
+    },
     time: '2–6.5 months',
     timeUnit: 'months',
     medianValue: 4,
@@ -160,6 +195,16 @@ const physioConditions = [
   {
     id: 'kneeoa',
     name: 'Knee Osteoarthritis (Acute Phase)',
+    expectTitle: 'What to Expect When You Visit Us for Knee Osteoarthritis',
+    expect:
+      'When you visit us for knee osteoarthritis, we assess your pain, movement, strength, and functional limitations. Treatment may include gentle exercises, manual therapy, and strategies to reduce joint load and inflammation. Our goal is to improve mobility, reduce pain, and support daily function.',
+    research: {
+      summary:
+        'Exercise therapy is strongly recommended for knee osteoarthritis and has been shown to reduce pain and improve function (Bannuru et al., 2019).',
+      references: [
+        'Bannuru, R. R., Osani, M. C., Vaysbrot, E. E., et al. (2019). OARSI guidelines for knee osteoarthritis. Osteoarthritis and Cartilage, 27(11), 1578–1589.',
+      ],
+    },
     time: '2–12 wks',
     timeUnit: 'weeks',
     medianValue: 5,
@@ -195,6 +240,16 @@ const physioConditions = [
   {
     id: 'meniscus',
     name: 'Meniscus Injury',
+    expectTitle: 'What to Expect When You Visit Us for a Meniscus Injury',
+    expect:
+      'When you visit us for a meniscus injury, we assess your knee movement, stability, and functional limitations. Treatment focuses on restoring strength, improving mobility, and supporting safe return to activity through a structured rehabilitation program.',
+    research: {
+      summary:
+        'Research shows that physiotherapy can be as effective as surgery for many meniscus injuries, particularly in improving function and reducing pain (Katz et al., 2013).',
+      references: [
+        'Katz, J. N., Brophy, R. H., Chaisson, C. E., et al. (2013). Surgery versus physical therapy for meniscal tear. New England Journal of Medicine, 368(18), 1675–1684.',
+      ],
+    },
     time: '1–4 months',
     timeUnit: 'months',
     medianValue: 2.5,
@@ -230,6 +285,16 @@ const physioConditions = [
   {
     id: 'acl',
     name: 'Rehabilitation post ACL Reconstruction',
+    expectTitle: 'What to Expect When You Visit Us',
+    expect:
+      'When you visit us following ACL reconstruction, we guide you through a structured rehabilitation program tailored to your stage of recovery. This includes restoring strength, stability, balance, and confidence in your knee, with a focus on safe return to sport or activity.',
+    research: {
+      summary:
+        'Physiotherapy-led rehabilitation is essential after ACL reconstruction and plays a key role in improving outcomes and reducing reinjury risk (Ardern et al., 2016).',
+      references: [
+        'Ardern, C. L., Taylor, N. F., Feller, J. A., & Webster, K. E. (2016). Return to sport following ACL reconstruction. British Journal of Sports Medicine, 50(10), 596–606.',
+      ],
+    },
     time: '6–9 mos*',
     timeUnit: 'months',
     medianValue: 7.5,
@@ -265,6 +330,16 @@ const physioConditions = [
   {
     id: 'anklesprain',
     name: 'Lateral Ankle Sprain',
+    expectTitle: 'What to Expect When You Visit Us for an Ankle Sprain',
+    expect:
+      'When you visit us for an ankle sprain, we assess swelling, stability, and movement. Treatment includes early mobility, strengthening, and balance training to support recovery and prevent recurrence.',
+    research: {
+      summary:
+        'Exercise-based rehabilitation is highly effective in improving recovery and reducing the risk of future ankle sprains (Doherty et al., 2017).',
+      references: [
+        'Doherty, C., Delahunt, E., Caulfield, B., et al. (2017). Lateral ankle sprain management. British Journal of Sports Medicine, 51(2), 113–125.',
+      ],
+    },
     time: '2–12 wks',
     timeUnit: 'weeks',
     medianValue: 4,
@@ -300,6 +375,16 @@ const physioConditions = [
   {
     id: 'achilles',
     name: 'Achilles Tendinopathy',
+    expectTitle: 'What to Expect When You Visit Us for Achilles Tendinopathy',
+    expect:
+      'When you visit us for Achilles tendon pain, we assess your loading patterns, strength, and activity levels. Treatment focuses on progressive loading exercises to strengthen the tendon and reduce pain.',
+    research: {
+      summary:
+        'Exercise therapy, particularly loading programs, is considered the gold standard for Achilles tendinopathy (Malliaras et al., 2013).',
+      references: [
+        'Malliaras, P., Barton, C. J., Reeves, N. D., & Langberg, H. (2013). Achilles tendinopathy loading programs. British Journal of Sports Medicine, 47(4), 207–214.',
+      ],
+    },
     time: '2–6.5 months',
     timeUnit: 'months',
     medianValue: 4,
@@ -335,6 +420,16 @@ const physioConditions = [
   {
     id: 'plantarfasciitis',
     name: 'Plantar Fasciitis',
+    expectTitle: 'What to Expect When You Visit Us for Plantar Fasciitis',
+    expect:
+      'When you visit us for heel pain, we assess your foot mechanics, walking patterns, and contributing factors. Treatment may include stretching, strengthening, and load management strategies.',
+    research: {
+      summary:
+        'Exercise therapy and load management are effective in reducing pain and improving function in plantar fasciitis (Rasenberg et al., 2018).',
+      references: [
+        'Rasenberg, N., Bierma-Zeinstra, S. M. A., Bindels, P. J. E., et al. (2018). Treatment of plantar fasciitis. British Journal of Sports Medicine, 52(5), 323–328.',
+      ],
+    },
     time: '1.5–6 months',
     timeUnit: 'months',
     medianValue: 3.5,
@@ -370,6 +465,16 @@ const physioConditions = [
   {
     id: 'pfps',
     name: 'Patellofemoral Pain Syndrome',
+    expectTitle: 'What to Expect When You Visit Us for Knee Pain (PFPS)',
+    expect:
+      'When you visit us for patellofemoral pain, we assess your movement patterns, strength, and biomechanics. Treatment focuses on strengthening the hip and knee, improving alignment, and reducing stress on the joint.',
+    research: {
+      summary:
+        'Exercise therapy, particularly strengthening, is strongly recommended and effective in reducing pain and improving function (Crossley et al., 2016).',
+      references: [
+        'Crossley, K. M., van Middelkoop, M., Callaghan, M. J., et al. (2016). Patellofemoral pain consensus statement. British Journal of Sports Medicine, 50(14), 844–852.',
+      ],
+    },
     time: '1.5–5 months',
     timeUnit: 'months',
     medianValue: 3,
@@ -404,6 +509,12 @@ const physioConditions = [
   },
 ]
 
+const sortedConditions = computed(() => {
+  return [...physioConditions].sort((a, b) =>
+    a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }),
+  )
+})
+
 const selectedId = ref(physioConditions[0].id)
 
 const selectedData = computed(() => {
@@ -431,10 +542,13 @@ const sustainedData = computed(() => {
   }
 })
 
+const hasExpect = computed(() => Boolean(selectedData.value?.expect))
+const hasResearch = computed(() => Boolean(selectedData.value?.research))
+
 const unitShortMap = {
   days: 'd',
   weeks: 'w',
-  months: 'moths',
+  months: 'mo',
   cycles: 'cy',
 }
 
@@ -604,11 +718,16 @@ const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value
 }
 
+const toggleResearch = () => {
+  isResearchOpen.value = !isResearchOpen.value
+}
+
 const selectCondition = (id) => {
   selectedId.value = id
   isDropdownOpen.value = false
   activeChartPoint.value = null
   showTheoryNoteTooltip.value = false
+  isResearchOpen.value = false
 }
 
 const closeDropdown = (e) => {
@@ -677,6 +796,7 @@ onUnmounted(() => {
 
           <div class="select-filter-container">
             <span class="filter-label">CHOOSE A CONDITION</span>
+
             <div class="custom-select" @click.stop="toggleDropdown">
               <span class="selected-text">{{ selectedData.name }}</span>
               <svg
@@ -711,6 +831,22 @@ onUnmounted(() => {
       <section class="vis-dashboard" :ref="setSectionRef" data-bgcolor="#FAF7F2">
         <div class="container">
           <h2 class="dashboard-title">{{ selectedData.name }}</h2>
+
+          <Transition name="fade" mode="out-in">
+            <section
+              v-if="hasExpect"
+              :key="'expect-' + selectedId"
+              class="info-panel expect-panel shimmer-effect top-expect-panel"
+            >
+              <div class="info-panel-header">
+                <div class="info-icon teal-soft">✦</div>
+                <h3>{{ selectedData.expectTitle }}</h3>
+              </div>
+              <p class="info-panel-text">
+                {{ selectedData.expect }}
+              </p>
+            </section>
+          </Transition>
 
           <Transition name="fade" mode="out-in">
             <div :key="selectedId" class="dashboard-grid">
@@ -974,98 +1110,12 @@ onUnmounted(() => {
                   </div>
 
                   <div class="split-box hover-info-block">
-                    <span class="split-label split-label-with-icon">
-                      <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        aria-hidden="true"
-                      >
-                        <circle cx="8" cy="9" r="2.4" fill="#D8C2A8" />
-                        <path
-                          d="M5.5 19V16.8C5.5 14.9 6.9 13.5 8.8 13.5H11.2"
-                          stroke="#325B49"
-                          stroke-width="1.7"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                        <path
-                          d="M14 8.5L18.5 4"
-                          stroke="#325B49"
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                        />
-                        <path
-                          d="M13 11L19.5 17.5"
-                          stroke="#325B49"
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                        />
-                        <circle cx="19.5" cy="17.5" r="1.1" fill="#325B49" />
-                      </svg>
-                      Manual Therapy
-                    </span>
+                    <span class="split-label split-label-with-icon">Manual Therapy</span>
                     <span class="split-text">{{ selectedData.manualRole }}</span>
                   </div>
 
                   <div class="split-box mt-10 hover-info-block">
-                    <span class="split-label split-label-with-icon">
-                      <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        aria-hidden="true"
-                      >
-                        <circle cx="8" cy="6.8" r="2.2" fill="#D8C2A8" />
-                        <path
-                          d="M8 9.8V14.6"
-                          stroke="#325B49"
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                        />
-                        <path
-                          d="M8 11.8L4.8 13.8"
-                          stroke="#325B49"
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                        />
-                        <path
-                          d="M8 11.8L11.6 10.2"
-                          stroke="#325B49"
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                        />
-                        <path
-                          d="M8 14.6L5.2 18.8"
-                          stroke="#325B49"
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                        />
-                        <path
-                          d="M8 14.6L13.8 18.2"
-                          stroke="#325B49"
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                        />
-                        <path
-                          d="M14.8 6.5H20"
-                          stroke="#5E8B73"
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                        />
-                        <path
-                          d="M17.4 3.9V9.1"
-                          stroke="#5E8B73"
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                        />
-                      </svg>
-                      Exercise Rehab
-                    </span>
+                    <span class="split-label split-label-with-icon">Exercise Rehab</span>
                     <span class="split-text">{{ selectedData.exerciseRole }}</span>
                   </div>
                 </div>
@@ -1148,6 +1198,63 @@ onUnmounted(() => {
               </div>
             </div>
           </Transition>
+
+          <Transition name="fade" mode="out-in">
+            <section
+              v-if="hasResearch"
+              :key="'research-' + selectedId"
+              class="info-panel research-panel shimmer-effect"
+            >
+              <button type="button" class="research-toggle" @click="toggleResearch">
+                <div class="research-title-wrap">
+                  <h3>What does the Evidence say?</h3>
+                </div>
+
+                <span class="research-chevron" :class="{ open: isResearchOpen }">
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M6 14L12 8L18 14"
+                      stroke="currentColor"
+                      stroke-width="2.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </span>
+              </button>
+
+              <Transition name="fade">
+                <div v-if="isResearchOpen" class="research-content">
+                  <p class="info-panel-text research-summary">
+                    {{ selectedData.research.summary }}
+                  </p>
+
+                  <div
+                    v-if="
+                      selectedData.research.references && selectedData.research.references.length
+                    "
+                    class="references-box"
+                  >
+                    <h4>References</h4>
+                    <ul>
+                      <li
+                        v-for="(reference, index) in selectedData.research.references"
+                        :key="`${selectedId}-ref-${index}`"
+                      >
+                        {{ reference }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </Transition>
+            </section>
+          </Transition>
         </div>
       </section>
 
@@ -1220,14 +1327,17 @@ onUnmounted(() => {
 .text-teal {
   color: var(--primary-teal);
 }
+
 .teal-text {
   color: var(--primary-teal);
   font-weight: 700;
 }
+
 .pink-text {
   color: var(--accent-pink);
   font-weight: 700;
 }
+
 .brown-text {
   color: #967c60;
   font-weight: 700;
@@ -1236,9 +1346,11 @@ onUnmounted(() => {
 .mt-10 {
   margin-top: 10px;
 }
+
 .mt-20 {
   margin-top: 20px;
 }
+
 .mt-30 {
   margin-top: 30px;
 }
@@ -1357,7 +1469,8 @@ onUnmounted(() => {
 }
 
 .dash-card,
-.factors-dashboard {
+.factors-dashboard,
+.info-panel {
   background: white;
   border-radius: 24px;
   padding: 40px;
@@ -1380,11 +1493,15 @@ onUnmounted(() => {
   justify-content: center;
   font-size: 20px;
   flex-shrink: 0;
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease;
 }
 
 .icon-circle.teal {
   background: rgba(50, 91, 73, 0.1);
 }
+
 .icon-circle.pink {
   background: rgba(214, 139, 162, 0.15);
 }
@@ -1701,6 +1818,7 @@ onUnmounted(() => {
 .teal-fill {
   background: var(--primary-teal);
 }
+
 .brown-fill {
   background: #967c60;
 }
@@ -1905,6 +2023,10 @@ onUnmounted(() => {
   padding: 14px;
 }
 
+.factors-dashboard {
+  margin-bottom: 30px;
+}
+
 .factors-title {
   text-align: center;
   font-size: 24px;
@@ -1943,6 +2065,7 @@ onUnmounted(() => {
 .arrow-up {
   background: var(--primary-teal);
 }
+
 .arrow-down {
   background: var(--accent-pink);
 }
@@ -1993,6 +2116,148 @@ onUnmounted(() => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.info-panel {
+  margin-bottom: 30px;
+}
+
+.info-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.info-panel-header h3 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--text-primary);
+}
+
+.info-panel-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.85;
+  color: #555;
+}
+
+.info-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.teal-soft {
+  background: rgba(50, 91, 73, 0.1);
+  color: var(--primary-teal);
+}
+
+.pink-soft {
+  background: rgba(214, 139, 162, 0.15);
+  color: var(--accent-pink);
+}
+
+.expect-panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(249, 252, 249, 1) 100%);
+}
+
+.research-panel {
+  margin-top: 28px;
+  padding: 28px 28px 24px;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 10px 24px rgba(50, 91, 73, 0.05);
+}
+
+.research-toggle {
+  width: 100%;
+  border: none;
+  background: #eef0ec;
+  border-radius: 20px;
+  padding: 20px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background-color 0.25s ease;
+}
+
+.research-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(50, 91, 73, 0.05);
+}
+
+.research-title-wrap h3 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #3e6a58;
+}
+
+.research-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #3e6a58;
+  flex-shrink: 0;
+  transition: transform 0.26s ease;
+}
+
+.research-chevron.open {
+  transform: rotate(180deg);
+}
+
+.research-content {
+  margin-top: 20px;
+  background: #f1f3ef;
+  border: 1px solid rgba(50, 91, 73, 0.08);
+  border-radius: 20px;
+  padding: 26px 26px 24px;
+}
+
+.research-summary {
+  margin: 0 0 16px 0;
+  font-size: 15px;
+  line-height: 1.8;
+  color: #4b6959;
+}
+
+.references-box {
+  margin-top: 4px;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.references-box h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #3e6a58;
+}
+
+.references-box ul {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.references-box li {
+  margin-bottom: 10px;
+  font-size: 14px;
+  line-height: 1.75;
+  color: #6a6a6a;
 }
 
 .disclaimer-section {
@@ -2226,7 +2491,8 @@ onUnmounted(() => {
   }
 }
 
-.dash-card {
+.dash-card,
+.info-panel {
   position: relative;
   transition:
     transform 0.32s ease,
@@ -2236,7 +2502,8 @@ onUnmounted(() => {
   border: 1px solid transparent;
 }
 
-.dash-card::before {
+.dash-card::before,
+.info-panel::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -2251,12 +2518,14 @@ onUnmounted(() => {
   z-index: 1;
 }
 
-.dash-card > * {
+.dash-card > *,
+.info-panel > * {
   position: relative;
   z-index: 2;
 }
 
-.hover-card:hover {
+.hover-card:hover,
+.info-panel:hover {
   transform: translateY(-8px);
   box-shadow: 0 22px 44px rgba(50, 91, 73, 0.12);
   border-color: rgba(50, 91, 73, 0.08);
@@ -2264,12 +2533,6 @@ onUnmounted(() => {
 
 .hover-card:hover .icon-circle {
   transform: scale(1.05);
-}
-
-.icon-circle {
-  transition:
-    transform 0.28s ease,
-    box-shadow 0.28s ease;
 }
 
 .hover-chart:hover {
@@ -2386,7 +2649,8 @@ onUnmounted(() => {
   }
 
   .dash-card,
-  .factors-dashboard {
+  .factors-dashboard,
+  .info-panel {
     padding: 25px;
   }
 
@@ -2426,5 +2690,72 @@ onUnmounted(() => {
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .info-panel-header {
+    align-items: flex-start;
+  }
+
+  .info-panel-header h3,
+  .research-title-wrap h3 {
+    font-size: 18px;
+  }
+
+  .research-panel {
+    padding: 18px 16px 16px;
+    border-radius: 22px;
+  }
+
+  .research-toggle {
+    padding: 16px 18px;
+    border-radius: 16px;
+  }
+
+  .research-content {
+    margin-top: 16px;
+    padding: 18px 18px 16px;
+    border-radius: 16px;
+  }
+
+  .research-summary {
+    font-size: 14px;
+    line-height: 1.75;
+  }
+
+  .references-box h4 {
+    font-size: 13px;
+  }
+
+  .references-box li {
+    font-size: 13px;
+    line-height: 1.7;
+  }
+}
+
+.top-expect-panel {
+  margin-bottom: 28px;
+  padding: 34px 40px;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 10px 24px rgba(50, 91, 73, 0.05);
+}
+
+.top-expect-panel .info-panel-header h3 {
+  font-size: 26px;
+  line-height: 1.35;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.top-expect-panel .info-panel-text {
+  font-size: 15px;
+  line-height: 1.85;
+  color: #555;
+}
+
+.top-expect-panel .info-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  font-size: 18px;
 }
 </style>

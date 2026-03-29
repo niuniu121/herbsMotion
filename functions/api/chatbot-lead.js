@@ -17,8 +17,8 @@ export async function onRequestPost(context) {
             )
         }
 
-        // 1) 发邮件（保留你原来的功能）
-        const resend = new Resend(env.RESEND_API_KEY)
+        // 发邮件
+        const resend = new Resend(String(env.RESEND_API_KEY || '').trim())
 
         const { data, error } = await resend.emails.send({
             from: 'Herbs Motion <noreply@herbsmotion.com.au>',
@@ -44,15 +44,16 @@ export async function onRequestPost(context) {
             )
         }
 
-        // 2) 发 Telegram 通知（新增）
-        const botToken = env.TELEGRAM_BOT_TOKEN
-        const chatId = env.TELEGRAM_CHAT_ID
+        // 发 Telegram
+        const botToken = String(env.TELEGRAM_BOT_TOKEN || '').trim()
+        const chatId = String(env.TELEGRAM_CHAT_ID || '').trim()
 
         if (!botToken || !chatId) {
             return json(
                 {
                     success: false,
                     message: 'Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID.',
+                    debug: { hasBotToken: !!botToken, hasChatId: !!chatId },
                 },
                 500
             )
@@ -60,18 +61,16 @@ export async function onRequestPost(context) {
 
         const telegramText =
             `🌿 New HerbsBo enquiry\n\n` +
-            `Name: ${escapeTelegram(name)}\n` +
-            `Email: ${escapeTelegram(email)}\n` +
-            `Phone: ${escapeTelegram(phone)}\n\n` +
-            `Question:\n${escapeTelegram(question)}`
+            `Name: ${name}\n` +
+            `Email: ${email}\n` +
+            `Phone: ${phone}\n\n` +
+            `Question:\n${question}`
 
         const telegramResponse = await fetch(
             `https://api.telegram.org/bot${botToken}/sendMessage`,
             {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     chat_id: chatId,
                     text: telegramText,
@@ -85,8 +84,8 @@ export async function onRequestPost(context) {
             return json(
                 {
                     success: false,
-                    message:
-                        telegramResult.description || 'Failed to send Telegram message.',
+                    message: telegramResult.description || 'Failed to send Telegram message.',
+                    telegramResult,
                 },
                 500
             )
@@ -95,14 +94,19 @@ export async function onRequestPost(context) {
         return json(
             {
                 success: true,
-                data,
+                email: true,
                 telegram: true,
+                telegramResult,
+                data,
             },
             200
         )
     } catch (error) {
         return json(
-            { success: false, message: error.message || 'Server error.' },
+            {
+                success: false,
+                message: error.message || 'Server error.',
+            },
             500
         )
     }
@@ -124,11 +128,4 @@ function escapeHtml(str) {
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#39;')
-}
-
-function escapeTelegram(str) {
-    return String(str)
-        .replaceAll('&', '&')
-        .replaceAll('<', '<')
-        .replaceAll('>', '>')
 }

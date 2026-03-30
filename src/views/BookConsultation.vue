@@ -380,6 +380,7 @@ onBeforeUnmount(() => {
   color: #2d5a42;
   font-weight: 800;
   letter-spacing: -0.02em;
+  margin-bottom: 25px;
 }
 
 .hero-desc {

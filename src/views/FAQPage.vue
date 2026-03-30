@@ -51,10 +51,20 @@
               </div>
             </div>
 
-            <div class="faq-list">
+            <div v-if="loading" class="faq-state-card">Loading FAQs...</div>
+
+            <div v-else-if="errorMessage" class="faq-state-card faq-error-card">
+              {{ errorMessage }}
+            </div>
+
+            <div v-else-if="faqs.length === 0" class="faq-state-card">
+              FAQ content will be available soon.
+            </div>
+
+            <div v-else class="faq-list">
               <article
                 v-for="(item, index) in faqs"
-                :key="index"
+                :key="item.id || index"
                 class="faq-item"
                 :class="{ open: openIndex === index }"
               >
@@ -86,22 +96,9 @@
 
                 <transition name="faq-expand">
                   <div v-if="openIndex === index" class="faq-answer">
-                    <template v-if="item.type === 'paragraphs'">
-                      <p v-for="(paragraph, pIndex) in item.answer" :key="pIndex">
-                        {{ paragraph }}
-                      </p>
-                    </template>
-
-                    <template v-else-if="item.type === 'parking'">
-                      <p>{{ item.intro }}</p>
-                      <p>{{ item.noteOne }}</p>
-                      <p>{{ item.noteTwo }}</p>
-                      <ol class="parking-number-list">
-                        <li v-for="(entry, lIndex) in item.parkingList" :key="lIndex">
-                          {{ entry }}
-                        </li>
-                      </ol>
-                    </template>
+                    <p v-for="(paragraph, pIndex) in parseAnswer(item.answer)" :key="pIndex">
+                      {{ paragraph }}
+                    </p>
                   </div>
                 </transition>
               </article>
@@ -124,12 +121,18 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
+import { doc, getDoc } from 'firebase/firestore'
+import { db } from '@/firebase'
 import NavBar from '../component/NavBar.vue'
 import PageFooter from '../component/PageFooter.vue'
 
 const openIndex = ref(-1)
 const currentBgGradient = ref('linear-gradient(180deg, #dfe7dc 0%, #e7efe4 52%, #eef4ec 100%)')
 const sectionRefs = ref([])
+const loading = ref(true)
+const errorMessage = ref('')
+const faqs = ref([])
+
 let observer = null
 
 const toggleItem = (index) => {
@@ -146,9 +149,44 @@ const setSectionRef = (el) => {
   }
 }
 
+const parseAnswer = (value) => {
+  if (!value) return []
+  return value
+    .split('\n')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+const fetchFaqs = async () => {
+  loading.value = true
+  errorMessage.value = ''
+
+  try {
+    const docRef = doc(db, 'siteContent', 'faq')
+    const docSnap = await getDoc(docRef)
+
+    if (!docSnap.exists()) {
+      faqs.value = []
+      return
+    }
+
+    const data = docSnap.data()
+
+    faqs.value = Array.isArray(data.items)
+      ? data.items.filter((item) => item.visible !== false)
+      : []
+  } catch (error) {
+    console.error('Failed to fetch FAQs:', error)
+    errorMessage.value = 'Failed to load FAQ content.'
+  } finally {
+    loading.value = false
+  }
+}
+
 onMounted(async () => {
   window.scrollTo(0, 0)
   closeAllAnswers()
+  await fetchFaqs()
   await nextTick()
 
   const observerOptions = {
@@ -188,118 +226,6 @@ onUnmounted(() => {
 
   sectionRefs.value = []
 })
-
-const faqs = [
-  {
-    question: 'Do you have parking?',
-    type: 'parking',
-    intro:
-      'Paid street parking is available directly in front of the clinic for your convenience. Please always check parking signs carefully, as clearway restrictions may apply at certain times.',
-    noteTwo:
-      'There are several free 2-hour parking options just a few minutes’ walk from the clinic:',
-    parkingList: [
-      'Camberwell Station parking',
-      'Parking opposite the clinic near Mayston Street',
-      'Car park at Market Place',
-    ],
-  },
-  {
-    question: 'How long are the sessions?',
-    type: 'paragraphs',
-    answer: [
-      'Initial consultations, whether for Chinese medicine or physiotherapy, are 40 minutes. We use this time to understand your condition and map out your path to recovery.',
-      'Follow-up consultations range from 20–60 minutes, depending on the complexity of your condition. Your treating practitioner will discuss the best option for your recovery.',
-    ],
-  },
-  {
-    question: 'What do I need to bring?',
-    type: 'paragraphs',
-    answer: [
-      'If you have had scans or other investigations, please bring the results with you.',
-      'If you have a care plan referral from your GP, WorkCover, TAC, or are a Home Care patient, please inform reception at the time of booking and bring any relevant documentation with you. You can also email them to info@herbsmotion.com.au',
-    ],
-  },
-  {
-    question: 'Do I need a referral?',
-    type: 'paragraphs',
-    answer: [
-      'No, you do not need a referral to be seen. However, we welcome any referral letters or reports from your treating doctor or health professional.',
-    ],
-  },
-  {
-    question: 'Can I receive treatment while menstruating?',
-    type: 'paragraphs',
-    answer: [
-      'Yes, our Women’s Health Physio treats patients during all stages of their menstrual cycle.',
-    ],
-  },
-  {
-    question: 'How many sessions will I need?',
-    type: 'paragraphs',
-    answer: [
-      'The number of sessions and timeframe required for recovery will vary depending on the type and severity of your injury. During your initial appointment, your treating physio will assess your condition and provide an expected recovery timeframe.',
-    ],
-  },
-  {
-    question: 'I have a Medicare card. Does Medicare rebate any of my appointment costs?',
-    type: 'paragraphs',
-    answer: [
-      'A Medicare rebate of $61.80 applies to clients who have a current Chronic Disease Management Plan from their GP. This program allows eligible patients to claim rebates for up to 5 sessions per calendar year.',
-      'An out-of-pocket fee applies. We require a copy of your referral signed and dated by your GP, along with your Medicare details, to submit your claim. Rebates are usually processed within 48 hours on weekdays and paid into your nominated bank account.',
-    ],
-  },
-  {
-    question: 'I have private health insurance. Can I claim a rebate?',
-    type: 'paragraphs',
-    answer: [
-      'If you have extras cover, you can claim on the spot via our HICAPS machine. The rebate amount will depend on your insurer and level of cover.',
-      'We accept all major private health insurers, including Medibank, Bupa, Phoenix, HCF, and NIB. Please contact your insurer for a detailed estimate of your rebate.',
-    ],
-  },
-  {
-    question: 'What should I wear to my appointments?',
-    type: 'paragraphs',
-    answer: [
-      'Please wear clothing that allows easy access to the area of injury. Shorts and a singlet are suitable for most conditions. In winter, many patients wear shorts under track pants.',
-    ],
-  },
-  {
-    question: 'What if I can’t make an appointment?',
-    type: 'paragraphs',
-    answer: [
-      'We require at least 24 hours’ notice for cancellations so we can offer your appointment to another patient. A $50 fee will apply if less than 24 hours’ notice is given.',
-    ],
-  },
-  {
-    question: 'Do you accept WorkCover insurance?',
-    type: 'paragraphs',
-    answer: [
-      'Yes, we welcome WorkCover clients. Please provide your claim number and insurance details.',
-      'Once your medical excess has been met, we can invoice your insurer directly with no out-of-pocket costs. Until then, you will be charged the WorkCover rate and can seek reimbursement from your employer.',
-    ],
-  },
-  {
-    question: 'Do you accept TAC clients?',
-    type: 'paragraphs',
-    answer: [
-      'Yes, we welcome TAC clients. We can submit invoices directly to TAC on your behalf with no out-of-pocket fees, provided you have a valid TAC claim number and have met the medical excess (if applicable).',
-    ],
-  },
-  {
-    question: 'Do you accept Home Care Package clients?',
-    type: 'paragraphs',
-    answer: [
-      'Yes, we welcome Home Care Package clients. If you are not with one of our partner providers (such as Happy Living), payment is required upfront and we will provide an invoice for reimbursement.',
-    ],
-  },
-  {
-    question: 'Do you provide home visit services?',
-    type: 'paragraphs',
-    answer: [
-      'Yes, although we encourage clients to attend the clinic where possible, some practitioners offer home visits. Please enquire with your treating practitioner to see if this service is suitable for you.',
-    ],
-  },
-]
 </script>
 
 <style scoped>
@@ -422,6 +348,20 @@ const faqs = [
   color: #64756a;
 }
 
+.faq-state-card {
+  padding: 22px 20px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(50, 91, 73, 0.08);
+  color: #5e7065;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.faq-error-card {
+  color: #a14f67;
+}
+
 .faq-list {
   display: grid;
   gap: 14px;
@@ -506,24 +446,6 @@ const faqs = [
   margin-bottom: 0;
 }
 
-.parking-number-list {
-  margin: 14px 0 0 28px;
-  padding-left: 18px;
-  list-style: decimal;
-}
-
-.parking-number-list li {
-  margin-bottom: 6px;
-  padding-left: 6px;
-  font-size: 16px;
-  line-height: 1.8;
-  color: #4c5e54;
-}
-
-.parking-number-list li:last-child {
-  margin-bottom: 0;
-}
-
 .faq-footer-wrap {
   position: relative;
 }
@@ -579,15 +501,9 @@ const faqs = [
     padding: 0 16px 18px;
   }
 
-  .faq-answer p,
-  .parking-number-list li {
+  .faq-answer p {
     font-size: 15px;
     line-height: 1.75;
-  }
-
-  .parking-number-list {
-    margin: 12px 0 0 22px;
-    padding-left: 16px;
   }
 
   .hero-subtitle {

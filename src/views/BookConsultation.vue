@@ -12,59 +12,76 @@
         </p>
       </section>
 
-      <section class="location-section location-section-top">
-        <div class="location-card compact-location-card">
-          <div class="location-head compact-location-head">
-            <div class="location-copy compact-location-copy">
-              <div class="location-badge-row">
-                <span class="location-pin">📍</span>
-                <p class="card-label">Visit Our Clinic</p>
+      <!-- Map + Promotion -->
+      <section class="top-split-section">
+        <div class="top-split-grid" :class="{ 'single-column': !promotion.visible }">
+          <!-- Left: Map -->
+          <div class="location-card compact-location-card split-card">
+            <div class="location-head compact-location-head">
+              <div class="location-copy compact-location-copy">
+                <div class="location-badge-row">
+                  <span class="location-pin">📍</span>
+                  <p class="card-label">Visit Our Clinic</p>
+                </div>
+                <h2>696 Burke Rd, Camberwell VIC 3124</h2>
+                <p class="location-text">
+                  Conveniently located for your in-person consultation and ongoing care.
+                </p>
               </div>
-              <h2>696 Burke Rd, Camberwell VIC 3124</h2>
-              <p class="location-text">
-                Conveniently located for your in-person consultation and ongoing care.
-              </p>
+
+              <a
+                class="map-link"
+                href="https://www.google.com/maps?q=696+Burke+Rd,+Camberwell+VIC+3124"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open in Google Maps
+              </a>
             </div>
 
-            <a
-              class="map-link"
-              href="https://www.google.com/maps?q=696+Burke+Rd,+Camberwell+VIC+3124"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Open in Google Maps
-            </a>
-          </div>
+            <div class="map-shell compact-map-shell">
+              <iframe
+                title="Herbs & Motion clinic location"
+                class="location-map compact-location-map split-location-map"
+                src="https://www.google.com/maps?q=696%20Burke%20Rd,%20Camberwell%20VIC%203124&z=17&output=embed"
+                loading="lazy"
+                allowfullscreen
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
 
-          <div class="map-shell compact-map-shell">
-            <iframe
-              title="Herbs & Motion clinic location"
-              class="location-map compact-location-map"
-              src="https://www.google.com/maps?q=696%20Burke%20Rd,%20Camberwell%20VIC%203124&z=17&output=embed"
-              loading="lazy"
-              allowfullscreen
-              referrerpolicy="no-referrer-when-downgrade"
-            ></iframe>
-
-            <div class="map-note compact-map-note">
-              Tap or click the map pin to view the full address in the popup.
+              <div class="map-note compact-map-note">
+                Tap or click the map pin to view the full address in the popup.
+              </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      <section v-if="promotion.visible" class="promotion-section">
-        <div class="promotion-card">
-          <div class="promotion-left">
-            <p class="promotion-tag">Promotion</p>
-            <h2>{{ promotion.title }}</h2>
-            <p class="promotion-text">
-              {{ promotion.content }}
-            </p>
-          </div>
+          <!-- Right: Promotion -->
+          <div v-if="promotion.visible" class="promotion-card split-card promotion-half-card">
+            <div class="promotion-left promotion-half-left">
+              <p class="promotion-tag">Promotion</p>
+              <h2>{{ promotion.title }}</h2>
 
-          <div class="promotion-right">
-            <div class="promotion-placeholder">Current Promotion</div>
+              <div
+                ref="promotionContentRef"
+                :class="[
+                  'promotion-text-wrap',
+                  { collapsed: shouldCollapse && !promotionExpanded },
+                ]"
+              >
+                <p class="promotion-text">
+                  {{ promotion.content }}
+                </p>
+              </div>
+
+              <button
+                v-if="shouldCollapse"
+                class="read-more-btn"
+                @click="promotionExpanded = !promotionExpanded"
+                type="button"
+              >
+                {{ promotionExpanded ? 'Read less' : 'Read more' }}
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -133,7 +150,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
+import { computed, onMounted, onBeforeUnmount, ref, nextTick } from 'vue'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/firebase'
 import NavBar from '@/component/NavBar.vue'
@@ -143,11 +160,28 @@ const scrollRatio = ref(0)
 let handleIFrameMessage = null
 let handleScroll = null
 
+const promotionExpanded = ref(false)
+const promotionContentRef = ref(null)
+const shouldCollapse = ref(false)
+const PROMOTION_COLLAPSED_HEIGHT = 150
+
 const promotion = ref({
   title: '',
   content: '',
   visible: false,
 })
+
+const checkPromotionOverflow = async () => {
+  await nextTick()
+
+  const el = promotionContentRef.value
+  if (!el || !promotion.value?.content) {
+    shouldCollapse.value = false
+    return
+  }
+
+  shouldCollapse.value = el.scrollHeight > PROMOTION_COLLAPSED_HEIGHT
+}
 
 const fetchPromotion = async () => {
   try {
@@ -168,6 +202,9 @@ const fetchPromotion = async () => {
         visible: false,
       }
     }
+
+    promotionExpanded.value = false
+    await checkPromotionOverflow()
   } catch (error) {
     console.error('Failed to fetch promotion:', error)
   }
@@ -247,6 +284,7 @@ const pageBgStyle = computed(() => {
 
 onMounted(() => {
   fetchPromotion()
+  window.addEventListener('resize', checkPromotionOverflow)
 
   handleIFrameMessage = function (e) {
     const clinikoBookings = document.getElementById('cliniko-51970928')
@@ -293,6 +331,8 @@ onBeforeUnmount(() => {
   if (handleScroll) {
     window.removeEventListener('scroll', handleScroll)
   }
+
+  window.removeEventListener('resize', checkPromotionOverflow)
 })
 </script>
 
@@ -303,69 +343,83 @@ onBeforeUnmount(() => {
 }
 
 .book-content {
-  padding: 56px 24px 100px;
+  padding: 18px 24px 100px;
 }
 
 .hero-section,
-.location-section,
-.promotion-section,
+.top-split-section,
 .booking-layout {
-  max-width: 1320px;
+  max-width: 1240px;
   margin-left: auto;
   margin-right: auto;
 }
 
 .hero-section {
   text-align: center;
-  max-width: 920px;
-  margin-bottom: 34px;
+  max-width: 860px;
+  margin-bottom: 8px;
 }
 
 .hero-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 16px;
-  margin-bottom: 18px;
+  padding: 7px 14px;
+  margin-bottom: 10px;
   border-radius: 999px;
   background: rgba(47, 91, 67, 0.1);
   color: #2f5b43;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
 
 .hero-title {
-  margin: 0 0 14px;
-  font-size: clamp(2.2rem, 4vw, 3.6rem);
-  line-height: 1.08;
+  margin: 0 0 6px;
+  font-size: clamp(2rem, 3.6vw, 3.15rem);
+  line-height: 1.03;
   color: #2d5a42;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
 
 .hero-desc {
-  max-width: 760px;
+  max-width: 700px;
   margin: 0 auto;
-  font-size: 1.04rem;
-  line-height: 1.8;
+  font-size: 0.96rem;
+  line-height: 1.6;
   color: #5f6f66;
+}
+
+/* =========================
+   Top split layout
+   ========================= */
+.top-split-section {
+  margin-bottom: 18px;
+}
+
+.top-split-grid {
+  display: grid;
+  grid-template-columns: 1.03fr 0.97fr;
+  gap: 14px;
+  align-items: stretch;
+  margin-bottom: 40px;
+}
+
+.top-split-grid.single-column {
+  grid-template-columns: 1fr;
+}
+
+.split-card {
+  height: 100%;
 }
 
 /* =========================
    Location
    ========================= */
-.location-section {
-  margin-bottom: 28px;
-}
-
-.location-section-top {
-  margin-bottom: 30px;
-}
-
 .location-card {
-  padding: 28px;
-  border-radius: 30px;
+  padding: 16px;
+  border-radius: 24px;
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(56, 92, 71, 0.08);
   backdrop-filter: blur(12px);
@@ -373,20 +427,20 @@ onBeforeUnmount(() => {
 }
 
 .compact-location-card {
-  padding: 22px;
-  border-radius: 24px;
+  padding: 15px;
+  border-radius: 20px;
 }
 
 .location-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 22px;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
 .compact-location-head {
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   align-items: center;
 }
 
@@ -395,30 +449,30 @@ onBeforeUnmount(() => {
 }
 
 .compact-location-copy {
-  max-width: 680px;
+  max-width: 640px;
 }
 
 .location-badge-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
 .location-pin {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
-  border-radius: 16px;
+  border-radius: 13px;
   background: rgba(47, 91, 67, 0.08);
-  font-size: 1.3rem;
+  font-size: 1.08rem;
   flex-shrink: 0;
 }
 
 .card-label {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #79907f;
   text-transform: uppercase;
@@ -426,28 +480,29 @@ onBeforeUnmount(() => {
 }
 
 .location-card h2 {
-  margin: 0 0 10px;
+  margin: 0 0 6px;
   color: #2d5a42;
-  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-size: clamp(1.28rem, 2vw, 1.92rem);
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.12;
 }
 
 .compact-location-card h2 {
-  font-size: clamp(1.2rem, 2vw, 1.55rem);
-  margin: 0 0 8px;
+  font-size: clamp(1.15rem, 1.7vw, 1.55rem);
+  margin: 0 0 6px;
 }
 
 .location-text {
   margin: 0;
   color: #66786d;
-  line-height: 1.75;
-  font-size: 1.02rem;
+  line-height: 1.5;
+  font-size: 0.92rem;
+  max-width: 470px;
 }
 
 .compact-location-card .location-text {
-  font-size: 0.95rem;
-  line-height: 1.68;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .map-link {
@@ -455,15 +510,16 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
-  padding: 0 18px;
+  min-height: 38px;
+  padding: 0 14px;
   border-radius: 999px;
   background: rgba(47, 91, 67, 0.1);
   color: #2f5b43;
-  font-size: 0.94rem;
+  font-size: 0.86rem;
   font-weight: 700;
   text-decoration: none;
   transition: all 0.25s ease;
+  white-space: nowrap;
 }
 
 .map-link:hover {
@@ -472,29 +528,23 @@ onBeforeUnmount(() => {
   transform: translateY(-1px);
 }
 
-.compact-location-card .map-link {
-  min-height: 42px;
-  padding: 0 16px;
-  font-size: 0.88rem;
-}
-
 .map-shell {
   position: relative;
   overflow: hidden;
-  border-radius: 26px;
+  border-radius: 18px;
   border: 1px solid rgba(47, 91, 67, 0.08);
   background: #f6f9f5;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
 .compact-map-shell {
-  border-radius: 20px;
+  border-radius: 16px;
 }
 
 .location-map {
   display: block;
   width: 100%;
-  height: 460px;
+  height: 270px;
   border: 0;
 }
 
@@ -502,51 +552,63 @@ onBeforeUnmount(() => {
   height: 250px;
 }
 
+.split-location-map {
+  height: 250px;
+  min-height: 250px;
+}
+
 .map-note {
   position: absolute;
-  left: 18px;
-  bottom: 18px;
-  padding: 10px 14px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.88);
+  left: 12px;
+  bottom: 12px;
+  padding: 7px 11px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.9);
   color: #5b6f63;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  font-size: 0.78rem;
+  line-height: 1.3;
   backdrop-filter: blur(8px);
   box-shadow: 0 10px 24px rgba(47, 91, 67, 0.08);
 }
 
 .compact-map-note {
-  left: 14px;
-  bottom: 14px;
-  padding: 8px 12px;
-  border-radius: 12px;
-  font-size: 0.82rem;
+  left: 10px;
+  bottom: 10px;
+  padding: 7px 11px;
+  border-radius: 11px;
+  font-size: 0.76rem;
 }
 
 /* =========================
    Promotion
    ========================= */
-.promotion-section {
-  margin-bottom: 30px;
-}
-
 .promotion-card {
-  display: grid;
-  grid-template-columns: 1.18fr 0.82fr;
-  gap: 24px;
-  align-items: stretch;
-  padding: 28px;
-  border-radius: 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 16px 18px;
+  border-radius: 24px;
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(56, 92, 71, 0.08);
   box-shadow: 0 18px 40px rgba(47, 91, 67, 0.08);
   backdrop-filter: blur(12px);
 }
 
+.promotion-half-card {
+  min-height: 250px;
+}
+
+.promotion-half-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  max-width: 100%;
+  padding-top: 0;
+}
+
 .promotion-tag {
-  margin: 0 0 8px;
-  font-size: 0.88rem;
+  margin: 0 0 6px;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #7a8d80;
   text-transform: uppercase;
@@ -554,35 +616,67 @@ onBeforeUnmount(() => {
 }
 
 .promotion-card h2 {
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   color: #2d5a42;
-  font-size: 1.7rem;
+  font-size: clamp(1.34rem, 2vw, 1.82rem);
   font-weight: 800;
+  line-height: 1.18;
+  max-width: 420px;
 }
 
 .promotion-card p {
   margin: 0;
   color: #64766a;
-  line-height: 1.8;
+  line-height: 1.62;
 }
 
-.promotion-right {
-  display: flex;
+.promotion-text-wrap {
+  max-width: 460px;
+  overflow: hidden;
+  transition: max-height 0.28s ease;
 }
 
-.promotion-placeholder {
-  width: 100%;
-  min-height: 180px;
-  padding: 20px;
-  border-radius: 22px;
-  border: 2px dashed rgba(47, 91, 67, 0.2);
-  background: rgba(47, 91, 67, 0.04);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: #6d8375;
+.promotion-text-wrap.collapsed {
+  max-height: 150px;
+}
+
+.promotion-text {
+  margin-top: 0;
+  white-space: pre-line;
+  font-size: 0.92rem;
+}
+
+.read-more-btn {
+  align-self: flex-start;
+  margin-top: 12px;
+  min-height: 38px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(47, 91, 67, 0.1);
+  color: #2f5b43;
+  font-size: 0.86rem;
   font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.read-more-btn:hover {
+  background: #2f5b43;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* 保留这组也没问题，虽然正文现在不是用 transition 包着 */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.28s ease;
+}
+
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 
 /* =========================
@@ -715,27 +809,40 @@ onBeforeUnmount(() => {
    Responsive
    ========================= */
 @media (max-width: 1100px) {
-  .promotion-card,
+  .top-split-grid,
   .booking-layout {
     grid-template-columns: 1fr;
   }
 
-  .location-map {
-    height: 400px;
+  .promotion-half-card,
+  .split-location-map {
+    min-height: unset;
   }
 
-  .compact-location-map {
+  .location-map,
+  .compact-location-map,
+  .split-location-map {
     height: 220px;
+    min-height: 220px;
+  }
+
+  .promotion-card {
+    min-height: auto;
+  }
+
+  .promotion-text-wrap,
+  .promotion-card h2 {
+    max-width: 100%;
   }
 }
 
 @media (max-width: 768px) {
   .book-content {
-    padding: 32px 16px 72px;
+    padding: 18px 16px 72px;
   }
 
   .hero-section {
-    margin-bottom: 26px;
+    margin-bottom: 10px;
   }
 
   .hero-title {
@@ -743,56 +850,48 @@ onBeforeUnmount(() => {
   }
 
   .hero-desc {
-    font-size: 0.96rem;
-    line-height: 1.72;
+    font-size: 0.94rem;
+    line-height: 1.6;
   }
 
   .location-card,
   .promotion-card,
   .booking-card,
   .side-card {
-    padding: 18px;
-    border-radius: 20px;
+    padding: 16px;
+    border-radius: 18px;
   }
 
   .compact-location-card {
-    padding: 16px;
+    padding: 14px;
   }
 
   .location-head {
     flex-direction: column;
     align-items: flex-start;
-    margin-bottom: 18px;
+    margin-bottom: 12px;
   }
 
   .location-card h2 {
-    font-size: 1.8rem;
+    font-size: 1.45rem;
   }
 
   .compact-location-card h2 {
-    font-size: 1.15rem;
+    font-size: 1.22rem;
   }
 
-  .location-map {
-    height: 320px;
-  }
-
-  .compact-location-map {
+  .location-map,
+  .compact-location-map,
+  .split-location-map {
     height: 200px;
+    min-height: 200px;
   }
 
   .map-note {
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
-    font-size: 0.84rem;
-  }
-
-  .compact-map-note {
     left: 10px;
     right: 10px;
     bottom: 10px;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
   }
 
   .booking-head {
@@ -810,11 +909,11 @@ onBeforeUnmount(() => {
   }
 
   .promotion-card h2 {
-    font-size: 1.35rem;
+    font-size: 1.36rem;
   }
 
-  .promotion-placeholder {
-    min-height: 120px;
+  .promotion-text-wrap.collapsed {
+    max-height: 132px;
   }
 
   #cliniko-51970928 {
@@ -824,35 +923,42 @@ onBeforeUnmount(() => {
 
 @media (max-width: 480px) {
   .book-content {
-    padding: 24px 12px 60px;
+    padding: 16px 12px 60px;
   }
 
   .hero-badge {
-    font-size: 0.82rem;
-    padding: 7px 14px;
+    font-size: 0.8rem;
+    padding: 7px 13px;
   }
 
   .hero-title {
-    font-size: 1.8rem;
+    font-size: 1.75rem;
   }
 
   .location-pin {
-    width: 44px;
-    height: 44px;
-    font-size: 1.16rem;
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
   }
 
   .location-card h2,
   .side-card h3 {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
   }
 
-  .location-map {
-    height: 280px;
+  .location-map,
+  .compact-location-map,
+  .split-location-map {
+    height: 182px;
+    min-height: 182px;
   }
 
-  .compact-location-map {
-    height: 180px;
+  .promotion-card h2 {
+    font-size: 1.22rem;
+  }
+
+  .promotion-text-wrap.collapsed {
+    max-height: 118px;
   }
 
   .booking-head h2 {
@@ -864,7 +970,16 @@ onBeforeUnmount(() => {
   }
 }
 
-.promotion-text {
-  white-space: pre-line;
+.book-content {
+  padding: 8px 24px 100px;
+}
+
+.hero-section {
+  margin-bottom: 2px;
+}
+
+.top-split-section {
+  margin-top: 0;
+  margin-bottom: 14px;
 }
 </style>

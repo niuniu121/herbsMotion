@@ -2,7 +2,6 @@
   <div class="herbsie-container">
     <!-- Floating launcher -->
     <div v-if="!isOpen" class="floating-entry">
-      <!-- rotating mini prompt bubble -->
       <transition name="prompt-fade" mode="out-in">
         <div
           v-if="showPromptBubble"
@@ -19,8 +18,6 @@
         <span class="icon">
           <img src="../assets/logo_opacity.svg" alt="Herbsie" />
         </span>
-
-        <!-- optional small status badge -->
         <span class="floating-badge">❤</span>
       </button>
     </div>
@@ -47,19 +44,24 @@
       <div class="options-area">
         <div class="tags-header">
           <span>Quick FAQ</span>
+          <span v-if="faqLoading" class="faq-loading-text">Loading...</span>
         </div>
 
         <div class="tags-scroll">
           <button
-            v-for="(item, index) in faqDatabase"
-            :key="index"
+            v-for="item in faqDatabase"
+            :key="item.id"
             @click="handleSelect(item)"
             class="tag-btn"
             type="button"
-            :disabled="isSubmitting"
+            :disabled="isSubmitting || faqLoading"
           >
             {{ item.q }}
           </button>
+
+          <div v-if="!faqLoading && faqDatabase.length === 0" class="empty-faq-state">
+            No FAQ available right now.
+          </div>
         </div>
       </div>
 
@@ -152,11 +154,16 @@
 
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { doc, getDoc } from 'firebase/firestore'
+import { db } from '@/firebase'
 
 const isOpen = ref(false)
 const userInput = ref('')
 const scrollBox = ref(null)
 const isSubmitting = ref(false)
+
+const faqLoading = ref(false)
+const faqDatabase = ref([])
 
 const messages = ref([
   {
@@ -165,89 +172,6 @@ const messages = ref([
   },
 ])
 
-const faqDatabase = [
-  {
-    q: 'Do you have parking?',
-    keywords: ['parking', 'park', 'car', 'drive'],
-    a: 'There are 3 onsite parking bays at the front of the building and 2 at the rear. Additional public parking is available on Canterbury Road and adjoining streets. There are several free 2-hour parking options just a few minutes’ walk from the clinic: Camberwell Station, near Mayston Street, and Market Place.',
-  },
-  {
-    q: 'How long are the sessions?',
-    keywords: ['long', 'duration', 'time', 'sessions', 'minutes'],
-    a: 'Initial consultations are 40 minutes. Follow-up consultations range from 20–60 minutes, depending on the complexity of your condition.',
-  },
-  {
-    q: 'What do I need to bring?',
-    keywords: ['bring', 'scans', 'results', 'documents'],
-    a: 'If you have had scans or other investigations, please bring the results. If you have a care plan referral, WorkCover, TAC, or Home Care docs, bring them or email them to info@herbsmotion.com.au.',
-  },
-  {
-    q: 'Do I need a referral?',
-    keywords: ['referral', 'doctor', 'gp letter'],
-    a: 'No, you do not need a referral to be seen. However, we welcome any referral letters or reports from your treating doctor.',
-  },
-  {
-    q: 'Treatment while menstruating?',
-    keywords: ['menstruating', 'menstrual', 'period', 'women'],
-    a: 'Yes, our Women’s Health Physio treats patients during all stages of their menstrual cycle.',
-  },
-  {
-    q: 'How many sessions will I need?',
-    keywords: ['how many', 'number of sessions'],
-    a: 'The number of sessions will vary depending on the type and severity of your injury. Your physio will provide an expected timeframe during your initial appointment.',
-  },
-  {
-    q: 'Does Medicare rebate costs?',
-    keywords: ['medicare', 'rebate', 'cdmp'],
-    a: 'A Medicare rebate of $61.80 applies to clients who have a current Chronic Disease Management Plan from their GP. This allows rebates for up to 5 sessions per calendar year.',
-  },
-  {
-    q: 'Private health insurance claims?',
-    keywords: [
-      'private health',
-      'insurance',
-      'hicaps',
-      'medibank',
-      'bupa',
-      'phoenix',
-      'hcf',
-      'nib',
-    ],
-    a: 'If you have extras cover, you can claim on the spot via our HICAPS machine. We accept all major insurers, including Medibank, Bupa, Phoenix, HCF, and NIB.',
-  },
-  {
-    q: 'What should I wear?',
-    keywords: ['wear', 'clothing', 'clothes', 'shorts'],
-    a: 'Please wear clothing that allows easy access to the area of injury. Shorts and a singlet are suitable for most conditions.',
-  },
-  {
-    q: 'What if I can’t make an appointment?',
-    keywords: ['cancel', 'miss', 'reschedule', 'notice'],
-    a: 'We require at least 24 hours’ notice for cancellations. A $50 fee will apply if less than 24 hours’ notice is given.',
-  },
-  {
-    q: 'Do you accept WorkCover?',
-    keywords: ['workcover', 'work cover'],
-    a: 'Yes, we welcome WorkCover clients. Once your medical excess has been met, we can invoice your insurer directly with no out-of-pocket costs.',
-  },
-  {
-    q: 'Do you accept TAC clients?',
-    keywords: ['tac'],
-    a: 'Yes, we welcome TAC clients. We can submit invoices directly to TAC on your behalf with no out-of-pocket fees, provided you have met the excess.',
-  },
-  {
-    q: 'Do you accept Home Care Packages?',
-    keywords: ['home care', 'package', 'happy living'],
-    a: 'Yes, we welcome Home Care Package clients. If you are not with one of our partner providers (such as Happy Living), payment is required upfront and we will provide an invoice for reimbursement.',
-  },
-  {
-    q: 'Do you provide home visit services?',
-    keywords: ['home visit', 'visit my home'],
-    a: 'Yes, although we encourage clients to attend the clinic, some practitioners offer home visits. Please enquire with your treating practitioner.',
-  },
-]
-
-/** floating prompt */
 const rotatingPrompts = [
   "G'day — I’m HerbsBo 👋",
   'Need help with parking or bookings?',
@@ -276,6 +200,51 @@ const fieldErrors = ref({
   email: '',
   phone: '',
 })
+
+async function fetchFaqsFromFirestore() {
+  faqLoading.value = true
+
+  try {
+    const docRef = doc(db, 'siteContent', 'faq')
+    const docSnap = await getDoc(docRef)
+
+    if (!docSnap.exists()) {
+      faqDatabase.value = []
+      return
+    }
+
+    const data = docSnap.data()
+    const items = Array.isArray(data.items) ? data.items : []
+
+    faqDatabase.value = items
+      .filter((item) => item.visible !== false)
+      .map((item) => ({
+        id: item.id || `faq_${Math.random().toString(36).slice(2, 8)}`,
+        q: item.question || '',
+        a: item.answer || '',
+        keywords: buildKeywords(item.question || '', item.answer || ''),
+      }))
+      .filter((item) => item.q.trim() && item.a.trim())
+  } catch (error) {
+    console.error('Failed to load chatbot FAQs:', error)
+    faqDatabase.value = []
+  } finally {
+    faqLoading.value = false
+  }
+}
+
+function buildKeywords(question, answer) {
+  const combined = `${question} ${answer}`.toLowerCase()
+
+  const words = combined
+    .replace(/[^\w\s]/g, ' ')
+    .split(/\s+/)
+    .map((word) => word.trim())
+    .filter(Boolean)
+    .filter((word) => word.length >= 3)
+
+  return [...new Set(words)]
+}
 
 function startPromptRotation() {
   stopPromptRotation()
@@ -325,9 +294,14 @@ function openChatFromPrompt() {
   openChat()
 }
 
-function openChat() {
+async function openChat() {
   isOpen.value = true
   showPromptBubble.value = false
+
+  if (!faqDatabase.value.length) {
+    await fetchFaqsFromFirestore()
+  }
+
   scrollToBottom()
 }
 
@@ -338,19 +312,61 @@ function closeChat() {
 }
 
 function normalize(text) {
-  return text.trim().toLowerCase()
+  return String(text || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+}
+
+function getWords(text) {
+  return normalize(text).split(' ').filter(Boolean)
 }
 
 function findFaqMatch(rawText) {
   const text = normalize(rawText)
+  const words = getWords(rawText)
 
-  for (const item of faqDatabase) {
-    const keywordHit = item.keywords.some((k) => text.includes(k.toLowerCase()))
-    const questionHit = text.includes(item.q.toLowerCase())
-    if (keywordHit || questionHit) return item
+  let bestMatch = null
+  let bestScore = 0
+
+  for (const item of faqDatabase.value) {
+    let score = 0
+
+    const questionText = normalize(item.q)
+    const answerText = normalize(item.a)
+
+    if (text.includes(questionText) && questionText) {
+      score += 10
+    }
+
+    for (const keyword of item.keywords || []) {
+      const normalizedKeyword = normalize(keyword)
+
+      if (!normalizedKeyword) continue
+
+      if (text.includes(normalizedKeyword)) {
+        score += normalizedKeyword.split(' ').length > 1 ? 4 : 2
+      }
+    }
+
+    for (const word of words) {
+      if (word.length >= 4 && questionText.includes(word)) {
+        score += 1
+      }
+
+      if (word.length >= 5 && answerText.includes(word)) {
+        score += 0.5
+      }
+    }
+
+    if (score > bestScore) {
+      bestScore = score
+      bestMatch = item
+    }
   }
 
-  return null
+  return bestScore >= 2 ? bestMatch : null
 }
 
 function pushUserMessage(text) {
@@ -375,6 +391,10 @@ const handleSelect = (item) => {
 const handleSend = async () => {
   const raw = userInput.value.trim()
   if (!raw || isSubmitting.value) return
+
+  if (!faqDatabase.value.length && !faqLoading.value) {
+    await fetchFaqsFromFirestore()
+  }
 
   pushUserMessage(raw)
   userInput.value = ''
@@ -503,6 +523,7 @@ const scrollToBottom = async () => {
 onMounted(() => {
   startPromptRotation()
   resetPromptAutoShow()
+  fetchFaqsFromFirestore()
 })
 
 onBeforeUnmount(() => {
@@ -528,7 +549,6 @@ onBeforeUnmount(() => {
   gap: 12px;
 }
 
-/* ========== floating prompt bubble ========== */
 .floating-prompt {
   position: absolute;
   right: 14px;
@@ -585,7 +605,6 @@ onBeforeUnmount(() => {
   box-shadow: 0 8px 18px rgba(17, 55, 35, 0.2);
 }
 
-/* ========== floating logo ========== */
 .floating-ball {
   position: relative;
   width: 66px;
@@ -656,7 +675,6 @@ onBeforeUnmount(() => {
   border: 2px solid #d9f5e5;
 }
 
-/* ========== chat window ========== */
 .chat-window {
   width: 360px;
   height: 550px;
@@ -754,6 +772,7 @@ onBeforeUnmount(() => {
   border-radius: 12px;
   font-size: 14px;
   line-height: 1.5;
+  word-break: break-word;
 }
 
 .bot .bubble {
@@ -785,6 +804,11 @@ onBeforeUnmount(() => {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.faq-loading-text {
+  font-size: 11px;
+  color: #94a39b;
 }
 
 .tags-scroll {
@@ -836,6 +860,12 @@ onBeforeUnmount(() => {
   cursor: not-allowed;
 }
 
+.empty-faq-state {
+  font-size: 13px;
+  color: #7d8e84;
+  padding: 8px 2px;
+}
+
 .input-area {
   padding: 12px 15px;
   border-top: 1px solid #eee;
@@ -881,7 +911,6 @@ onBeforeUnmount(() => {
   cursor: not-allowed;
 }
 
-/* Modal */
 .lead-modal-overlay {
   position: fixed;
   inset: 0;
@@ -1061,7 +1090,6 @@ onBeforeUnmount(() => {
   transform: none;
 }
 
-/* prompt transitions */
 .prompt-fade-enter-active,
 .prompt-fade-leave-active {
   transition:

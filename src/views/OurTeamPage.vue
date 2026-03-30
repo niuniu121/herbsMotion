@@ -134,18 +134,20 @@ const handleScroll = () => {
 }
 
 const pageDynamicStyle = computed(() => {
-  const offset = Math.min(scrollY.value * 0.12, 180)
+  const scrollPercent = Math.min(scrollY.value / window.innerHeight, 1)
 
   return {
     background: `
       linear-gradient(
         180deg,
-        #CFDAC8 ${0 + offset * 0.05}px,
-        #FAF7F2 ${260 + offset * 0.14}px,
-        #F5DFE6 ${820 + offset * 0.22}px,
-        #EED6DF ${1500 + offset * 0.3}px
+        #CFDAC8 0%,
+        #FAF7F2 33%,
+        #F5DFE6 66%,
+        #EED6DF 100%
       )
     `,
+    backgroundPosition: `0% ${scrollPercent * 40}%`,
+    backgroundSize: '100% 200%',
   }
 })
 

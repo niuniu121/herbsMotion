@@ -77,8 +77,13 @@
                       {{ faq.visible ? 'Visible' : 'Hidden' }}
                     </button>
 
-                    <button class="danger-btn" type="button" @click="askRemoveFaq(index)">
-                      Delete
+                    <button
+                      class="danger-btn"
+                      type="button"
+                      @click="askRemoveFaq(index)"
+                      :disabled="deleting"
+                    >
+                      {{ deleting && deleteModal.index === index ? 'Deleting...' : 'Delete' }}
                     </button>
                   </div>
                 </div>
@@ -206,15 +211,27 @@
         <div class="modal-icon neutral-icon">?</div>
         <h3>Delete FAQ Item</h3>
         <p>
-          This will remove
-          <strong>{{ deleteModal.question || 'this FAQ item' }}</strong>
-          from the current form. This action cannot be undone after saving.
+          Are you sure you want to delete
+          <strong>{{ deleteModal.question || 'this FAQ item' }}</strong
+          >? This will be removed immediately and synced to the website and chatbot.
         </p>
         <div class="modal-actions">
-          <button class="modal-btn secondary" @click="closeDeleteModal" type="button">
+          <button
+            class="modal-btn secondary"
+            @click="closeDeleteModal"
+            type="button"
+            :disabled="deleting"
+          >
             Cancel
           </button>
-          <button class="modal-btn danger" @click="confirmRemoveFaq" type="button">Delete</button>
+          <button
+            class="modal-btn danger"
+            @click="confirmRemoveFaq"
+            type="button"
+            :disabled="deleting"
+          >
+            {{ deleting ? 'Deleting...' : 'Delete Now' }}
+          </button>
         </div>
       </div>
     </div>
@@ -255,17 +272,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed, nextTick } from 'vue'
 import draggable from 'vuedraggable'
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, getDoc, setDoc, serverTimestamp, writeBatch } from 'firebase/firestore'
 import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { db } from '@/firebase'
-import { nextTick } from 'vue'
 
 const router = useRouter()
 
 const loading = ref(true)
 const saving = ref(false)
+const deleting = ref(false)
 const inlineErrorMessage = ref('')
 const faqs = ref([])
 const expandedFaqIds = ref([])
@@ -408,6 +425,7 @@ const askRemoveFaq = (index) => {
 }
 
 const closeDeleteModal = () => {
+  if (deleting.value) return
   deleteModal.value = {
     open: false,
     index: null,
@@ -415,16 +433,78 @@ const closeDeleteModal = () => {
   }
 }
 
-const confirmRemoveFaq = () => {
-  if (deleteModal.value.index !== null) {
-    const removedFaq = faqs.value[deleteModal.value.index]
-    faqs.value.splice(deleteModal.value.index, 1)
+const persistFaqs = async (list) => {
+  const normalizedItems = normalizeFaqsForSave(list)
+
+  const faqRef = doc(db, 'siteContent', 'faq')
+  const chatbotFaqRef = doc(db, 'siteContent', 'chatbotFAQ')
+
+  const batch = writeBatch(db)
+
+  batch.set(
+    faqRef,
+    {
+      items: normalizedItems,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true },
+  )
+
+  batch.set(
+    chatbotFaqRef,
+    {
+      items: normalizedItems,
+      quickQuestions: normalizedItems
+        .filter((item) => item.visible && item.question.trim() && item.answer.trim())
+        .map((item) => ({
+          id: item.id,
+          question: item.question,
+          answer: item.answer,
+        })),
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true },
+  )
+
+  await batch.commit()
+}
+
+const confirmRemoveFaq = async () => {
+  if (deleteModal.value.index === null || deleting.value) return
+
+  deleting.value = true
+  inlineErrorMessage.value = ''
+
+  const removeIndex = deleteModal.value.index
+  const nextFaqs = [...faqs.value]
+  const removedFaq = nextFaqs[removeIndex]
+
+  nextFaqs.splice(removeIndex, 1)
+
+  try {
+    await persistFaqs(nextFaqs)
+
+    faqs.value = nextFaqs
 
     if (removedFaq?.id) {
       expandedFaqIds.value = expandedFaqIds.value.filter((id) => id !== removedFaq.id)
     }
+
+    updateSnapshot()
+
+    deleteModal.value = {
+      open: false,
+      index: null,
+      question: '',
+    }
+
+    openSuccessModal('FAQ deleted successfully and synced to the website and chatbot.')
+  } catch (error) {
+    console.error('Failed to delete FAQ:', error)
+    openErrorModal('Failed to delete this FAQ item. Please try again.')
+  } finally {
+    deleting.value = false
   }
-  closeDeleteModal()
 }
 
 const openUnsavedModal = () => {
@@ -524,16 +604,11 @@ const saveFaqs = async () => {
   }
 
   try {
-    const docRef = doc(db, 'siteContent', 'faq')
-
-    await setDoc(docRef, {
-      items: normalizeFaqsForSave(faqs.value),
-      updatedAt: serverTimestamp(),
-    })
+    await persistFaqs(faqs.value)
 
     updateSnapshot()
     collapseAllFaqs()
-    openSuccessModal('Your FAQ content has been saved successfully.')
+    openSuccessModal('Your FAQ content has been saved successfully and synced to the chatbot.')
   } catch (error) {
     console.error('Failed to save FAQs:', error)
     const message = 'Failed to save FAQ content. Please try again.'
@@ -698,6 +773,19 @@ onBeforeUnmount(() => {
 .mini-btn:hover,
 .read-more-btn:hover {
   transform: translateY(-1px);
+}
+
+.secondary-btn:disabled,
+.save-btn:disabled,
+.danger-btn:disabled,
+.toggle-btn:disabled,
+.back-btn:disabled,
+.modal-btn:disabled,
+.mini-btn:disabled,
+.read-more-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .secondary-btn {

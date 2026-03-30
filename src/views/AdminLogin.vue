@@ -77,7 +77,7 @@ const handleLogin = async () => {
 
   try {
     await signInWithEmailAndPassword(auth, email.value, password.value)
-    router.push('/admin/promotion')
+    router.push('/admin')
   } catch (error) {
     console.error('Login failed:', error)
 

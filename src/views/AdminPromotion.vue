@@ -8,7 +8,7 @@
           <p class="desc">Edit promotion content and control visibility on booking page.</p>
         </div>
 
-        <button class="logout-btn" @click="handleLogout">Logout</button>
+        <button class="logout-btn" @click="goBack">Back</button>
       </div>
 
       <div class="admin-card">
@@ -84,6 +84,9 @@ const saving = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
 
+const goBack = () => {
+  router.push('/admin')
+}
 /* ========================
    获取数据
 ======================== */

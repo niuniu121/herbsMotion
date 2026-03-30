@@ -78,7 +78,7 @@
     </div>
 
     <!-- Lead Popup -->
-    <div v-if="showLeadModal" class="lead-modal-overlay" @click.self="handleLeadBack">
+    <div v-if="showLeadModal" class="lead-modal-overlay">
       <div class="lead-modal">
         <div class="lead-modal-header">
           <div>

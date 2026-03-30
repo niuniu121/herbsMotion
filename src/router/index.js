@@ -5,7 +5,13 @@ import PhysioOutcomeView from '../views/PhysioOutcomeView.vue'
 import FAQPage from '../views/FAQPage.vue'
 import BookConsultation from '@/views/BookConsultation.vue'
 import AdminLogin from '@/views/AdminLogin.vue'
+import AdminDashboard from '@/views/AdminDashboard.vue'
 import AdminPromotion from '@/views/AdminPromotion.vue'
+import AdminFAQ from '@/views/AdminFAQ.vue'
+import AdminOurTeam from '@/views/AdminOurTeam.vue'
+import AdminServices from '@/views/AdminServices.vue'
+import OurTeamPage from '@/views/OurTeamPage.vue'
+
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -27,7 +33,7 @@ const router = createRouter({
     },
     {
       path: '/faq',
-      name: 'FAQPage',
+      name: 'FAQ',
       component: FAQPage,
     },
     {
@@ -35,33 +41,44 @@ const router = createRouter({
       name: 'BookConsultation',
       component: BookConsultation,
     },
+
+    // admin
     {
       path: '/admin/login',
       name: 'AdminLogin',
       component: AdminLogin,
     },
     {
+      path: '/admin',
+      name: 'AdminDashboard',
+      component: AdminDashboard,
+    },
+    {
       path: '/admin/promotion',
       name: 'AdminPromotion',
       component: AdminPromotion,
-    }
+    },
+    {
+      path: '/admin/faq',
+      name: 'AdminFAQ',
+      component: AdminFAQ,
+    },
+    {
+      path: '/admin/our-team',
+      name: 'AdminOurTeam',
+      component: AdminOurTeam,
+    },
+    {
+      path: '/admin/services',
+      name: 'AdminServices',
+      component: AdminServices,
+    },
+    {
+      path: '/our-team',
+      name: 'OurTeam',
+      component: OurTeamPage,
+    },
   ],
-  // 🌟 修复版：使用 Promise 延迟滚动
-  scrollBehavior(to, from, savedPosition) {
-    if (savedPosition) {
-      return savedPosition
-    } else {
-      // 延迟 100 毫秒，给 Vue 充足的时间去渲染新页面的 DOM
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            top: 0,
-            behavior: 'smooth' // 加上这个，不仅会回到顶部，而且是丝滑地滚回去
-          })
-        }, 100)
-      })
-    }
-  }
 })
 
 export default router

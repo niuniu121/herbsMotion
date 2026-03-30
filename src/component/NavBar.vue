@@ -59,7 +59,7 @@ onUnmounted(() => {
       <div :class="['nav-overlay', { 'is-open': isMobileMenuOpen }]">
         <nav class="nav-links">
           <RouterLink to="/" @click="closeMobileMenu">Home</RouterLink>
-          <a href="#" @click="closeMobileMenu">Our team</a>
+          <RouterLink to="/our-team" @click="closeMobileMenu">Our Team</RouterLink>
 
           <div class="dropdown-wrapper" @click="toggleDropdownMobile">
             <a href="#" class="dropdown-trigger" @click.prevent>

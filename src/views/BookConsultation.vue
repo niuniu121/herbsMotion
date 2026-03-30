@@ -1,4 +1,4 @@
-<!-- <template>
+<template>
   <div class="book-page" :style="pageBgStyle">
     <NavBar />
 
@@ -17,7 +17,9 @@
           <div class="promotion-left">
             <p class="promotion-tag">Promotion</p>
             <h2>{{ promotion.title }}</h2>
-            <p>{{ promotion.content }}</p>
+            <p class="promotion-text">
+              {{ promotion.content }}
+            </p>
           </div>
 
           <div class="promotion-right">
@@ -782,9 +784,13 @@ onBeforeUnmount(() => {
     min-height: 820px;
   }
 }
-</style> -->
 
-<template>
+.promotion-text {
+  white-space: pre-line;
+}
+</style>
+
+<!-- <template>
   <div>
     <NavBar />
     <div>1111111</div>
@@ -802,4 +808,4 @@ export default {
 }
 </script>
 
-<style></style>
+<style></style> -->

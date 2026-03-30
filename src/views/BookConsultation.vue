@@ -12,6 +12,47 @@
         </p>
       </section>
 
+      <section class="location-section location-section-top">
+        <div class="location-card compact-location-card">
+          <div class="location-head compact-location-head">
+            <div class="location-copy compact-location-copy">
+              <div class="location-badge-row">
+                <span class="location-pin">📍</span>
+                <p class="card-label">Visit Our Clinic</p>
+              </div>
+              <h2>696 Burke Rd, Camberwell VIC 3124</h2>
+              <p class="location-text">
+                Conveniently located for your in-person consultation and ongoing care.
+              </p>
+            </div>
+
+            <a
+              class="map-link"
+              href="https://www.google.com/maps?q=696+Burke+Rd,+Camberwell+VIC+3124"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open in Google Maps
+            </a>
+          </div>
+
+          <div class="map-shell compact-map-shell">
+            <iframe
+              title="Herbs & Motion clinic location"
+              class="location-map compact-location-map"
+              src="https://www.google.com/maps?q=696%20Burke%20Rd,%20Camberwell%20VIC%203124&z=17&output=embed"
+              loading="lazy"
+              allowfullscreen
+              referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
+
+            <div class="map-note compact-map-note">
+              Tap or click the map pin to view the full address in the popup.
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section v-if="promotion.visible" class="promotion-section">
         <div class="promotion-card">
           <div class="promotion-left">
@@ -86,46 +127,7 @@
         </aside>
       </section>
     </main>
-    <section class="location-section">
-      <div class="location-card">
-        <div class="location-head">
-          <div class="location-copy">
-            <div class="location-badge-row">
-              <span class="location-pin">📍</span>
-              <p class="card-label">Visit Our Clinic</p>
-            </div>
-            <h2>696 Burke Rd, Camberwell VIC 3124</h2>
-            <p class="location-text">
-              Conveniently located for your in-person consultation and ongoing care.
-            </p>
-          </div>
 
-          <a
-            class="map-link"
-            href="https://www.google.com/maps?q=696+Burke+Rd,+Camberwell+VIC+3124"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Open in Google Maps
-          </a>
-        </div>
-
-        <div class="map-shell">
-          <iframe
-            title="Herbs & Motion clinic location"
-            class="location-map"
-            src="https://www.google.com/maps?q=696%20Burke%20Rd,%20Camberwell%20VIC%203124&z=17&output=embed"
-            loading="lazy"
-            allowfullscreen
-            referrerpolicy="no-referrer-when-downgrade"
-          ></iframe>
-
-          <div class="map-note">
-            Tap or click the map pin to view the full address in the popup.
-          </div>
-        </div>
-      </div>
-    </section>
     <PageFooter />
   </div>
 </template>
@@ -316,7 +318,7 @@ onBeforeUnmount(() => {
 .hero-section {
   text-align: center;
   max-width: 920px;
-  margin-bottom: 42px;
+  margin-bottom: 34px;
 }
 
 .hero-badge {
@@ -357,6 +359,10 @@ onBeforeUnmount(() => {
   margin-bottom: 28px;
 }
 
+.location-section-top {
+  margin-bottom: 30px;
+}
+
 .location-card {
   padding: 28px;
   border-radius: 30px;
@@ -364,6 +370,11 @@ onBeforeUnmount(() => {
   border: 1px solid rgba(56, 92, 71, 0.08);
   backdrop-filter: blur(12px);
   box-shadow: 0 16px 38px rgba(47, 91, 67, 0.08);
+}
+
+.compact-location-card {
+  padding: 22px;
+  border-radius: 24px;
 }
 
 .location-head {
@@ -374,8 +385,17 @@ onBeforeUnmount(() => {
   margin-bottom: 22px;
 }
 
+.compact-location-head {
+  margin-bottom: 16px;
+  align-items: center;
+}
+
 .location-copy {
   max-width: 760px;
+}
+
+.compact-location-copy {
+  max-width: 680px;
 }
 
 .location-badge-row {
@@ -413,11 +433,21 @@ onBeforeUnmount(() => {
   line-height: 1.15;
 }
 
+.compact-location-card h2 {
+  font-size: clamp(1.2rem, 2vw, 1.55rem);
+  margin: 0 0 8px;
+}
+
 .location-text {
   margin: 0;
   color: #66786d;
   line-height: 1.75;
   font-size: 1.02rem;
+}
+
+.compact-location-card .location-text {
+  font-size: 0.95rem;
+  line-height: 1.68;
 }
 
 .map-link {
@@ -442,6 +472,12 @@ onBeforeUnmount(() => {
   transform: translateY(-1px);
 }
 
+.compact-location-card .map-link {
+  min-height: 42px;
+  padding: 0 16px;
+  font-size: 0.88rem;
+}
+
 .map-shell {
   position: relative;
   overflow: hidden;
@@ -451,11 +487,19 @@ onBeforeUnmount(() => {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
+.compact-map-shell {
+  border-radius: 20px;
+}
+
 .location-map {
   display: block;
   width: 100%;
   height: 460px;
   border: 0;
+}
+
+.compact-location-map {
+  height: 250px;
 }
 
 .map-note {
@@ -470,6 +514,14 @@ onBeforeUnmount(() => {
   line-height: 1.4;
   backdrop-filter: blur(8px);
   box-shadow: 0 10px 24px rgba(47, 91, 67, 0.08);
+}
+
+.compact-map-note {
+  left: 14px;
+  bottom: 14px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 0.82rem;
 }
 
 /* =========================
@@ -671,6 +723,10 @@ onBeforeUnmount(() => {
   .location-map {
     height: 400px;
   }
+
+  .compact-location-map {
+    height: 220px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -679,7 +735,7 @@ onBeforeUnmount(() => {
   }
 
   .hero-section {
-    margin-bottom: 30px;
+    margin-bottom: 26px;
   }
 
   .hero-title {
@@ -699,6 +755,10 @@ onBeforeUnmount(() => {
     border-radius: 20px;
   }
 
+  .compact-location-card {
+    padding: 16px;
+  }
+
   .location-head {
     flex-direction: column;
     align-items: flex-start;
@@ -709,8 +769,16 @@ onBeforeUnmount(() => {
     font-size: 1.8rem;
   }
 
+  .compact-location-card h2 {
+    font-size: 1.15rem;
+  }
+
   .location-map {
     height: 320px;
+  }
+
+  .compact-location-map {
+    height: 200px;
   }
 
   .map-note {
@@ -718,6 +786,13 @@ onBeforeUnmount(() => {
     right: 12px;
     bottom: 12px;
     font-size: 0.84rem;
+  }
+
+  .compact-map-note {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    font-size: 0.78rem;
   }
 
   .booking-head {
@@ -776,6 +851,10 @@ onBeforeUnmount(() => {
     height: 280px;
   }
 
+  .compact-location-map {
+    height: 180px;
+  }
+
   .booking-head h2 {
     font-size: 1.2rem;
   }
@@ -789,23 +868,3 @@ onBeforeUnmount(() => {
   white-space: pre-line;
 }
 </style>
-
-<!-- <template>
-  <div>
-    <NavBar />
-    <div>1111111</div>
-  </div>
-</template>
-
-<script>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-
-import NavBar from '../component/NavBar.vue'
-export default {
-  components: {
-    NavBar,
-  },
-}
-</script>
-
-<style></style> -->

@@ -35,7 +35,9 @@ const socialIcons = ['📱', '📷']
       </div>
       <div class="footer-links-group">
         <h4>Legal</h4>
-        <a href="#">Privacy Policy</a>
+        <a href="#"></a>
+        <RouterLink to="/privacy-policy" @click="closeMobileMenu">Privacy Policy</RouterLink>
+
         <a href="#">Terms of Service</a>
       </div>
     </div>

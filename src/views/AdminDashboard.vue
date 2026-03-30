@@ -33,12 +33,12 @@
           <span class="card-link">Open module →</span>
         </button>
 
-        <button class="admin-card" @click="goTo('/admin/services')">
+        <!-- <button class="admin-card" @click="goTo('/admin/services')">
           <div class="card-icon">🩺</div>
           <h2>Our Services</h2>
           <p>Manage services content, descriptions and display order.</p>
           <span class="card-link">Open module →</span>
-        </button>
+        </button> -->
       </div>
     </div>
   </div>

@@ -11,6 +11,9 @@ import AdminFAQ from '@/views/AdminFAQ.vue'
 import AdminOurTeam from '@/views/AdminOurTeam.vue'
 import AdminServices from '@/views/AdminServices.vue'
 import OurTeamPage from '@/views/OurTeamPage.vue'
+import PrivacyPolicy from '@/views/PrivacyPolicy.vue'
+import AdminServiceDetail from '@/views/AdminServiceDetail.vue'
+import AppointmentRequest from '@/views/AppointmentRequest.vue'
 
 
 const router = createRouter({
@@ -78,6 +81,21 @@ const router = createRouter({
       name: 'OurTeam',
       component: OurTeamPage,
     },
+    {
+      path: '/privacy-policy',
+      name: 'PrivacyPolicy',
+      component: PrivacyPolicy,
+    },
+    {
+      path: '/admin/services/:id',
+      name: 'AdminServiceDetail',
+      component: AdminServiceDetail,
+    },
+    {
+      path: '/appointment-request',
+      name: 'AppointmentRequest',
+      component: AppointmentRequest,
+    }
   ],
 })
 

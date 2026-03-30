@@ -5,7 +5,6 @@
     <main class="book-content">
       <section class="hero-section">
         <h1 class="hero-title">Book a Consultation</h1>
-        <div class="hero-badge">Book Online</div>
         <p class="hero-desc">
           Schedule your appointment with Herbs & Motion through our secure online booking system.
           Choose your preferred service, practitioner, and time that suits you best.

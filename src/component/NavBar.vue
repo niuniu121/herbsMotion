@@ -83,7 +83,7 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <a href="#" @click="closeMobileMenu">Our Services</a>
+          <RouterLink to="/our-services" @click="closeMobileMenu">Our Services</RouterLink>
           <RouterLink to="/faq" @click="closeMobileMenu">FAQ</RouterLink>
           <a href="#" class="mobile-only-link" @click="closeMobileMenu">Location</a>
         </nav>

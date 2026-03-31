@@ -173,7 +173,7 @@ const messages = ref([
 ])
 
 const rotatingPrompts = [
-  "G'day — I’m HerbsBo 👋",
+  "G'day — I’m Herbsie 👋",
   'Need help with parking or bookings?',
   'Ask me about sessions, rebates or referrals.',
   'Quick help for common clinic questions.',

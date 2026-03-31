@@ -14,6 +14,8 @@ import OurTeamPage from '@/views/OurTeamPage.vue'
 import PrivacyPolicy from '@/views/PrivacyPolicy.vue'
 import AdminServiceDetail from '@/views/AdminServiceDetail.vue'
 import AppointmentRequest from '@/views/AppointmentRequest.vue'
+import OurServices from '@/views/OurServices.vue'
+import ServiceDetail from '@/views/ServiceDetail.vue'
 
 
 const router = createRouter({
@@ -95,7 +97,17 @@ const router = createRouter({
       path: '/appointment-request',
       name: 'AppointmentRequest',
       component: AppointmentRequest,
-    }
+    },
+    {
+      path: '/our-services',
+      name: 'OurServices',
+      component: OurServices,
+    },
+    {
+      path: '/our-services/:slug',
+      name: 'ServiceDetail',
+      component: ServiceDetail,
+    },
   ],
 })
 

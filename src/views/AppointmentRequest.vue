@@ -43,13 +43,7 @@
               <p class="soft-box-title">
                 {{ isChinese ? '诊所信息' : 'Clinic details' }}
               </p>
-              <p>
-                {{ isChinese ? '地址：' : 'Address:' }} Elevate Medical, 305 Warrigal Rd, Burwood
-                3125
-              </p>
-              <p>
-                {{ isChinese ? '诊所后方提供停车位。' : 'Parking is available behind the clinic.' }}
-              </p>
+              <p>{{ isChinese ? '地址：' : 'Address:' }} 696 Burke Rd, Camberwell</p>
             </div>
           </div>
 

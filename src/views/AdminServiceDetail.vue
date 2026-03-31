@@ -29,40 +29,6 @@
       </div>
 
       <div v-else class="detail-layout">
-        <!-- linked entry info -->
-        <div class="admin-card main-card">
-          <div class="section-head">
-            <div>
-              <h2>Linked Entry</h2>
-              <p class="section-desc">
-                This shows which outer list item opened this detail page. It is read-only here.
-              </p>
-            </div>
-          </div>
-
-          <div class="linked-meta">
-            <div class="meta-row">
-              <span class="meta-label">Service</span>
-              <span class="meta-value">{{ form.title || '—' }}</span>
-            </div>
-
-            <div class="meta-row">
-              <span class="meta-label">List Title</span>
-              <span class="meta-value">{{ linkedListItem?.title || 'No linked list item' }}</span>
-            </div>
-
-            <div class="meta-row">
-              <span class="meta-label">List Description</span>
-              <span class="meta-value">{{ linkedListItem?.description || '—' }}</span>
-            </div>
-
-            <div class="meta-row">
-              <span class="meta-label">detailPageId</span>
-              <span class="meta-value mono">{{ selectedDetailId || '—' }}</span>
-            </div>
-          </div>
-        </div>
-
         <!-- main heading -->
         <div class="admin-card main-card" v-if="currentDetailPage">
           <div class="section-head">
@@ -160,14 +126,14 @@
             />
           </div>
 
-          <div class="field">
+          <!-- <div class="field">
             <label>Excerpt (Optional)</label>
             <textarea
               v-model="currentArticle.excerpt"
               rows="3"
               placeholder="Short introduction for this detail article..."
             ></textarea>
-          </div>
+          </div> -->
 
           <div class="field">
             <label>Article Image URL (Optional)</label>

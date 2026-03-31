@@ -11,107 +11,71 @@
 
         <template v-else-if="service && currentDetailPage">
           <div class="top-actions">
-            <button class="back-btn" @click="goBack">← Back</button>
+            <button class="back-btn" @click="goBack">
+              <span>←</span>
+              <span>Back to Services</span>
+            </button>
           </div>
 
-          <!-- Hero -->
-          <section v-if="currentHeroImage" class="hero-section">
-            <div class="hero-banner" :style="heroBannerStyle">
-              <div class="hero-overlay">
-                <h1>{{ displayHeroTitle }}</h1>
-              </div>
-            </div>
-          </section>
-
-          <section v-else class="title-only-section">
+          <!-- Title only: no hero background image -->
+          <section class="title-header-section">
             <h1>{{ displayHeroTitle }}</h1>
+            <p v-if="serviceSubtitle" class="title-header-subtitle">
+              {{ serviceSubtitle }}
+            </p>
           </section>
 
-          <!-- Topic Navigator: 外层入口 -->
-          <section v-if="topicNav.length > 1" class="article-nav-section">
-            <div class="article-nav-card">
-              <div class="article-nav-head">
-                <h2>Explore Topics</h2>
-                <p>Select a topic to open a different detail page.</p>
-              </div>
-
-              <div class="article-pill-list">
-                <button
-                  v-for="topic in topicNav"
-                  :key="topic.id"
-                  class="article-pill"
-                  :class="{ active: topic.detailPageId === activeDetailPageId }"
-                  @click="goToDetailPage(topic.detailPageId)"
-                >
-                  {{ topic.title }}
-                </button>
-              </div>
-            </div>
-          </section>
-
-          <!-- Inner article navigator: 当前 detailPage 内部的 articles -->
-          <section
-            v-if="visibleArticles.length > 1"
-            class="article-nav-section inner-article-nav-section"
-          >
-            <div class="article-nav-card">
-              <div class="article-nav-head">
-                <h2>Inside This Topic</h2>
-                <p>Select an article inside this detail page.</p>
-              </div>
-
-              <div class="article-pill-list">
-                <button
-                  v-for="article in visibleArticles"
-                  :key="article.id"
-                  class="article-pill secondary-pill"
-                  :class="{ active: article.id === activeArticleId }"
-                  @click="goToArticle(article.id)"
-                >
-                  {{ article.title || 'Untitled Article' }}
-                </button>
-              </div>
-            </div>
-          </section>
-
-          <!-- Main Article -->
-          <section class="article-section">
-            <article class="article-card" :class="{ 'with-image': !!currentArticle?.image }">
-              <div v-if="currentArticle?.image" class="article-image-wrap">
-                <img
-                  :src="currentArticle.image"
-                  :alt="currentArticle.title || 'Article image'"
-                  class="article-image"
-                />
-              </div>
-
-              <div class="article-body">
-                <h2>
-                  {{ currentArticle?.title || currentLinkedTopicTitle || 'Untitled Article' }}
-                </h2>
-
-                <div v-if="currentArticle?.excerpt" class="article-excerpt">
-                  {{ currentArticle.excerpt }}
+          <!-- only ONE matched detail page -->
+          <section v-if="visibleArticles.length" class="single-topic-section">
+            <div class="article-grid">
+              <article v-for="article in visibleArticles" :key="article.id" class="article-card">
+                <div v-if="article.image" class="article-image-wrap">
+                  <img
+                    :src="article.image"
+                    :alt="article.title || 'Article image'"
+                    class="article-image"
+                  />
                 </div>
 
-                <div class="article-content">
-                  <p v-for="(paragraph, index) in formattedParagraphs" :key="index">
-                    {{ paragraph }}
+                <div class="article-body">
+                  <h3 class="article-title">
+                    {{ article.title || 'Untitled Article' }}
+                  </h3>
+
+                  <p v-if="article.excerpt" class="article-excerpt">
+                    {{ article.excerpt }}
                   </p>
+
+                  <div
+                    v-if="article.excerpt || getArticleParagraphs(article).length"
+                    class="article-divider"
+                  ></div>
+
+                  <div class="article-content">
+                    <p v-for="(paragraph, index) in getArticleParagraphs(article)" :key="index">
+                      {{ paragraph }}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </article>
+              </article>
+            </div>
+          </section>
+
+          <section v-else class="state-card">
+            <div class="empty-icon">✦</div>
+            <h3>No content yet</h3>
+            <p>This detail page has been linked, but no article content has been added yet.</p>
           </section>
 
           <section class="bottom-action">
-            <button class="book-btn" @click="goToBooking">Book it now</button>
+            <button class="book-btn" @click="goToBooking">Book a Consultation</button>
           </section>
         </template>
 
         <div v-else class="state-card">
           <div class="empty-icon">✦</div>
           <h3>Content not found</h3>
-          <p>This detail page may not exist yet, or no content has been added.</p>
+          <p>This detail page may not exist yet, or it is not linked correctly.</p>
           <button class="back-btn secondary" @click="goBack">Back to Services</button>
         </div>
       </div>
@@ -177,11 +141,9 @@ function normalizeDetailPage(page = {}) {
 }
 
 function normalizeService(raw = {}, id = '') {
-  let listItems = Array.isArray(raw.listItems) ? raw.listItems.map(normalizeListItem) : []
-
+  const listItems = Array.isArray(raw.listItems) ? raw.listItems.map(normalizeListItem) : []
   let detailPages = Array.isArray(raw.detailPages) ? raw.detailPages.map(normalizeDetailPage) : []
 
-  // 兼容旧数据：没有 detailPages 时，按 listItems 补空壳
   if (!detailPages.length && listItems.length) {
     detailPages = listItems
       .filter((item) => item.detailPageId)
@@ -204,97 +166,84 @@ function normalizeService(raw = {}, id = '') {
   }
 }
 
+function hasArticleContent(article = {}) {
+  return Boolean(
+    String(article?.title || '').trim() ||
+    String(article?.excerpt || '').trim() ||
+    String(article?.content || '').trim() ||
+    String(article?.image || '').trim(),
+  )
+}
+
 const queryDetailId = computed(() => String(route.query.detail || '').trim())
-const queryArticleId = computed(() => String(route.query.article || '').trim())
 
-const topicNav = computed(() => {
-  if (!service.value) return []
-
-  return service.value.listItems.filter((item) => item.id && item.title && item.detailPageId)
+const linkedListItems = computed(() => {
+  if (!service.value?.listItems?.length) return []
+  return service.value.listItems.filter((item) => item.title && item.detailPageId)
 })
 
 const activeDetailPageId = computed(() => {
   if (!service.value?.detailPages?.length) return ''
 
-  const matched = service.value.detailPages.find((page) => page.id === queryDetailId.value)
+  if (queryDetailId.value) {
+    const matched = service.value.detailPages.find((page) => page.id === queryDetailId.value)
+    if (matched) return matched.id
+  }
 
-  if (matched) return matched.id
-
-  const firstFromNav = topicNav.value[0]?.detailPageId
-  if (firstFromNav) return firstFromNav
+  const firstLinked = linkedListItems.value[0]?.detailPageId
+  if (firstLinked) return firstLinked
 
   return service.value.detailPages[0]?.id || ''
 })
 
 const currentDetailPage = computed(() => {
-  if (!service.value?.detailPages?.length) return null
-
+  if (!service.value?.detailPages?.length || !activeDetailPageId.value) return null
   return service.value.detailPages.find((page) => page.id === activeDetailPageId.value) || null
 })
 
-const visibleArticles = computed(() => {
-  return Array.isArray(currentDetailPage.value?.articles)
-    ? currentDetailPage.value.articles.filter((article) => article.active !== false)
-    : []
-})
-
-const activeArticleId = computed(() => {
-  if (!visibleArticles.value.length) return ''
-
-  const matched = visibleArticles.value.find((article) => article.id === queryArticleId.value)
-
-  return matched?.id || visibleArticles.value[0]?.id || ''
-})
-
-const currentArticle = computed(() => {
-  if (!visibleArticles.value.length) return null
-
+const currentLinkedItem = computed(() => {
+  if (!activeDetailPageId.value) return null
   return (
-    visibleArticles.value.find((article) => article.id === activeArticleId.value) ||
-    visibleArticles.value[0] ||
-    null
+    linkedListItems.value.find((item) => item.detailPageId === activeDetailPageId.value) || null
   )
 })
 
-const currentLinkedTopic = computed(() => {
-  return topicNav.value.find((item) => item.detailPageId === activeDetailPageId.value) || null
-})
+const visibleArticles = computed(() => {
+  if (!currentDetailPage.value?.articles?.length) return []
 
-const currentLinkedTopicTitle = computed(() => {
-  return currentLinkedTopic.value?.title || ''
-})
-
-const currentHeroImage = computed(() => {
-  if (currentArticle.value?.image) return currentArticle.value.image
-  return ''
+  return currentDetailPage.value.articles.filter(
+    (article) => article.active !== false && hasArticleContent(article),
+  )
 })
 
 const displayHeroTitle = computed(() => {
   return (
     currentDetailPage.value?.heroTitle ||
-    currentLinkedTopicTitle.value ||
+    currentLinkedItem.value?.title ||
     service.value?.heroTitle ||
     service.value?.title ||
     'Service Detail'
   )
 })
 
-const heroBannerStyle = computed(() => {
-  const image = currentHeroImage.value || ''
-  return {
-    backgroundImage: `linear-gradient(rgba(74, 110, 90, 0.22), rgba(90, 120, 103, 0.28)), url('${image}')`,
-  }
+const serviceSubtitle = computed(() => {
+  if (currentLinkedItem.value?.description) return currentLinkedItem.value.description
+
+  const firstExcerpt = visibleArticles.value.find((article) => article.excerpt)?.excerpt
+  if (firstExcerpt) return firstExcerpt
+
+  return ''
 })
 
-const formattedParagraphs = computed(() => {
-  const content = String(currentArticle.value?.content || '').trim()
-  if (!content) return ['No article content has been added yet.']
+function getArticleParagraphs(article) {
+  const content = String(article?.content || '').trim()
+  if (!content) return []
 
   return content
     .split(/\n{2,}|\r\n\r\n/)
     .map((item) => item.trim())
     .filter(Boolean)
-})
+}
 
 async function loadService() {
   loading.value = true
@@ -338,29 +287,6 @@ function goToBooking() {
   router.push(service.value?.bookingPath || '/book')
 }
 
-function goToDetailPage(detailPageId = '') {
-  if (!detailPageId) return
-
-  router.replace({
-    path: route.path,
-    query: {
-      detail: detailPageId,
-    },
-  })
-}
-
-function goToArticle(articleId = '') {
-  if (!articleId || !activeDetailPageId.value) return
-
-  router.replace({
-    path: route.path,
-    query: {
-      detail: activeDetailPageId.value,
-      article: articleId,
-    },
-  })
-}
-
 watch(
   () => route.params.slug,
   () => {
@@ -379,7 +305,7 @@ onMounted(loadService)
 }
 
 .detail-main {
-  padding: 92px 20px 90px;
+  padding: 92px 22px 90px;
 }
 
 .detail-shell {
@@ -390,284 +316,220 @@ onMounted(loadService)
 .top-actions {
   display: flex;
   justify-content: flex-start;
-  margin-bottom: 18px;
+  margin-bottom: 22px;
 }
 
 .back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   border: none;
   border-radius: 999px;
-  padding: 11px 18px;
-  background: #4f8b6d;
-  color: white;
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #4d6859;
   font: inherit;
   font-weight: 800;
   cursor: pointer;
   transition:
     transform 0.2s ease,
-    opacity 0.2s ease,
-    box-shadow 0.2s ease;
-  box-shadow: 0 10px 20px rgba(79, 139, 109, 0.18);
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+  box-shadow: 0 10px 26px rgba(95, 122, 106, 0.08);
+  backdrop-filter: blur(10px);
 }
 
 .back-btn:hover {
   transform: translateY(-1px);
-  opacity: 0.97;
-  box-shadow: 0 14px 26px rgba(79, 139, 109, 0.22);
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 14px 30px rgba(95, 122, 106, 0.12);
 }
 
 .back-btn.secondary {
-  background: #6fa98a;
+  background: #5f8e74;
+  color: #fff;
 }
 
-.hero-section {
-  margin-bottom: 24px;
+.title-header-section {
+  margin-bottom: 34px;
+  padding: 18px 4px 6px;
 }
 
-.hero-banner {
-  min-height: 240px;
-  border-radius: 30px;
-  background-size: cover;
-  background-position: center;
-  overflow: hidden;
-  box-shadow: 0 18px 38px rgba(122, 142, 129, 0.14);
+.title-header-section h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 5vw, 4.6rem);
+  line-height: 1.02;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  color: #4f6b5b;
+  max-width: 920px;
 }
 
-.hero-overlay {
-  min-height: 240px;
+.title-header-subtitle {
+  margin: 14px 0 0;
+  max-width: 760px;
+  font-size: 1.02rem;
+  line-height: 1.8;
+  color: #738379;
+}
+
+.single-topic-section {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  text-align: center;
-  padding: 32px;
+  gap: 18px;
 }
 
-.hero-overlay h1,
-.title-only-section h1 {
-  margin: 0;
-  font-size: clamp(2.2rem, 4.6vw, 4rem);
-  line-height: 1.06;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-}
-
-.hero-overlay h1 {
-  color: white;
-  max-width: 900px;
-  text-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
-}
-
-.title-only-section {
-  padding: 8px 0 10px;
-  text-align: center;
-  margin-bottom: 24px;
-}
-
-.title-only-section h1 {
-  color: #4a6656;
-}
-
-.article-nav-section {
-  margin-bottom: 22px;
-}
-
-.inner-article-nav-section {
-  margin-top: -6px;
-}
-
-.article-nav-card {
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  border-radius: 28px;
-  padding: 24px;
-  box-shadow: 0 14px 28px rgba(128, 144, 132, 0.08);
-  backdrop-filter: blur(8px);
-}
-
-.article-nav-head {
-  margin-bottom: 14px;
-}
-
-.article-nav-head h2 {
-  margin: 0 0 6px;
-  font-size: 1.08rem;
-  color: #56705f;
-  font-weight: 800;
-}
-
-.article-nav-head p {
-  margin: 0;
-  color: #819084;
-  line-height: 1.7;
-  font-size: 0.95rem;
-}
-
-.article-pill-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.article-pill {
-  border: none;
-  border-radius: 999px;
-  padding: 11px 17px;
-  background: #edf5ef;
-  color: #5f7468;
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    transform 0.18s ease,
-    background 0.18s ease,
-    color 0.18s ease,
-    box-shadow 0.18s ease;
-}
-
-.article-pill:hover {
-  transform: translateY(-1px);
-  background: #e4efe7;
-}
-
-.article-pill.active {
-  background: #4f8b6d;
-  color: white;
-  box-shadow: 0 10px 18px rgba(79, 139, 109, 0.16);
-}
-
-.secondary-pill {
-  background: #f3f7f4;
-}
-
-.secondary-pill.active {
-  background: #5e9078;
-}
-
-.article-section {
-  margin-bottom: 28px;
+.article-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
 }
 
 .article-card {
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.76);
   border: 1px solid rgba(255, 255, 255, 0.82);
   border-radius: 30px;
   overflow: hidden;
-  box-shadow: 0 18px 36px rgba(128, 144, 132, 0.1);
-  backdrop-filter: blur(6px);
+  box-shadow: 0 18px 40px rgba(109, 127, 115, 0.09);
+  backdrop-filter: blur(10px);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
 }
 
-.article-card.with-image {
-  display: grid;
-  grid-template-columns: minmax(320px, 430px) 1fr;
-  align-items: stretch;
+.article-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px rgba(109, 127, 115, 0.13);
 }
 
 .article-image-wrap {
-  min-height: 100%;
-  background: #eef2ee;
+  width: 100%;
+  height: 240px;
+  background: #edf3ee;
+  overflow: hidden;
 }
 
 .article-image {
   width: 100%;
   height: 100%;
-  min-height: 420px;
   object-fit: cover;
   display: block;
+  transition: transform 0.45s ease;
+}
+
+.article-card:hover .article-image {
+  transform: scale(1.04);
 }
 
 .article-body {
-  padding: 40px 38px 42px;
+  padding: 26px 24px 26px;
 }
 
-.article-body h2 {
-  margin: 0 0 18px;
-  font-size: clamp(1.8rem, 3vw, 2.7rem);
-  line-height: 1.12;
-  color: #56705f;
-  font-weight: 800;
+.article-title {
+  margin: 0;
+  font-size: 1.45rem;
+  line-height: 1.18;
+  font-weight: 900;
+  color: #526c5c;
+  letter-spacing: -0.02em;
 }
 
 .article-excerpt {
-  margin: 0 0 18px;
-  color: #718279;
-  line-height: 1.85;
+  margin: 14px 0 0;
+  color: #6a7b72;
   font-size: 1rem;
+  line-height: 1.82;
+  font-weight: 600;
+}
+
+.article-divider {
+  width: 100%;
+  height: 1px;
+  margin: 18px 0 18px;
+  background: linear-gradient(
+    90deg,
+    rgba(91, 116, 102, 0.18) 0%,
+    rgba(91, 116, 102, 0.08) 50%,
+    rgba(91, 116, 102, 0) 100%
+  );
 }
 
 .article-content p {
-  margin: 0 0 16px;
-  color: #627269;
-  line-height: 1.95;
-  font-size: 1.04rem;
+  margin: 0 0 14px;
+  font-size: 0.99rem;
+  line-height: 1.88;
+  color: #617168;
 }
 
 .bottom-action {
   display: flex;
   justify-content: center;
+  margin-top: 40px;
 }
 
 .book-btn {
   border: none;
-  border-radius: 18px;
-  padding: 14px 30px;
-  background: #4f8b6d;
-  color: white;
+  border-radius: 999px;
+  padding: 15px 32px;
+  background: linear-gradient(135deg, #5a9476, #4b8367);
+  color: #fff;
   font: inherit;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
   transition:
     transform 0.2s ease,
-    opacity 0.2s ease,
-    box-shadow 0.2s ease;
-  box-shadow: 0 12px 22px rgba(79, 139, 109, 0.16);
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+  box-shadow: 0 16px 32px rgba(79, 139, 109, 0.2);
 }
 
 .book-btn:hover {
   transform: translateY(-2px);
-  opacity: 0.96;
-  box-shadow: 0 16px 28px rgba(79, 139, 109, 0.2);
+  opacity: 0.98;
+  box-shadow: 0 20px 36px rgba(79, 139, 109, 0.24);
 }
 
 .state-card {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.78);
   border: 1px solid rgba(255, 255, 255, 0.82);
-  border-radius: 28px;
-  padding: 56px 24px;
+  border-radius: 30px;
+  padding: 60px 24px;
   text-align: center;
-  box-shadow: 0 16px 34px rgba(128, 144, 132, 0.1);
+  box-shadow: 0 18px 40px rgba(109, 127, 115, 0.1);
+  backdrop-filter: blur(8px);
 }
 
 .state-card h3 {
   margin: 0 0 10px;
   color: #56705f;
-  font-size: 1.5rem;
+  font-size: 1.55rem;
 }
 
 .state-card p {
   margin: 0 0 18px;
-  color: #7d8d82;
+  color: #7b8a81;
   line-height: 1.8;
 }
 
 .empty-icon {
-  width: 54px;
-  height: 54px;
+  width: 56px;
+  height: 56px;
   margin: 0 auto 14px;
-  border-radius: 16px;
+  border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #f2e6ea, #e8f1e8);
   color: #60756b;
   font-weight: 800;
+  font-size: 1.1rem;
 }
 
 .loader {
   width: 42px;
   height: 42px;
   margin: 0 auto 14px;
-  border: 4px solid rgba(130, 152, 136, 0.22);
+  border: 4px solid rgba(130, 152, 136, 0.2);
   border-top-color: #88a795;
   border-radius: 50%;
   animation: spin 0.9s linear infinite;
@@ -679,18 +541,13 @@ onMounted(loadService)
   }
 }
 
-@media (max-width: 960px) {
-  .article-card.with-image {
+@media (max-width: 980px) {
+  .article-grid {
     grid-template-columns: 1fr;
   }
 
-  .article-image {
-    min-height: 260px;
-  }
-
-  .hero-banner,
-  .hero-overlay {
-    min-height: 190px;
+  .article-image-wrap {
+    height: 220px;
   }
 }
 
@@ -699,39 +556,40 @@ onMounted(loadService)
     padding: 78px 16px 72px;
   }
 
-  .hero-banner {
-    border-radius: 22px;
+  .top-actions {
+    margin-bottom: 18px;
   }
 
-  .hero-overlay {
-    padding: 24px 18px;
+  .title-header-section {
+    margin-bottom: 26px;
+    padding-top: 8px;
   }
 
-  .article-nav-card,
+  .title-header-section h1 {
+    font-size: 2.4rem;
+  }
+
   .article-card,
   .state-card {
-    border-radius: 22px;
+    border-radius: 24px;
   }
 
   .article-body {
-    padding: 24px 20px 28px;
+    padding: 22px 18px 22px;
   }
 
-  .article-body h2 {
-    font-size: 1.85rem;
+  .article-title {
+    font-size: 1.28rem;
   }
 
+  .article-excerpt,
   .article-content p {
-    font-size: 1rem;
+    font-size: 0.98rem;
   }
 
-  .article-pill-list {
-    gap: 8px;
-  }
-
-  .article-pill {
+  .book-btn {
     width: 100%;
-    text-align: left;
+    justify-content: center;
   }
 }
 </style>

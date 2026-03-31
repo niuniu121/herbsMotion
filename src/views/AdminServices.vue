@@ -92,10 +92,6 @@
               <div class="section-head">
                 <div>
                   <h3>List Content</h3>
-                  <p>
-                    These are the outer entry items only. Each item links to one detail page by
-                    <strong>detailPageId</strong>.
-                  </p>
                 </div>
                 <button class="save-btn small-btn" @click="addListItem(service)">+ Add Item</button>
               </div>
@@ -122,7 +118,6 @@
                       <span class="item-order">{{ itemIndex + 1 }}</span>
                       <div class="item-id-wrap">
                         <strong>{{ item.title || `Item ${itemIndex + 1}` }}</strong>
-                        <small>detailPageId: {{ item.detailPageId || 'not-created-yet' }}</small>
                       </div>
                     </div>
 
@@ -146,14 +141,14 @@
                       />
                     </div>
 
-                    <div class="field full">
+                    <!-- <div class="field full">
                       <label>List Description</label>
                       <textarea
                         v-model="item.description"
                         rows="3"
                         placeholder="Short text shown in the list only"
                       ></textarea>
-                    </div>
+                    </div> -->
                   </div>
                 </div>
               </div>

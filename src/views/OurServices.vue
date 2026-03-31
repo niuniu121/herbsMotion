@@ -51,10 +51,6 @@
                   </p>
 
                   <div v-if="normalizedListItems(service).length" class="list-panel">
-                    <div class="list-panel-head">
-                      <span>Available topics</span>
-                    </div>
-
                     <div class="topic-list">
                       <button
                         v-for="item in normalizedListItems(service)"
@@ -536,5 +532,11 @@ onMounted(fetchServices)
 </style> -->
 
 <template>
-  <div>111111</div>
+  <div>111</div>
 </template>
+
+<script>
+export default {}
+</script>
+
+<style></style>

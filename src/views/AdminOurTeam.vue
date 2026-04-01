@@ -3,11 +3,7 @@
     <div class="admin-container">
       <div class="admin-header">
         <div>
-          <p class="badge">Admin Panel</p>
           <h1>Our Team Management</h1>
-          <p class="desc">
-            Manage practitioner profiles, images, bios and visibility for the Our Team page.
-          </p>
         </div>
 
         <button class="back-btn" @click="handleBackClick">Back</button>
@@ -20,7 +16,6 @@
           <div class="toolbar">
             <div class="toolbar-left">
               <h2>Team Members</h2>
-              <p>Edit your practitioner profiles below.</p>
             </div>
 
             <div class="toolbar-right">
@@ -124,11 +119,6 @@
                           </button>
                         </div>
                       </div>
-
-                      <p class="helper-text">
-                        Add as many roles as you like. They will display beside the name and be
-                        separated by / automatically.
-                      </p>
                     </div>
 
                     <div class="form-group">

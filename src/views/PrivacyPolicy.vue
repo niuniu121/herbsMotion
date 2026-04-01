@@ -45,7 +45,7 @@
           <h1 class="document-title">Privacy Policy</h1>
           <p class="company-info">
             Herbs & Motion<br />
-            ABN: 37 688 415 741 Address: 696 Burke Rd, Camberwell VIC 3124 <br />Email:
+            ABN: 37 688 415 741 <br />Address: 696 Burke Rd, Camberwell VIC 3124 <br />Email:
             info@herbsmotion.com.au <br />Website: herbsmotion.com.au
           </p>
 

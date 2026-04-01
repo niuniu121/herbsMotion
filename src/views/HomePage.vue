@@ -1,10 +1,13 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import NavBar from '../component/NavBar.vue'
 import PageFooter from '../component/PageFooter.vue'
 import imgPhysio from '../assets/wulizhiliao1.png'
 import imgMedicine from '../assets/zhongyi2.png'
 import imgMassage from '../assets/anmo1.png'
+
+const router = useRouter()
 
 const loading = ref(true)
 const currentBgColor = ref('#CFDAC8')
@@ -17,24 +20,35 @@ const heroCards = [
     desc: 'For active movement',
     bgColor: '#3A7D87',
     bgImage: `url(${imgPhysio})`,
+    route: '/our-services',
   },
   {
     title: 'Chinese Medicine',
     desc: 'For holistic health',
     bgColor: '#2D5041',
     bgImage: `url(${imgMedicine})`,
+    route: '/our-services',
   },
   {
     title: 'Remedial Massage',
     desc: 'For my recovery',
     bgColor: '#967C60',
     bgImage: `url(${imgMassage})`,
+    route: '/our-services',
   },
 ]
 
 const setSectionRef = (el) => {
   if (el && !sectionRefs.value.includes(el)) {
     sectionRefs.value.push(el)
+  }
+}
+
+// 跳转页面的方法
+const navigateTo = (path) => {
+  if (path) {
+    router.push(path)
+    window.scrollTo(0, 0) // 跳转后页面滚动到最顶部
   }
 }
 
@@ -113,6 +127,7 @@ onUnmounted(() => {
             v-for="(card, index) in heroCards"
             :key="index"
             class="hero-card-v2 animate-slide-in-up"
+            @click="navigateTo(card.route)"
             :style="{
               '--card-index': index,
               '--bg-color': card.bgColor,

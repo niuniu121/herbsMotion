@@ -25,17 +25,20 @@
               </p>
             </section>
 
-            <section v-if="visibleArticles.length" class="editorial-content">
+            <section v-if="visibleArticles.length" class="editorial-content" ref="masonryGridRef">
               <article
                 v-for="article in visibleArticles"
                 :key="article.id"
                 class="editorial-article"
+                :ref="(el) => setMasonryItemRef(article.id, el)"
               >
                 <div v-if="article.image && !article.imageError" class="article-hero-image">
                   <img
                     :src="article.image"
                     :alt="article.title || 'Article image'"
-                    @error="article.imageError = true"
+                    loading="lazy"
+                    @load="layoutMasonry"
+                    @error="handleImageError(article)"
                   />
                 </div>
 
@@ -48,11 +51,29 @@
                     {{ article.excerpt }}
                   </p>
 
-                  <div class="article-paragraphs" v-if="getArticleParagraphs(article).length">
-                    <p v-for="(paragraph, index) in getArticleParagraphs(article)" :key="index">
+                  <div
+                    v-if="getArticleParagraphs(article).length"
+                    class="article-paragraphs"
+                    :ref="(el) => setArticleContentRef(article.id, el)"
+                  >
+                    <p
+                      v-for="(paragraph, index) in getVisibleParagraphs(article)"
+                      :key="`${article.id}-${index}`"
+                      :class="{ expanded: expandedArticles[article.id] }"
+                    >
                       {{ paragraph }}
                     </p>
                   </div>
+
+                  <p v-else class="article-empty-copy">Detailed content is coming soon.</p>
+
+                  <button
+                    v-if="shouldShowReadMore(article.id)"
+                    class="read-more-btn"
+                    @click="toggleArticle(article.id)"
+                  >
+                    {{ expandedArticles[article.id] ? 'Show less' : 'Read more' }}
+                  </button>
                 </div>
               </article>
             </section>
@@ -86,7 +107,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import NavBar from '@/component/NavBar.vue'
@@ -98,6 +119,14 @@ const router = useRouter()
 
 const loading = ref(true)
 const service = ref(null)
+const expandedArticles = ref({})
+const articleContentRefs = ref({})
+const articleOverflowMap = ref({})
+
+const masonryGridRef = ref(null)
+const masonryItemRefs = ref({})
+
+let resizeObserver = null
 
 function uid(prefix = 'id') {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
@@ -246,8 +275,130 @@ function getArticleParagraphs(article) {
     .filter(Boolean)
 }
 
+function getVisibleParagraphs(article) {
+  const paragraphs = getArticleParagraphs(article)
+  if (expandedArticles.value[article.id]) return paragraphs
+  return paragraphs.slice(0, 1)
+}
+
+function toggleArticle(id) {
+  expandedArticles.value[id] = !expandedArticles.value[id]
+
+  nextTick(() => {
+    checkOverflowForArticle(id)
+    layoutMasonry()
+  })
+}
+
+function setArticleContentRef(id, el) {
+  if (el) {
+    articleContentRefs.value[id] = el
+    if (resizeObserver) resizeObserver.observe(el)
+  } else {
+    delete articleContentRefs.value[id]
+  }
+}
+
+function setMasonryItemRef(id, el) {
+  if (el) {
+    masonryItemRefs.value[id] = el
+  } else {
+    delete masonryItemRefs.value[id]
+  }
+}
+
+function checkOverflowForArticle(id) {
+  const el = articleContentRefs.value[id]
+  if (!el) return
+
+  const isExpanded = !!expandedArticles.value[id]
+
+  if (isExpanded) {
+    articleOverflowMap.value[id] = true
+    return
+  }
+
+  const firstParagraph = el.querySelector('p')
+  if (!firstParagraph) {
+    articleOverflowMap.value[id] = false
+    return
+  }
+
+  articleOverflowMap.value[id] =
+    firstParagraph.scrollHeight > firstParagraph.clientHeight + 1 ||
+    firstParagraph.scrollWidth > firstParagraph.clientWidth + 1
+}
+
+function checkAllOverflows() {
+  visibleArticles.value.forEach((article) => {
+    checkOverflowForArticle(article.id)
+  })
+}
+
+function shouldShowReadMore(id) {
+  return !!articleOverflowMap.value[id]
+}
+
+function setupResizeObserver() {
+  if (typeof window === 'undefined' || typeof ResizeObserver === 'undefined') return
+
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+  }
+
+  resizeObserver = new ResizeObserver(() => {
+    checkAllOverflows()
+    layoutMasonry()
+  })
+
+  Object.values(articleContentRefs.value).forEach((el) => {
+    if (el) resizeObserver.observe(el)
+  })
+}
+
+function layoutMasonry() {
+  nextTick(() => {
+    const grid = masonryGridRef.value
+    if (!grid || typeof window === 'undefined') return
+
+    const computedStyle = window.getComputedStyle(grid)
+    const rowGap =
+      parseFloat(computedStyle.getPropertyValue('row-gap')) ||
+      parseFloat(computedStyle.getPropertyValue('gap')) ||
+      34
+    const rowHeight = parseFloat(computedStyle.getPropertyValue('grid-auto-rows')) || 10
+
+    Object.values(masonryItemRefs.value).forEach((item) => {
+      if (!item) return
+
+      item.style.gridRowEnd = 'auto'
+
+      const itemHeight = item.getBoundingClientRect().height
+      const rowSpan = Math.ceil((itemHeight + rowGap) / (rowHeight + rowGap))
+
+      item.style.gridRowEnd = `span ${rowSpan}`
+    })
+  })
+}
+
+function handleWindowResize() {
+  checkAllOverflows()
+  layoutMasonry()
+}
+
+function handleImageError(article) {
+  article.imageError = true
+  nextTick(() => {
+    layoutMasonry()
+  })
+}
+
 async function loadService() {
   loading.value = true
+  expandedArticles.value = {}
+  articleContentRefs.value = {}
+  articleOverflowMap.value = {}
+  masonryItemRefs.value = {}
 
   try {
     const slug = String(route.params.slug || '').trim()
@@ -279,6 +430,11 @@ async function loadService() {
     service.value = null
   } finally {
     loading.value = false
+
+    await nextTick()
+    setupResizeObserver()
+    checkAllOverflows()
+    layoutMasonry()
   }
 }
 
@@ -292,12 +448,35 @@ function goToBooking() {
 
 watch(
   () => [route.params.slug, route.query.detail],
-  () => {
-    loadService()
+  async () => {
+    await loadService()
   },
 )
 
-onMounted(loadService)
+watch(
+  visibleArticles,
+  async () => {
+    await nextTick()
+    setupResizeObserver()
+    checkAllOverflows()
+    layoutMasonry()
+  },
+  { deep: true },
+)
+
+onMounted(async () => {
+  await loadService()
+  window.addEventListener('resize', handleWindowResize)
+})
+
+onBeforeUnmount(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
+  }
+
+  window.removeEventListener('resize', handleWindowResize)
+})
 </script>
 
 <style scoped>
@@ -316,21 +495,22 @@ onMounted(loadService)
 }
 
 .detail-main {
-  padding: 120px 24px 100px;
+  padding: 104px 28px 96px;
 }
 
 .detail-shell {
-  max-width: 1320px;
+  max-width: 1560px;
   margin: 0 auto;
 }
 
 .content-wrapper {
-  max-width: 1200px;
+  max-width: 1480px;
   margin: 0 auto;
 }
 
 .top-actions {
-  margin-bottom: 36px;
+  max-width: 1320px;
+  margin: 0 auto 18px;
 }
 
 .back-btn {
@@ -362,82 +542,82 @@ onMounted(loadService)
 }
 
 .editorial-header {
-  margin-bottom: 46px;
-  text-align: center;
+  max-width: 1320px;
+  margin: 0 auto 34px;
+  text-align: left;
 }
 
 .editorial-header h1 {
   margin: 0;
-  font-size: clamp(2.4rem, 5vw, 3.8rem);
-  line-height: 1.08;
+  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  line-height: 1.06;
   font-weight: 800;
-  letter-spacing: -0.03em;
-  color: #1a3326;
+  letter-spacing: -0.04em;
+  color: #163426;
 }
 
 .editorial-subtitle {
-  margin: 18px auto 0;
-  font-size: 1.05rem;
-  line-height: 1.7;
+  margin: 16px 0 0;
+  font-size: 1.04rem;
+  line-height: 1.72;
   color: #5c7063;
   max-width: 760px;
 }
 
-/* 一行三个卡片 */
 .editorial-content {
+  max-width: 1320px;
+  margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 28px;
+  column-gap: 34px;
+  row-gap: 34px;
+  grid-auto-rows: 10px;
   align-items: start;
 }
 
 .editorial-article {
-  background: #ffffff;
-  border-radius: 22px;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 100%;
-  box-shadow: 0 8px 24px rgba(26, 51, 38, 0.05);
+  background: #ffffff;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 10px 26px rgba(26, 51, 38, 0.05);
   border: 1px solid rgba(26, 51, 38, 0.04);
   transition:
     transform 0.25s ease,
     box-shadow 0.25s ease;
+  will-change: transform;
 }
 
 .editorial-article:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 34px rgba(26, 51, 38, 0.08);
+  box-shadow: 0 18px 38px rgba(26, 51, 38, 0.08);
 }
 
 .article-hero-image {
   width: 100%;
-  aspect-ratio: 4 / 3;
   background: #f0f4f2;
   overflow: hidden;
 }
 
 .article-hero-image img {
+  display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.8s ease;
-}
-
-.editorial-article:hover .article-hero-image img {
-  transform: scale(1.03);
+  height: auto;
+  max-height: 560px;
+  object-fit: contain;
 }
 
 .article-text-body {
-  padding: 18px 18px 20px;
+  padding: 22px 22px 24px;
   display: flex;
   flex-direction: column;
   flex: 1;
 }
 
 .article-title {
-  margin: 0 0 10px;
-  font-size: 1.2rem;
+  margin: 0 0 12px;
+  font-size: 1.14rem;
   line-height: 1.3;
   font-weight: 700;
   color: #1a3326;
@@ -461,17 +641,51 @@ onMounted(loadService)
 .article-paragraphs p {
   margin: 0;
   font-size: 0.95rem;
-  line-height: 1.7;
+  line-height: 1.78;
   color: #5c7063;
-
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  transition: all 0.25s ease;
+}
+
+.article-paragraphs p.expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+.article-empty-copy {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #7a8f83;
+}
+
+.read-more-btn {
+  margin-top: 14px;
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #2f5b43;
+  cursor: pointer;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.read-more-btn:hover {
+  opacity: 0.75;
+  transform: translateY(-1px);
 }
 
 .bottom-action {
-  margin-top: 70px;
+  max-width: 1320px;
+  margin: 76px auto 0;
 }
 
 .cta-card {
@@ -568,28 +782,53 @@ onMounted(loadService)
   }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
+  .detail-main {
+    padding: 96px 22px 88px;
+  }
+
+  .top-actions,
+  .editorial-header,
+  .editorial-content,
+  .bottom-action {
+    max-width: 1180px;
+  }
+
+  .editorial-content {
+    column-gap: 26px;
+    row-gap: 26px;
+  }
+}
+
+@media (max-width: 980px) {
   .editorial-content {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 22px;
   }
 }
 
 @media (max-width: 768px) {
   .detail-main {
-    padding: 100px 16px 80px;
+    padding: 92px 16px 76px;
+  }
+
+  .top-actions {
+    margin-bottom: 14px;
   }
 
   .editorial-header {
-    margin-bottom: 34px;
+    margin-bottom: 26px;
   }
 
   .editorial-header h1 {
     font-size: 2.2rem;
   }
 
+  .article-text-body {
+    padding: 18px 18px 20px;
+  }
+
   .article-title {
-    font-size: 1.12rem;
+    font-size: 1.08rem;
   }
 
   .article-excerpt,
@@ -598,22 +837,15 @@ onMounted(loadService)
   }
 
   .cta-card {
-    padding: 40px 24px;
+    padding: 38px 22px;
   }
 }
 
 @media (max-width: 640px) {
   .editorial-content {
     grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  .article-hero-image {
-    aspect-ratio: 4 / 3;
-  }
-
-  .article-text-body {
-    padding: 18px 16px 18px;
+    column-gap: 18px;
+    row-gap: 18px;
   }
 }
 </style>

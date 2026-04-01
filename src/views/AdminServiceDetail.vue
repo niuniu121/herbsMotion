@@ -156,7 +156,9 @@
 
             <div class="modal-actions">
               <button class="outline-btn" @click="closeDeleteModal">Cancel</button>
-              <button class="danger-solid-btn" @click="removeArticleConfirmed">Delete</button>
+              <button class="danger-solid-btn" @click="removeArticleConfirmed">
+                {{ deleting ? 'Deleting...' : 'Delete' }}
+              </button>
             </div>
           </div>
         </div>
@@ -182,6 +184,7 @@ const router = useRouter()
 
 const loading = ref(true)
 const saving = ref(false)
+const deleting = ref(false)
 const loadError = ref('')
 const dragArticleId = ref(null)
 
@@ -355,7 +358,6 @@ function ensureAtLeastOneArticleSelected() {
   }
 }
 
-// 🐛 Bug 修复区域：去掉了致命的 filter，保留所有编辑过的详情页！
 function buildPayload() {
   const listItems = Array.isArray(form.value.listItems)
     ? form.value.listItems.map((item) => ({
@@ -391,7 +393,7 @@ function buildPayload() {
     order: Number(form.value.order || 999),
     active: !!form.value.active,
     listItems,
-    detailPages, // 现在它会被原封不动保存，不再被误删了
+    detailPages,
     updatedAt: serverTimestamp(),
   }
 }
@@ -453,7 +455,9 @@ function confirmRemoveArticle(articleId) {
   }
 }
 
-function closeDeleteModal() {
+function closeDeleteModal(force = false) {
+  if (deleting.value && !force) return
+
   deleteModal.value = {
     open: false,
     articleId: '',
@@ -461,30 +465,50 @@ function closeDeleteModal() {
   }
 }
 
-function removeArticleConfirmed() {
-  if (!currentDetailPage.value || !deleteModal.value.articleId) {
-    closeDeleteModal()
+async function removeArticleConfirmed() {
+  if (!currentDetailPage.value || !deleteModal.value.articleId || !form.value.id) {
+    closeDeleteModal(true)
     return
   }
 
-  const articleId = deleteModal.value.articleId
-  currentDetailPage.value.articles = currentDetailPage.value.articles.filter(
-    (article) => article.id !== articleId,
-  )
+  deleting.value = true
 
-  const nextArticleId = currentDetailPage.value.articles[0]?.id || ''
-  closeDeleteModal()
+  try {
+    const articleId = deleteModal.value.articleId
 
-  if (nextArticleId) {
-    goToArticle(nextArticleId)
-  } else {
-    router.replace({
-      path: `/admin/services/${form.value.id}`,
-      query: { detail: selectedDetailId.value },
-    })
+    currentDetailPage.value.articles = currentDetailPage.value.articles.filter(
+      (article) => article.id !== articleId,
+    )
+
+    await setDoc(doc(db, 'services', form.value.id), buildPayload(), { merge: true })
+
+    const nextArticleId = currentDetailPage.value.articles[0]?.id || ''
+
+    // 这里强制关闭弹窗
+    closeDeleteModal(true)
+
+    if (nextArticleId) {
+      await router.replace({
+        path: `/admin/services/${form.value.id}`,
+        query: {
+          detail: selectedDetailId.value,
+          article: nextArticleId,
+        },
+      })
+    } else {
+      await router.replace({
+        path: `/admin/services/${form.value.id}`,
+        query: { detail: selectedDetailId.value },
+      })
+    }
+
+    showToast('Article deleted.')
+  } catch (error) {
+    console.error('Failed to delete article:', error)
+    showToast('Failed to delete article.')
+  } finally {
+    deleting.value = false
   }
-
-  showToast('Article removed from this detail page.')
 }
 
 function handleDragStart(articleId) {
@@ -532,7 +556,6 @@ async function saveDetailPage() {
       }))
     }
 
-    // 将完全组装且不再被误删的数据写入数据库
     await setDoc(doc(db, 'services', form.value.id), buildPayload(), { merge: true })
     showToast('Detail page saved successfully.')
   } catch (error) {
@@ -917,6 +940,16 @@ h1 {
   padding: 14px 22px;
   background: #d56c81;
   color: white;
+}
+
+.danger-solid-btn:disabled,
+.icon-btn:disabled,
+.outline-btn:disabled,
+.save-btn:disabled,
+.mini-outline-btn:disabled,
+.danger-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .modal-overlay {

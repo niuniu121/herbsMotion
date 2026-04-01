@@ -29,7 +29,9 @@ const socialIcons = ['📱', '📷']
       </div>
       <div class="footer-links-group">
         <h4>Company</h4>
-        <a href="#">About Us</a>
+
+        <RouterLink to="/our-team" @click="closeMobileMenu">About Us</RouterLink>
+
         <a href="#">Contact</a>
         <a href="#">Success Stories</a>
       </div>

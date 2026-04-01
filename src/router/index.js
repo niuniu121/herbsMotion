@@ -16,7 +16,7 @@ import AdminServiceDetail from '@/views/AdminServiceDetail.vue'
 import AppointmentRequest from '@/views/AppointmentRequest.vue'
 import OurServices from '@/views/OurServices.vue'
 import ServiceDetail from '@/views/ServiceDetail.vue'
-
+import PractitionerDetail from '@/views/PractitionerDetail.vue'
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -79,19 +79,26 @@ const router = createRouter({
       component: AdminServices,
     },
     {
+      path: '/admin/services/:id',
+      name: 'AdminServiceDetail',
+      component: AdminServiceDetail,
+    },
+
+    // public
+    {
       path: '/our-team',
       name: 'OurTeam',
       component: OurTeamPage,
     },
     {
+      path: '/our-team/:slug',
+      name: 'PractitionerDetail',
+      component: PractitionerDetail,
+    },
+    {
       path: '/privacy-policy',
       name: 'PrivacyPolicy',
       component: PrivacyPolicy,
-    },
-    {
-      path: '/admin/services/:id',
-      name: 'AdminServiceDetail',
-      component: AdminServiceDetail,
     },
     {
       path: '/appointment-request',

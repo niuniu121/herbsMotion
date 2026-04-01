@@ -65,6 +65,11 @@
                       <div class="member-summary-text">
                         <span class="member-index">Member {{ index + 1 }}</span>
                         <h3>{{ member.name || 'New Team Member' }}</h3>
+
+                        <p v-if="formattedRoles(member).length" class="member-inline-roles">
+                          {{ formattedRoles(member).join(' / ') }}
+                        </p>
+
                         <p class="member-summary-subtitle">
                           {{ member.visible ? 'Visible on website' : 'Hidden from website' }}
                         </p>
@@ -87,7 +92,43 @@
                   <div class="form-side">
                     <div class="form-group">
                       <label>Name</label>
-                      <input v-model="member.name" type="text" placeholder="e.g. Jay Zheng" />
+                      <input v-model="member.name" type="text" placeholder="e.g. Sophia Chan" />
+                    </div>
+
+                    <div class="form-group">
+                      <div class="role-label-row">
+                        <label>Roles / Titles</label>
+                        <button class="add-role-btn" type="button" @click="addRole(member)">
+                          + Add
+                        </button>
+                      </div>
+
+                      <div class="roles-editor">
+                        <div
+                          v-for="(role, roleIndex) in member.roles"
+                          :key="`${member.id}-role-${roleIndex}`"
+                          class="role-input-row"
+                        >
+                          <input
+                            v-model="member.roles[roleIndex]"
+                            type="text"
+                            placeholder="e.g. Senior TCM Practitioner"
+                          />
+                          <button
+                            class="remove-role-btn"
+                            type="button"
+                            @click="removeRole(member, roleIndex)"
+                            title="Remove role"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+
+                      <p class="helper-text">
+                        Add as many roles as you like. They will display beside the name and be
+                        separated by / automatically.
+                      </p>
                     </div>
 
                     <div class="form-group">
@@ -191,7 +232,12 @@
                       <div class="preview-body">
                         <p class="preview-role-badge">Practitioner</p>
 
-                        <h4>{{ member.name || 'New Team Member' }}</h4>
+                        <div class="preview-name-row">
+                          <h4>{{ member.name || 'New Team Member' }}</h4>
+                          <span v-if="formattedRoles(member).length" class="preview-inline-roles">
+                            {{ formattedRoles(member).join(' / ') }}
+                          </span>
+                        </div>
 
                         <div class="preview-about multiline-text">
                           {{ member.about || 'Practitioner bio preview will appear here.' }}
@@ -336,9 +382,17 @@ const unsavedModal = ref({
   open: false,
 })
 
+const sanitizeRoles = (roles) => {
+  if (!Array.isArray(roles)) return []
+  return roles.map((item) => String(item || '').trim()).filter(Boolean)
+}
+
+const formattedRoles = (member) => sanitizeRoles(member.roles)
+
 const createEmptyMember = () => ({
   id: `member_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
   name: '',
+  roles: [''],
   image: '',
   imageError: false,
   qualifications: '',
@@ -353,6 +407,7 @@ const normalizeMembersForSave = (list) =>
   list.map((member) => ({
     id: member.id,
     name: member.name || '',
+    roles: sanitizeRoles(member.roles),
     image: member.image || '',
     qualifications: member.qualifications || '',
     education: member.education || '',
@@ -478,6 +533,27 @@ const addMember = () => {
   expandMember(newMember.id)
 }
 
+const addRole = (member) => {
+  if (!Array.isArray(member.roles)) {
+    member.roles = ['']
+    return
+  }
+  member.roles.push('')
+}
+
+const removeRole = (member, roleIndex) => {
+  if (!Array.isArray(member.roles)) {
+    member.roles = ['']
+    return
+  }
+
+  member.roles.splice(roleIndex, 1)
+
+  if (member.roles.length === 0) {
+    member.roles.push('')
+  }
+}
+
 const isDirectImageUrl = (url) => {
   if (!url) return true
 
@@ -512,6 +588,7 @@ const fetchTeam = async () => {
           ? data.members.map((item, idx) => ({
               id: item.id || `member_${idx}_${Date.now()}`,
               name: item.name || '',
+              roles: Array.isArray(item.roles) ? item.roles : item.role ? [item.role] : [''],
               image: item.image || '',
               imageError: false,
               qualifications: item.qualifications || '',
@@ -708,7 +785,9 @@ onBeforeUnmount(() => {
 .toggle-btn,
 .back-btn,
 .modal-btn,
-.member-summary-btn {
+.member-summary-btn,
+.add-role-btn,
+.remove-role-btn {
   border: none;
   cursor: pointer;
   transition:
@@ -723,7 +802,9 @@ onBeforeUnmount(() => {
 .toggle-btn:hover,
 .back-btn:hover,
 .modal-btn:hover,
-.member-summary-btn:hover {
+.member-summary-btn:hover,
+.add-role-btn:hover,
+.remove-role-btn:hover {
   transform: translateY(-1px);
 }
 
@@ -848,6 +929,14 @@ onBeforeUnmount(() => {
   line-height: 1.2;
 }
 
+.member-inline-roles {
+  margin: 8px 0 0;
+  color: #7a8b81;
+  font-size: 0.94rem;
+  line-height: 1.6;
+  font-style: italic;
+}
+
 .member-summary-subtitle {
   margin: 8px 0 0;
   color: #7a8b81;
@@ -933,6 +1022,49 @@ onBeforeUnmount(() => {
   resize: vertical;
   min-height: 120px;
   line-height: 1.65;
+}
+
+.role-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.roles-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.role-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.role-input-row input {
+  flex: 1;
+}
+
+.add-role-btn {
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: #edf1ed;
+  color: #2f5b43;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.remove-role-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #f6e9ed;
+  color: #b55067;
+  font-size: 1.25rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .helper-text {
@@ -1049,11 +1181,27 @@ onBeforeUnmount(() => {
   font-weight: 700;
 }
 
+.preview-name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-bottom: 12px;
+}
+
 .preview-body h4 {
-  margin: 0 0 12px;
+  margin: 0;
   color: #2f5b43;
   font-size: 1.8rem;
   line-height: 1.2;
+}
+
+.preview-inline-roles {
+  font-size: 0.95rem;
+  font-style: italic;
+  color: #7a8b81;
+  font-weight: 500;
+  line-height: 1.5;
 }
 
 .preview-about {
@@ -1221,7 +1369,8 @@ onBeforeUnmount(() => {
   .admin-header,
   .toolbar,
   .member-block-header,
-  .toggle-row {
+  .toggle-row,
+  .role-label-row {
     flex-direction: column;
     align-items: stretch;
   }

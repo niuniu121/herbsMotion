@@ -1,146 +1,101 @@
 <template>
-  <div class="book-page" :style="pageBgStyle">
+  <div class="book-page">
+    <div class="sky-background">
+      <div class="falling-leaves-container">
+        <div class="leaf leaf-1"></div>
+        <div class="leaf leaf-2"></div>
+        <div class="leaf leaf-3"></div>
+        <div class="leaf leaf-4"></div>
+        <div class="leaf leaf-5"></div>
+        <div class="leaf leaf-6"></div>
+        <div class="leaf leaf-7"></div>
+        <div class="leaf leaf-8"></div>
+      </div>
+
+      <div class="floating-orb orb-1"></div>
+      <div class="floating-orb orb-2"></div>
+      <div class="floating-orb orb-3"></div>
+
+      <div class="spark spark-1"></div>
+      <div class="spark spark-2"></div>
+      <div class="spark spark-3"></div>
+      <div class="spark spark-4"></div>
+    </div>
     <NavBar />
 
-    <main class="book-content">
-      <section class="hero-section">
-        <h1 class="hero-title">Book a Consultation</h1>
-        <p class="hero-desc">
-          Schedule your appointment with Herbs & Motion through our secure online booking system.
-          Choose your preferred service, practitioner, and time that suits you best.
-        </p>
-      </section>
-
-      <!-- Map + Promotion -->
-      <section class="top-split-section">
-        <div class="top-split-grid" :class="{ 'single-column': !promotion.visible }">
-          <!-- Left: Map -->
-          <div class="location-card compact-location-card split-card">
-            <div class="location-head compact-location-head">
-              <div class="location-copy compact-location-copy">
-                <div class="location-badge-row">
-                  <span class="location-pin">📍</span>
-                  <p class="card-label">Visit Our Clinic</p>
-                </div>
-                <h2>696 Burke Rd, Camberwell VIC 3124</h2>
-                <p class="location-text">
-                  Conveniently located for your in-person consultation and ongoing care.
-                </p>
-              </div>
-
-              <a
-                class="map-link"
-                href="https://www.google.com/maps?q=696+Burke+Rd,+Camberwell+VIC+3124"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Open in Google Maps
-              </a>
-            </div>
-
-            <div class="map-shell compact-map-shell">
-              <iframe
-                title="Herbs & Motion clinic location"
-                class="location-map compact-location-map split-location-map"
-                src="https://www.google.com/maps?q=696%20Burke%20Rd,%20Camberwell%20VIC%203124&z=17&output=embed"
-                loading="lazy"
-                allowfullscreen
-                referrerpolicy="no-referrer-when-downgrade"
-              ></iframe>
-
-              <div class="map-note compact-map-note">
-                Tap or click the map pin to view the full address in the popup.
-              </div>
-            </div>
-          </div>
-
-          <!-- Right: Promotion -->
-          <div v-if="promotion.visible" class="promotion-card split-card promotion-half-card">
-            <div class="promotion-left promotion-half-left">
-              <p class="promotion-tag">Promotion</p>
-              <h2>{{ promotion.title }}</h2>
-
-              <div
-                ref="promotionContentRef"
-                :class="[
-                  'promotion-text-wrap',
-                  { collapsed: shouldCollapse && !promotionExpanded },
-                ]"
-              >
-                <p class="promotion-text">
-                  {{ promotion.content }}
-                </p>
-              </div>
-
-              <button
-                v-if="shouldCollapse"
-                class="read-more-btn"
-                @click="promotionExpanded = !promotionExpanded"
-                type="button"
-              >
-                {{ promotionExpanded ? 'Read less' : 'Read more' }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="booking-layout">
-        <div class="booking-main">
-          <div class="booking-card">
-            <div class="booking-head">
-              <div>
-                <p class="small-label">Secure Booking System</p>
-                <h2>Choose Your Appointment</h2>
-              </div>
-              <div class="secure-pill">Online Booking</div>
-            </div>
-
-            <div class="booking-frame-wrap">
-              <iframe
-                id="cliniko-51970928"
-                src="https://geng-practice.au1.cliniko.com/bookings?embedded=true"
-                frameborder="0"
-                scrolling="auto"
-                width="100%"
-                height="1000"
-                style="pointer-events: auto"
-              ></iframe>
-            </div>
-          </div>
+    <main class="coming-page">
+      <section class="coming-hero">
+        <div class="wood-sign">
+          <img
+            src="https://img.icons8.com/?size=100&id=121404&format=png&color=2f5b43"
+            alt="sign icon"
+            class="sign-icon"
+          />
+          <p>Coming Soon</p>
         </div>
 
-        <aside class="booking-sidebar">
-          <div class="side-card">
-            <h3>What to Expect</h3>
-            <ul>
-              <li>Select your treatment or consultation type</li>
-              <li>Choose an available practitioner and time</li>
-              <li>Enter your details and confirm the booking</li>
-              <li>Receive a confirmation email</li>
-            </ul>
+        <div class="coming-card">
+          <div class="sticker stick-tl"></div>
+          <div class="sticker stick-tr"></div>
+          <div class="floating-icon icon-anchor"></div>
+          <div class="floating-icon icon-star"></div>
+          <div class="floating-icon icon-compass"></div>
+
+          <div class="icon-shell">
+            <div class="icon-halo"></div>
+
+            <svg
+              class="booking-icon"
+              viewBox="0 0 120 120"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <rect x="22" y="28" width="76" height="66" rx="16" class="icon-stroke icon-delay-1" />
+              <path d="M37 18V38" class="icon-stroke icon-delay-2" />
+              <path d="M83 18V38" class="icon-stroke icon-delay-2" />
+              <path d="M22 46H98" class="icon-stroke icon-delay-3" />
+              <path d="M41 63L54 75L79 50" class="icon-stroke icon-accent icon-delay-4" />
+            </svg>
           </div>
 
-          <div class="side-card">
-            <h3>Before Your Visit</h3>
-            <p>
-              Please arrive a few minutes early and bring any relevant reports, referral letters, or
-              scan results if applicable.
-            </p>
-          </div>
+          <p class="eyebrow">Herbs & Motion</p>
+          <h1 class="coming-title">Book a Consultation</h1>
 
-          <div class="side-card">
-            <h3>Need Help Booking?</h3>
-            <p>
-              If you are unsure which appointment to choose, please contact the clinic directly and
-              we will help guide you.
-            </p>
-            <div class="contact-mini">
-              <span>Email: info@herbsmotion.com.au</span>
-              <span>Phone: 0433644931</span>
+          <p class="coming-subtitle">
+            We’re preparing a more refined online booking experience for Herbs & Motion. This page
+            will be available soon.
+          </p>
+
+          <div class="contact-invitation">
+            <div class="invitation-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
             </div>
+            <div class="invitation-content">
+              <h3>Have a specific question?</h3>
+              <p>Leave your details and we'll get back to you shortly.</p>
+            </div>
+            <button class="open-form-btn" @click="openLeadForm">Leave a Message</button>
           </div>
-        </aside>
+
+          <div class="divider"></div>
+
+          <div class="action-row">
+            <a class="primary-btn"> Email us</a>
+            <a class="secondary-btn"> Call Us </a>
+          </div>
+
+          <p class="contact-note">info@herbsmotion.com.au · 0433644931</p>
+        </div>
       </section>
     </main>
 
@@ -149,837 +104,754 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onBeforeUnmount, ref, nextTick } from 'vue'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '@/firebase'
 import NavBar from '@/component/NavBar.vue'
 import PageFooter from '@/component/PageFooter.vue'
 
-const scrollRatio = ref(0)
-let handleIFrameMessage = null
-let handleScroll = null
-
-const promotionExpanded = ref(false)
-const promotionContentRef = ref(null)
-const shouldCollapse = ref(false)
-const PROMOTION_COLLAPSED_HEIGHT = 150
-
-const promotion = ref({
-  title: '',
-  content: '',
-  visible: false,
-})
-
-const checkPromotionOverflow = async () => {
-  await nextTick()
-
-  const el = promotionContentRef.value
-  if (!el || !promotion.value?.content) {
-    shouldCollapse.value = false
-    return
-  }
-
-  shouldCollapse.value = el.scrollHeight > PROMOTION_COLLAPSED_HEIGHT
+// Method to trigger the global Herbsie lead form modal
+const openLeadForm = () => {
+  // Connect this to your global state (e.g., Pinia store) or EventBus
+  // Example: useHerbsieStore().openLeadForm()
+  // or: window.dispatchEvent(new CustomEvent('open-herbsie-lead'))
+  window.dispatchEvent(new CustomEvent('open-herbsie-lead'))
+  console.log('Opening lead form modal...')
 }
-
-const fetchPromotion = async () => {
-  try {
-    const docRef = doc(db, 'siteContent', 'promotion')
-    const docSnap = await getDoc(docRef)
-
-    if (docSnap.exists()) {
-      const data = docSnap.data()
-      promotion.value = {
-        title: data.title || '',
-        content: data.content || '',
-        visible: data.visible ?? false,
-      }
-    } else {
-      promotion.value = {
-        title: '',
-        content: '',
-        visible: false,
-      }
-    }
-
-    promotionExpanded.value = false
-    await checkPromotionOverflow()
-  } catch (error) {
-    console.error('Failed to fetch promotion:', error)
-  }
-}
-
-function hexToRgb(hex) {
-  const clean = hex.replace('#', '')
-  const bigint = parseInt(clean, 16)
-  return {
-    r: (bigint >> 16) & 255,
-    g: (bigint >> 8) & 255,
-    b: bigint & 255,
-  }
-}
-
-function mixColor(color1, color2, amount) {
-  const c1 = hexToRgb(color1)
-  const c2 = hexToRgb(color2)
-
-  const r = Math.round(c1.r + (c2.r - c1.r) * amount)
-  const g = Math.round(c1.g + (c2.g - c1.g) * amount)
-  const b = Math.round(c1.b + (c2.b - c1.b) * amount)
-
-  return `rgb(${r}, ${g}, ${b})`
-}
-
-const gradientColors = ['#CFDAC8', '#FAF7F2', '#F5DFE6', '#EED6DF']
-
-const currentGradient = computed(() => {
-  const totalSegments = gradientColors.length - 1
-  const scaled = scrollRatio.value * totalSegments
-  const index = Math.min(Math.floor(scaled), totalSegments - 1)
-  const localT = scaled - index
-
-  const start = gradientColors[index]
-  const end = gradientColors[index + 1]
-
-  return mixColor(start, end, localT)
-})
-
-const secondGradient = computed(() => {
-  const shiftedRatio = Math.min(scrollRatio.value + 0.18, 1)
-  const totalSegments = gradientColors.length - 1
-  const scaled = shiftedRatio * totalSegments
-  const index = Math.min(Math.floor(scaled), totalSegments - 1)
-  const localT = scaled - index
-
-  const start = gradientColors[index]
-  const end = gradientColors[index + 1]
-
-  return mixColor(start, end, localT)
-})
-
-const thirdGradient = computed(() => {
-  const shiftedRatio = Math.max(scrollRatio.value - 0.12, 0)
-  const totalSegments = gradientColors.length - 1
-  const scaled = shiftedRatio * totalSegments
-  const index = Math.min(Math.floor(scaled), totalSegments - 1)
-  const localT = scaled - index
-
-  const start = gradientColors[index]
-  const end = gradientColors[index + 1]
-
-  return mixColor(start, end, localT)
-})
-
-const pageBgStyle = computed(() => {
-  return {
-    background: `
-      radial-gradient(circle at 15% 18%, rgba(255,255,255,0.55), transparent 24%),
-      radial-gradient(circle at 85% 12%, rgba(255,255,255,0.35), transparent 20%),
-      radial-gradient(circle at 70% 75%, rgba(255,255,255,0.22), transparent 22%),
-      linear-gradient(180deg, ${currentGradient.value} 0%, ${secondGradient.value} 52%, ${thirdGradient.value} 100%)
-    `,
-  }
-})
-
-onMounted(() => {
-  fetchPromotion()
-  window.addEventListener('resize', checkPromotionOverflow)
-
-  handleIFrameMessage = function (e) {
-    const clinikoBookings = document.getElementById('cliniko-51970928')
-    if (!clinikoBookings) return
-    if (typeof e.data !== 'string') return
-
-    if (e.data.search('cliniko-bookings-resize') > -1) {
-      const height = Number(e.data.split(':')[1])
-      if (!Number.isNaN(height)) {
-        clinikoBookings.style.height = height + 'px'
-      }
-    }
-
-    if (e.data.search('cliniko-bookings-page') > -1) {
-      clinikoBookings.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      })
-    }
-  }
-
-  handleScroll = () => {
-    const scrollTop = window.scrollY || window.pageYOffset
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight
-
-    if (docHeight <= 0) {
-      scrollRatio.value = 0
-      return
-    }
-
-    scrollRatio.value = Math.min(Math.max(scrollTop / docHeight, 0), 1)
-  }
-
-  handleScroll()
-  window.addEventListener('scroll', handleScroll, { passive: true })
-  window.addEventListener('message', handleIFrameMessage)
-})
-
-onBeforeUnmount(() => {
-  if (handleIFrameMessage) {
-    window.removeEventListener('message', handleIFrameMessage)
-  }
-
-  if (handleScroll) {
-    window.removeEventListener('scroll', handleScroll)
-  }
-
-  window.removeEventListener('resize', checkPromotionOverflow)
-})
 </script>
 
 <style scoped>
 .book-page {
-  min-height: 100vh;
-  transition: background 0.35s ease;
-}
-
-.book-content {
-  padding: 18px 24px 100px;
-}
-
-.hero-section,
-.top-split-section,
-.booking-layout {
-  max-width: 1240px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.hero-section {
-  text-align: center;
-  max-width: 860px;
-  margin-bottom: 8px;
-}
-
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 7px 14px;
-  margin-bottom: 10px;
-  border-radius: 999px;
-  background: rgba(47, 91, 67, 0.1);
-  color: #2f5b43;
-  font-size: 0.88rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-.hero-title {
-  margin: 0 0 6px;
-  font-size: clamp(2rem, 3.6vw, 3.15rem);
-  line-height: 1.03;
-  color: #2d5a42;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  margin-bottom: 25px;
-}
-
-.hero-desc {
-  max-width: 700px;
-  margin: 0 auto;
-  font-size: 0.96rem;
-  line-height: 1.6;
-  color: #5f6f66;
-}
-
-/* =========================
-   Top split layout
-   ========================= */
-.top-split-section {
-  margin-bottom: 18px;
-}
-
-.top-split-grid {
-  display: grid;
-  grid-template-columns: 1.03fr 0.97fr;
-  gap: 14px;
-  align-items: stretch;
-  margin-bottom: 40px;
-}
-
-.top-split-grid.single-column {
-  grid-template-columns: 1fr;
-}
-
-.split-card {
-  height: 100%;
-}
-
-/* =========================
-   Location
-   ========================= */
-.location-card {
-  padding: 16px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(56, 92, 71, 0.08);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 16px 38px rgba(47, 91, 67, 0.08);
-}
-
-.compact-location-card {
-  padding: 15px;
-  border-radius: 20px;
-}
-
-.location-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.compact-location-head {
-  margin-bottom: 10px;
-  align-items: center;
-}
-
-.location-copy {
-  max-width: 760px;
-}
-
-.compact-location-copy {
-  max-width: 640px;
-}
-
-.location-badge-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.location-pin {
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border-radius: 13px;
-  background: rgba(47, 91, 67, 0.08);
-  font-size: 1.08rem;
-  flex-shrink: 0;
-}
-
-.card-label {
-  margin: 0;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #79907f;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.location-card h2 {
-  margin: 0 0 6px;
-  color: #2d5a42;
-  font-size: clamp(1.28rem, 2vw, 1.92rem);
-  font-weight: 800;
-  line-height: 1.12;
-}
-
-.compact-location-card h2 {
-  font-size: clamp(1.15rem, 1.7vw, 1.55rem);
-  margin: 0 0 6px;
-}
-
-.location-text {
-  margin: 0;
-  color: #66786d;
-  line-height: 1.5;
-  font-size: 0.92rem;
-  max-width: 470px;
-}
-
-.compact-location-card .location-text {
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-.map-link {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 38px;
-  padding: 0 14px;
-  border-radius: 999px;
-  background: rgba(47, 91, 67, 0.1);
-  color: #2f5b43;
-  font-size: 0.86rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition: all 0.25s ease;
-  white-space: nowrap;
-}
-
-.map-link:hover {
-  background: #2f5b43;
-  color: #fff;
-  transform: translateY(-1px);
-}
-
-.map-shell {
   position: relative;
+  min-height: 100vh;
   overflow: hidden;
-  border-radius: 18px;
-  border: 1px solid rgba(47, 91, 67, 0.08);
-  background: #f6f9f5;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
-.compact-map-shell {
-  border-radius: 16px;
+/* Background elements in customized Herbs & Motion style */
+.sky-background {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: linear-gradient(180deg, #faf7f2 0%, #faf0e6 52%, #faf7f2 100%);
 }
 
-.location-map {
-  display: block;
-  width: 100%;
-  height: 270px;
-  border: 0;
-}
-
-.compact-location-map {
-  height: 250px;
-}
-
-.split-location-map {
-  height: 250px;
-  min-height: 250px;
-}
-
-.map-note {
+/* Falling Leaves Animation Styles with DARK leaf colors for visibility */
+.falling-leaves-container {
   position: absolute;
-  left: 12px;
-  bottom: 12px;
-  padding: 7px 11px;
-  border-radius: 11px;
-  background: rgba(255, 255, 255, 0.9);
-  color: #5b6f63;
-  font-size: 0.78rem;
-  line-height: 1.3;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 10px 24px rgba(47, 91, 67, 0.08);
-}
-
-.compact-map-note {
-  left: 10px;
-  bottom: 10px;
-  padding: 7px 11px;
-  border-radius: 11px;
-  font-size: 0.76rem;
-}
-
-/* =========================
-   Promotion
-   ========================= */
-.promotion-card {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding: 16px 18px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(56, 92, 71, 0.08);
-  box-shadow: 0 18px 40px rgba(47, 91, 67, 0.08);
-  backdrop-filter: blur(12px);
-}
-
-.promotion-half-card {
-  min-height: 250px;
-}
-
-.promotion-half-left {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  max-width: 100%;
-  padding-top: 0;
-}
-
-.promotion-tag {
-  margin: 0 0 6px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #7a8d80;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.promotion-card h2 {
-  margin: 0 0 10px;
-  color: #2d5a42;
-  font-size: clamp(1.34rem, 2vw, 1.82rem);
-  font-weight: 800;
-  line-height: 1.18;
-  max-width: 420px;
-}
-
-.promotion-card p {
-  margin: 0;
-  color: #64766a;
-  line-height: 1.62;
-}
-
-.promotion-text-wrap {
-  max-width: 460px;
+  inset: 0;
   overflow: hidden;
-  transition: max-height 0.28s ease;
+  opacity: 0.35;
+  z-index: -3;
 }
 
-.promotion-text-wrap.collapsed {
-  max-height: 150px;
+.leaf {
+  position: absolute;
+  top: -100px;
+  background: #2f5b43;
+  border-radius: 99% 1% 99% 1%;
+  filter: blur(5px);
+  animation: leafFall infinite linear;
 }
 
-.promotion-text {
-  margin-top: 0;
-  white-space: pre-line;
-  font-size: 0.92rem;
+.leaf-1 {
+  width: 40px;
+  height: 50px;
+  left: 10%;
+  animation-duration: 25s;
+  animation-delay: 0s;
+}
+.leaf-2 {
+  width: 30px;
+  height: 40px;
+  left: 30%;
+  animation-duration: 20s;
+  animation-delay: -5s;
+  transform: skewY(15deg);
+}
+.leaf-3 {
+  width: 50px;
+  height: 60px;
+  left: 50%;
+  animation-duration: 30s;
+  animation-delay: -10s;
+}
+.leaf-4 {
+  width: 35px;
+  height: 45px;
+  right: 20%;
+  animation-duration: 28s;
+  animation-delay: -15s;
+  transform: skewY(-10deg);
+}
+.leaf-5 {
+  width: 45px;
+  height: 55px;
+  right: 5%;
+  animation-duration: 22s;
+  animation-delay: -20s;
+}
+.leaf-6 {
+  width: 25px;
+  height: 35px;
+  left: 70%;
+  animation-duration: 24s;
+  animation-delay: -25s;
+}
+.leaf-7 {
+  width: 48px;
+  height: 58px;
+  left: 20%;
+  animation-duration: 32s;
+  animation-delay: -12s;
+}
+.leaf-8 {
+  width: 32px;
+  height: 42px;
+  right: 40%;
+  animation-duration: 26s;
+  animation-delay: -18s;
+  transform: skewY(5deg);
 }
 
-.read-more-btn {
-  align-self: flex-start;
-  margin-top: 12px;
-  min-height: 38px;
-  padding: 0 16px;
-  border: none;
+@keyframes leafFall {
+  0% {
+    top: -100px;
+    transform: translateX(0) rotate(0deg) skew(0deg) scale(1);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  40% {
+    transform: translateX(20px) rotate(45deg) skew(5deg) scale(1.05);
+  }
+  80% {
+    transform: translateX(-10px) rotate(-15deg) skew(-2deg) scale(0.95);
+  }
+  100% {
+    top: 110vh;
+    transform: translateX(30px) rotate(90deg) skew(10deg) scale(1.1);
+    opacity: 0;
+  }
+}
+
+/* Ambient floating orbs */
+.floating-orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(14px);
+  z-index: -1;
+  opacity: 0.5;
+}
+
+.orb-1 {
+  width: 240px;
+  height: 240px;
+  top: -70px;
+  left: -70px;
+  background: rgba(47, 91, 67, 0.08);
+  animation: orbMoveA 11s ease-in-out infinite;
+}
+.orb-2 {
+  width: 200px;
+  height: 200px;
+  right: -40px;
+  top: 80px;
+  background: rgba(245, 223, 230, 0.45);
+  animation: orbMoveB 13s ease-in-out infinite;
+}
+.orb-3 {
+  width: 220px;
+  height: 220px;
+  bottom: -80px;
+  right: 90px;
+  background: rgba(127, 167, 128, 0.1);
+  animation: orbMoveC 12s ease-in-out infinite;
+}
+
+/* Sparkles */
+.spark {
+  position: absolute;
   border-radius: 999px;
   background: rgba(47, 91, 67, 0.1);
-  color: #2f5b43;
-  font-size: 0.86rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.25s ease;
+  z-index: -1;
 }
 
-.read-more-btn:hover {
-  background: #2f5b43;
-  color: #fff;
-  transform: translateY(-1px);
+.spark::before,
+.spark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  background: inherit;
+  border-radius: 999px;
 }
 
-/* 保留这组也没问题，虽然正文现在不是用 transition 包着 */
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: all 0.28s ease;
+.spark::before {
+  width: 2px;
+  height: 16px;
+}
+.spark::after {
+  width: 16px;
+  height: 2px;
 }
 
-.fade-slide-enter-from,
-.fade-slide-leave-to {
-  opacity: 0;
-  transform: translateY(-6px);
+.spark-1 {
+  width: 16px;
+  height: 16px;
+  top: 70px;
+  right: 120px;
+  animation: sparkleFloat 7s ease-in-out infinite;
+}
+.spark-2 {
+  width: 14px;
+  height: 14px;
+  top: 160px;
+  left: 110px;
+  animation: sparkleFloat 8.5s ease-in-out infinite 0.8s;
+}
+.spark-3 {
+  width: 12px;
+  height: 12px;
+  bottom: 110px;
+  left: 140px;
+  animation: sparkleFloat 6.8s ease-in-out infinite 1.2s;
+}
+.spark-4 {
+  width: 15px;
+  height: 15px;
+  bottom: 80px;
+  right: 130px;
+  animation: sparkleFloat 9s ease-in-out infinite 0.6s;
 }
 
-/* =========================
-   Booking
-   ========================= */
-.booking-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.78fr);
-  gap: 28px;
-  align-items: start;
-}
-
-.booking-main,
-.booking-sidebar {
-  min-width: 0;
-}
-
-.booking-card {
-  padding: 24px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.76);
-  border: 1px solid rgba(56, 92, 71, 0.08);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 18px 45px rgba(47, 91, 67, 0.08);
-}
-
-.booking-head {
+/* Main Content Styles */
+.coming-page {
+  min-height: calc(100vh - 160px);
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 18px;
-  margin-bottom: 20px;
+  align-items: center;
+  justify-content: center;
+  padding: 34px 24px 92px;
+  position: relative;
+  z-index: 1;
 }
 
-.small-label {
-  margin: 0 0 6px;
-  font-size: 0.88rem;
+.coming-hero {
+  width: 100%;
+  max-width: 1180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* Wood Sign */
+.wood-sign {
+  position: absolute;
+  top: -60px;
+  left: -80px;
+  width: 160px;
+  height: 80px;
+  background-color: #e5ccb4;
+  border: 4px solid #b8987b;
+  border-radius: 12px;
+  box-shadow:
+    0 4px 0 #9f8369,
+    0 8px 16px rgba(159, 131, 105, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transform: rotate(-5deg);
+}
+
+.wood-sign::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 120px;
+  background-color: #b8987b;
+  border-radius: 0 0 8px 8px;
+}
+
+.sign-icon {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 4px;
+}
+
+.wood-sign p {
+  margin: 0;
+  color: #2f5b43;
+  font-family: 'Patrick Hand', cursive, sans-serif;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: #7a8d80;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-.booking-head h2 {
-  margin: 0;
-  font-size: 1.65rem;
-  color: #2d5a42;
-  font-weight: 800;
-}
-
-.secure-pill {
-  flex-shrink: 0;
-  padding: 10px 16px;
-  border-radius: 999px;
-  background: #2f5b43;
-  color: #fff;
-  font-size: 0.9rem;
-  font-weight: 700;
-  box-shadow: 0 8px 20px rgba(47, 91, 67, 0.18);
-}
-
-.booking-frame-wrap {
+/* Card Styles */
+.coming-card {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  padding: 56px 42px 48px;
+  border-radius: 38px;
   overflow: hidden;
-  border-radius: 22px;
-  border: 1px solid rgba(47, 91, 67, 0.08);
-  background: #fff;
-  width: 100%;
+  text-align: center;
+  isolation: isolate;
+  background-color: rgba(250, 247, 242, 0.8);
+  border: 1px solid rgba(56, 92, 71, 0.06);
+  box-shadow: 0 24px 70px rgba(47, 91, 67, 0.07);
+  backdrop-filter: blur(12px);
 }
 
-#cliniko-51970928 {
-  display: block;
-  width: 100%;
-  min-height: 1000px;
-  background: #fff;
+/* Stickers & Icons */
+.sticker {
+  position: absolute;
+  width: 60px;
+  height: 30px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  z-index: 1;
 }
 
-.booking-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.stick-tl {
+  top: -10px;
+  left: 20%;
+  transform: rotate(-25deg);
+  border-radius: 0 0 10px 10px;
+}
+.stick-tr {
+  top: -5px;
+  right: 15%;
+  transform: rotate(20deg);
+  border-radius: 0 0 10px 10px;
 }
 
-.side-card {
-  padding: 22px 20px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.74);
-  border: 1px solid rgba(56, 92, 71, 0.08);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 14px 35px rgba(47, 91, 67, 0.07);
+.floating-icon {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0.15;
+  z-index: 0;
 }
 
-.side-card h3 {
-  margin: 0 0 12px;
-  font-size: 1.15rem;
-  color: #2d5a42;
+.icon-anchor {
+  top: 15%;
+  left: 10%;
+  background-image: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 21V9M12 9L15 12M12 9L9 12M20 16C18.8954 16 18 16.8954 18 18C18 19.1046 18.8954 20 20 20C21.1046 20 22 19.1046 22 18C22 16.8954 21.1046 16 20 16ZM12 3C10.8954 3 10 3.89543 10 5C10 6.10457 10.8954 7 12 7C13.1046 7 14 6.10457 14 5C14 3.89543 13.1046 3 12 3Z" stroke="%232f5b43" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+}
+.icon-star {
+  top: 40%;
+  right: 8%;
+  background-image: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="%232f5b43" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+}
+.icon-compass {
+  bottom: 10%;
+  left: 12%;
+  background-image: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="%232f5b43" stroke-width="1.5"/><path d="M16.2 7.8L13.2 13.2L7.8 16.2L10.8 10.8L16.2 7.8Z" stroke="%232f5b43" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+}
+
+/* Typography */
+.eyebrow {
+  margin: 0 0 10px;
+  color: #7a8a7f;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.coming-title {
+  margin: 0;
+  color: #264936;
+  font-size: clamp(2.4rem, 5.2vw, 4.5rem);
+  line-height: 0.96;
+  letter-spacing: -0.035em;
   font-weight: 800;
 }
 
-.side-card p {
-  margin: 0;
-  color: #64766a;
-  line-height: 1.75;
+.coming-subtitle {
+  max-width: 640px;
+  margin: 18px auto 0;
+  color: #627368;
+  font-size: 1rem;
+  line-height: 1.8;
 }
 
-.side-card ul {
-  margin: 0;
-  padding-left: 18px;
-  color: #64766a;
-}
-
-.side-card li {
-  margin-bottom: 10px;
-  line-height: 1.65;
-}
-
-.contact-mini {
-  margin-top: 14px;
+/* Center Logo Icon */
+.icon-shell {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  margin: 0 auto 24px;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  justify-content: center;
 }
 
-.contact-mini span {
-  color: #466451;
-  font-size: 0.95rem;
+.icon-halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background:
+    radial-gradient(
+      circle at 30% 30%,
+      rgba(255, 255, 255, 0.95),
+      rgba(255, 255, 255, 0.16) 58%,
+      transparent 72%
+    ),
+    rgba(47, 91, 67, 0.08);
+  animation: haloPulse 6s ease-in-out infinite;
+}
+
+.booking-icon {
+  position: relative;
+  z-index: 2;
+  width: 88px;
+  height: 88px;
+  padding: 16px;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 249, 246, 0.9));
+  box-shadow:
+    0 14px 30px rgba(47, 91, 67, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  animation: floatSoft 5s ease-in-out infinite;
+}
+
+.icon-stroke {
+  stroke: #2f5b43;
+  stroke-width: 5.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 220;
+  stroke-dashoffset: 220;
+  animation: drawLine 1s ease forwards;
+}
+
+.icon-accent {
+  stroke: #8aaa79;
+}
+.icon-delay-1 {
+  animation-delay: 0.1s;
+}
+.icon-delay-2 {
+  animation-delay: 0.32s;
+}
+.icon-delay-3 {
+  animation-delay: 0.56s;
+}
+.icon-delay-4 {
+  animation-delay: 0.82s;
+}
+
+/* Contact Invitation CTA */
+.contact-invitation {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 30px auto;
+  padding: 16px 20px 16px 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(47, 91, 67, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(47, 91, 67, 0.04);
+  max-width: 500px;
+  text-align: left;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.contact-invitation:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(47, 91, 67, 0.08);
+}
+
+.invitation-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: #e9f2e9;
+  color: #2f5b43;
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+
+.invitation-content {
+  flex: 1;
+}
+
+.invitation-content h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2f5b43;
+}
+
+.invitation-content p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #627368;
+  line-height: 1.4;
+}
+
+.open-form-btn {
+  padding: 10px 18px;
+  background: #2f5b43;
+  color: white;
+  border: none;
+  border-radius: 12px;
   font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
 }
 
-/* =========================
-   Responsive
-   ========================= */
-@media (max-width: 1100px) {
-  .top-split-grid,
-  .booking-layout {
-    grid-template-columns: 1fr;
-  }
+.open-form-btn:hover {
+  background: #244633;
+}
 
-  .promotion-half-card,
-  .split-location-map {
-    min-height: unset;
-  }
+/* Footer Section */
+.divider {
+  width: min(100%, 540px);
+  height: 1px;
+  margin: 28px auto 22px;
+  background: linear-gradient(
+    90deg,
+    rgba(47, 91, 67, 0),
+    rgba(47, 91, 67, 0.14),
+    rgba(47, 91, 67, 0)
+  );
+}
 
-  .location-map,
-  .compact-location-map,
-  .split-location-map {
-    height: 220px;
-    min-height: 220px;
-  }
+.support-copy {
+  max-width: 600px;
+  margin: 0 auto;
+  color: #6f7f75;
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
 
-  .promotion-card {
-    min-height: auto;
-  }
+.action-row {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
 
-  .promotion-text-wrap,
-  .promotion-card h2 {
-    max-width: 100%;
+.primary-btn,
+.secondary-btn {
+  min-width: 190px;
+  min-height: 50px;
+  padding: 0 22px;
+  border-radius: 999px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  transition: all 0.26s ease;
+}
+
+.primary-btn {
+  color: #fff;
+  background: #2f5b43;
+  box-shadow: 0 14px 28px rgba(47, 91, 67, 0.18);
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px rgba(47, 91, 67, 0.24);
+}
+
+.secondary-btn {
+  color: #2f5b43;
+  background: rgba(47, 91, 67, 0.09);
+  border: 1px solid rgba(47, 91, 67, 0.1);
+}
+
+.secondary-btn:hover {
+  transform: translateY(-2px);
+  background: rgba(47, 91, 67, 0.13);
+}
+
+.contact-note {
+  margin: 18px 0 0;
+  color: #8a948e;
+  font-size: 1.5rem;
+  line-height: 1.7;
+}
+
+/* Keyframes */
+@keyframes drawLine {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes floatSoft {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes haloPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+@keyframes orbMoveA {
+  0% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(26px, 10px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+@keyframes orbMoveB {
+  0% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-20px, 16px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+@keyframes orbMoveC {
+  0% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-12px, -18px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+@keyframes sparkleFloat {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.1;
+  }
+  50% {
+    transform: translateY(-8px) scale(1.08);
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.1;
+  }
+}
+
+/* Media Queries */
+@media (max-width: 1024px) {
+  .wood-sign {
+    left: -40px;
   }
 }
 
 @media (max-width: 768px) {
-  .book-content {
-    padding: 18px 16px 72px;
+  .coming-page {
+    padding: 20px 16px 74px;
+  }
+  .coming-card {
+    padding: 40px 22px 34px;
+    border-radius: 28px;
+  }
+  .coming-title {
+    font-size: 2.35rem;
+  }
+  .coming-subtitle {
+    font-size: 0.96rem;
+    line-height: 1.7;
   }
 
-  .hero-section {
-    margin-bottom: 10px;
-  }
-
-  .hero-title {
-    font-size: 2rem;
-  }
-
-  .hero-desc {
-    font-size: 0.94rem;
-    line-height: 1.6;
-  }
-
-  .location-card,
-  .promotion-card,
-  .booking-card,
-  .side-card {
-    padding: 16px;
-    border-radius: 18px;
-  }
-
-  .compact-location-card {
-    padding: 14px;
-  }
-
-  .location-head {
+  .action-row {
     flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 12px;
+    align-items: center;
+  }
+  .primary-btn,
+  .secondary-btn {
+    width: 100%;
+    max-width: 290px;
   }
 
-  .location-card h2 {
-    font-size: 1.45rem;
+  .wood-sign {
+    position: relative;
+    top: 0;
+    left: 0;
+    transform: rotate(0);
+    margin-bottom: 30px;
   }
 
-  .compact-location-card h2 {
-    font-size: 1.22rem;
+  .stick-tl,
+  .stick-tr,
+  .icon-anchor,
+  .icon-star,
+  .icon-compass {
+    display: none;
   }
-
-  .location-map,
-  .compact-location-map,
-  .split-location-map {
-    height: 200px;
-    min-height: 200px;
+  .orb-1,
+  .orb-2,
+  .orb-3 {
+    opacity: 0.6;
   }
+}
 
-  .map-note {
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
-    font-size: 0.76rem;
-  }
-
-  .booking-head {
+@media (max-width: 600px) {
+  .contact-invitation {
     flex-direction: column;
-    align-items: flex-start;
+    text-align: center;
+    padding: 24px;
   }
-
-  .booking-head h2 {
-    font-size: 1.35rem;
-  }
-
-  .secure-pill {
-    padding: 8px 14px;
-    font-size: 0.86rem;
-  }
-
-  .promotion-card h2 {
-    font-size: 1.36rem;
-  }
-
-  .promotion-text-wrap.collapsed {
-    max-height: 132px;
-  }
-
-  #cliniko-51970928 {
-    min-height: 900px;
+  .open-form-btn {
+    width: 100%;
+    margin-top: 12px;
   }
 }
 
 @media (max-width: 480px) {
-  .book-content {
-    padding: 16px 12px 60px;
+  .coming-title {
+    font-size: 2rem;
   }
-
-  .hero-badge {
-    font-size: 0.8rem;
-    padding: 7px 13px;
+  .icon-shell {
+    width: 108px;
+    height: 108px;
+    margin-bottom: 20px;
   }
-
-  .hero-title {
-    font-size: 1.75rem;
+  .booking-icon {
+    width: 76px;
+    height: 76px;
+    padding: 13px;
+    border-radius: 22px;
   }
-
-  .location-pin {
-    width: 38px;
-    height: 38px;
-    font-size: 1rem;
+  .coming-subtitle,
+  .support-copy,
+  .contact-note {
+    font-size: 0.92rem;
   }
-
-  .location-card h2,
-  .side-card h3 {
-    font-size: 1.05rem;
-  }
-
-  .location-map,
-  .compact-location-map,
-  .split-location-map {
-    height: 182px;
-    min-height: 182px;
-  }
-
-  .promotion-card h2 {
-    font-size: 1.22rem;
-  }
-
-  .promotion-text-wrap.collapsed {
-    max-height: 118px;
-  }
-
-  .booking-head h2 {
-    font-size: 1.2rem;
-  }
-
-  #cliniko-51970928 {
-    min-height: 820px;
-  }
-}
-
-.book-content {
-  padding: 8px 24px 100px;
-}
-
-.hero-section {
-  margin-bottom: 2px;
-}
-
-.top-split-section {
-  margin-top: 0;
-  margin-bottom: 14px;
 }
 </style>

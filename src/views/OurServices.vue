@@ -1,4 +1,4 @@
-<!-- <template>
+<template>
   <div class="services-page">
     <NavBar />
 
@@ -6,9 +6,9 @@
       <section class="hero-section">
         <div class="hero-content">
           <h1>Our Services</h1>
-          <p class="hero-text">
+          <!-- <p class="hero-text">
             Explore our treatment services and click a topic below to view details.
-          </p>
+          </p> -->
         </div>
       </section>
 
@@ -213,7 +213,7 @@ onMounted(fetchServices)
 }
 
 .hero-section {
-  padding: 92px 20px 24px;
+  padding: 15px 20px 45px;
 }
 
 .hero-content {
@@ -318,14 +318,14 @@ onMounted(fetchServices)
   align-items: flex-start;
   justify-content: space-between;
   gap: 14px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .service-title {
   margin: 0;
   font-size: clamp(1.55rem, 2.6vw, 2.15rem);
   line-height: 1.15;
-  color: #184566;
+  color: #2f5b43;
   font-weight: 800;
   cursor: pointer;
   transition: opacity 0.2s ease;
@@ -529,14 +529,4 @@ onMounted(fetchServices)
     display: none;
   }
 }
-</style> -->
-
-<template>
-  <div>111</div>
-</template>
-
-<script>
-export default {}
-</script>
-
-<style></style>
+</style>

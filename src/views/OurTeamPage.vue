@@ -4,29 +4,29 @@
 
     <section class="hero-section">
       <div class="hero-inner">
-        <p class="hero-kicker">HERBS &amp; MOTION</p>
         <h1>Meet Our Team</h1>
-        <p class="hero-desc">
-          Our practitioners combine clinical expertise, thoughtful care and a holistic approach to
-          support every stage of your health journey.
-        </p>
       </div>
     </section>
 
     <section class="team-section">
-      <div v-if="loading" class="state-card">Loading our team...</div>
+      <div v-if="loading" class="state-card">Loading our practitioners...</div>
 
       <div v-else-if="errorMessage" class="state-card error-card">
         {{ errorMessage }}
       </div>
 
       <div v-else-if="teamMembers.length === 0" class="state-card">
-        Our team profiles will be available soon.
+        Our practitioner profiles will be available soon.
       </div>
 
-      <div v-else class="team-list">
-        <article v-for="(member, index) in teamMembers" :key="member.id || index" class="team-row">
-          <div class="member-image-wrap">
+      <div v-else class="team-grid">
+        <article
+          v-for="(member, index) in teamMembers"
+          :key="member.id || index"
+          class="team-card"
+          @click="goToDetail(member)"
+        >
+          <div class="card-image-wrapper">
             <img
               v-if="member.image && !member.imageError"
               :src="member.image"
@@ -39,74 +39,16 @@
             </div>
           </div>
 
-          <div class="member-content">
-            <div class="member-top">
-              <!-- <span class="member-role">
-                {{ member.role || 'Practitioner' }}
-              </span> -->
+          <div class="card-content">
+            <h2 class="member-name">{{ member.name || 'Team Member' }}</h2>
 
-              <h2>
-                {{ member.name || 'Team Member' }}
-                <span v-if="member.credentials" class="credentials">
-                  {{ member.credentials }}
-                </span>
-              </h2>
+            <p class="member-role">
+              {{ member.rolesText || 'Practitioner' }}
+            </p>
 
-              <div class="about-wrap">
-                <div
-                  class="member-about multiline-text"
-                  :class="{ collapsed: !member.aboutExpanded }"
-                >
-                  {{ member.about || 'Practitioner profile coming soon.' }}
-                </div>
-
-                <button
-                  v-if="showAboutToggle(member)"
-                  type="button"
-                  class="about-toggle-btn"
-                  @click="member.aboutExpanded = !member.aboutExpanded"
-                >
-                  {{ member.aboutExpanded ? 'Show less' : 'Read more' }}
-                </button>
-              </div>
-            </div>
-
-            <div class="member-info-grid">
-              <div v-if="parseLines(member.qualifications).length" class="info-card">
-                <h3>Qualifications</h3>
-                <ul>
-                  <li v-for="(item, idx) in parseLines(member.qualifications)" :key="idx">
-                    {{ item }}
-                  </li>
-                </ul>
-              </div>
-
-              <div v-if="parseLines(member.education).length" class="info-card">
-                <h3>Education</h3>
-                <ul>
-                  <li v-for="(item, idx) in parseLines(member.education)" :key="idx">
-                    {{ item }}
-                  </li>
-                </ul>
-              </div>
-
-              <div v-if="parseLines(member.services).length" class="info-card">
-                <h3>Services</h3>
-                <ul>
-                  <li v-for="(item, idx) in parseLines(member.services)" :key="idx">
-                    {{ item }}
-                  </li>
-                </ul>
-              </div>
-
-              <div v-if="parseLines(member.interests).length" class="info-card">
-                <h3>Areas of Special Interest</h3>
-                <ul>
-                  <li v-for="(item, idx) in parseLines(member.interests)" :key="idx">
-                    {{ item }}
-                  </li>
-                </ul>
-              </div>
+            <div class="profile-link">
+              View Profile
+              <span class="arrow">→</span>
             </div>
           </div>
         </article>
@@ -118,17 +60,20 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/firebase'
 import NavBar from '../component/NavBar.vue'
 import PageFooter from '../component/PageFooter.vue'
 
+const router = useRouter()
+
 const loading = ref(true)
 const errorMessage = ref('')
 const teamMembers = ref([])
-const scrollY = ref(0)
 
+const scrollY = ref(0)
 const handleScroll = () => {
   scrollY.value = window.scrollY || window.pageYOffset || 0
 }
@@ -151,17 +96,37 @@ const pageDynamicStyle = computed(() => {
   }
 })
 
-const parseLines = (value) => {
-  if (!value) return []
-  return value
-    .split('\n')
-    .map((item) => item.trim())
-    .filter(Boolean)
+const sanitizeRoles = (roles, fallbackRole = '') => {
+  if (Array.isArray(roles)) {
+    return roles.map((item) => String(item || '').trim()).filter(Boolean)
+  }
+
+  if (fallbackRole && String(fallbackRole).trim()) {
+    return [String(fallbackRole).trim()]
+  }
+
+  return []
 }
 
-const showAboutToggle = (member) => {
-  if (!member?.about) return false
-  return member.about.length > 320 || member.about.includes('\n')
+const buildSlug = (member, index) => {
+  if (member?.slug && String(member.slug).trim()) {
+    return String(member.slug).trim()
+  }
+
+  if (member?.name && String(member.name).trim()) {
+    return String(member.name)
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+  }
+
+  return `member-${index}`
+}
+
+const goToDetail = (member) => {
+  router.push(`/our-team/${member.slug}`)
 }
 
 const fetchTeamMembers = async () => {
@@ -182,25 +147,23 @@ const fetchTeamMembers = async () => {
     teamMembers.value = Array.isArray(data.members)
       ? data.members
           .filter((member) => member.visible !== false)
-          .map((member, index) => ({
-            id: member.id || `member_${index}`,
-            name: member.name || '',
-            role: member.role || '',
-            credentials: member.credentials || '',
-            image: member.image || '',
-            imageError: false,
-            qualifications: member.qualifications || '',
-            education: member.education || '',
-            services: member.services || '',
-            interests: member.interests || '',
-            about: member.about || '',
-            aboutExpanded: false,
-            visible: member.visible ?? true,
-          }))
+          .map((member, index) => {
+            const roles = sanitizeRoles(member.roles, member.role)
+            return {
+              id: member.id || `member_${index}`,
+              slug: buildSlug(member, index),
+              name: member.name || '',
+              roles,
+              rolesText: roles.join(' / '),
+              image: member.image || '',
+              imageError: false,
+              visible: member.visible ?? true,
+            }
+          })
       : []
   } catch (error) {
     console.error('Failed to fetch team members:', error)
-    errorMessage.value = 'Failed to load team profiles.'
+    errorMessage.value = 'Failed to load practitioner profiles.'
   } finally {
     loading.value = false
   }
@@ -221,82 +184,95 @@ onBeforeUnmount(() => {
 .our-team-page {
   min-height: 100vh;
   transition: background 0.25s ease-out;
-  padding-bottom: 0;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
 }
 
+/* ---------------- Hero Section ---------------- */
 .hero-section {
-  padding: 92px 20px 28px;
+  padding: 80px 24px 40px;
+  text-align: center;
 }
 
 .hero-inner {
-  max-width: 1180px;
+  max-width: 800px;
   margin: 0 auto;
-}
-
-.hero-kicker {
-  margin: 0 0 14px;
-  color: #4f7260;
-  font-size: 0.92rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
 }
 
 .hero-inner h1 {
   margin: 0;
-  color: #2f5b43;
-  font-size: clamp(2.8rem, 6vw, 4.7rem);
-  line-height: 1.02;
-  letter-spacing: -0.03em;
+  color: #1a3326;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 700;
 }
 
 .hero-desc {
-  max-width: 760px;
-  margin: 18px 0 0;
-  color: #62786d;
-  font-size: 1.08rem;
-  line-height: 1.85;
+  margin: 24px auto 0;
+  color: #5c7063;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  max-width: 600px;
 }
 
+/* ---------------- Team Section ---------------- */
 .team-section {
-  padding: 18px 20px 80px;
+  padding: 0 24px 120px;
 }
 
-.team-list {
-  max-width: 1180px;
+.team-grid {
+  max-width: 1200px;
   margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 24px;
+}
+
+/* ---------------- Team Card ---------------- */
+.team-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  transition:
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 24px rgba(26, 51, 38, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   display: flex;
   flex-direction: column;
-  gap: 26px;
 }
 
-.team-row {
-  display: grid;
-  grid-template-columns: 250px minmax(0, 1fr);
-  gap: 28px;
-  align-items: start;
-  padding: 24px;
-  border-radius: 30px;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(47, 91, 67, 0.08);
-  box-shadow: 0 20px 42px rgba(64, 79, 68, 0.1);
+.team-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 48px rgba(26, 51, 38, 0.08);
 }
 
-.member-image-wrap {
-  width: 250px;
-  height: 320px;
-  border-radius: 22px;
+/* ---------------- Image Wrapper ---------------- */
+.card-image-wrapper {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 10px;
   overflow: hidden;
-  background: linear-gradient(180deg, #edf4e7 0%, #f7f6f2 100%);
-  flex-shrink: 0;
+  background-color: #f0f4f2;
+  margin-bottom: 16px;
+  position: relative;
 }
 
 .member-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.team-card:hover .member-image {
+  transform: scale(1.05);
 }
 
 .member-image-placeholder {
@@ -305,193 +281,95 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #d9e6d4, #f4ece7);
+  font-size: 2.5rem;
+  color: #8aaa79;
+  font-weight: 500;
 }
 
-.member-image-placeholder span {
-  width: 92px;
-  height: 92px;
-  border-radius: 50%;
-  background: #2f5b43;
-  color: #fff;
+/* ---------------- Card Content ---------------- */
+.card-content {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.2rem;
-  font-weight: 700;
-  box-shadow: 0 12px 28px rgba(47, 91, 67, 0.2);
+  flex-direction: column;
+  flex-grow: 1;
 }
 
-.member-content {
-  min-width: 0;
-}
-
-.member-top {
-  margin-bottom: 22px;
+.member-name {
+  margin: 0 0 4px;
+  color: #1a3326;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .member-role {
+  margin: 0 0 16px;
+  color: #7a8f83;
+  font-size: 0.9rem;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.55;
+  min-height: 2.8em;
+}
+
+/* ---------------- Elegant Text Link ---------------- */
+.profile-link {
+  margin-top: auto;
   display: inline-flex;
   align-items: center;
-  min-height: 34px;
-  padding: 0 16px;
-  border-radius: 999px;
-  background: #eef3ec;
-  color: #607a69;
-  font-size: 0.92rem;
-  font-weight: 700;
-  margin-bottom: 14px;
-}
-
-.member-top h2 {
-  margin: 0;
+  gap: 8px;
   color: #2f5b43;
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-}
-
-.credentials {
-  display: inline-block;
-  margin-left: 10px;
-  color: #6d8577;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  vertical-align: middle;
+  transition: color 0.3s ease;
 }
 
-.about-wrap {
-  margin-top: 18px;
+.arrow {
+  transition: transform 0.3s ease;
 }
 
-.member-about {
-  color: #63786c;
-  font-size: 1.02rem;
-  line-height: 1.9;
-  white-space: pre-line;
+.team-card:hover .profile-link {
+  color: #1a3326;
 }
 
-.member-about.collapsed {
-  display: -webkit-box;
-  -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.team-card:hover .arrow {
+  transform: translateX(4px);
 }
 
-.about-toggle-btn {
-  margin-top: 12px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: #2f6a45;
-  font-size: 0.96rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.about-toggle-btn:hover {
-  opacity: 0.8;
-}
-
-.member-info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.info-card {
-  border-radius: 22px;
-  background: rgba(247, 250, 248, 0.96);
-  border: 1px solid rgba(47, 91, 67, 0.07);
-  padding: 18px 18px 16px;
-}
-
-.info-card h3 {
-  margin: 0 0 10px;
-  color: #355b47;
-  font-size: 1rem;
-}
-
-.info-card ul {
-  margin: 0;
-  padding-left: 1.15rem;
-  color: #60776b;
-}
-
-.info-card li {
-  margin-bottom: 8px;
-  line-height: 1.75;
-}
-
+/* ---------------- State Cards ---------------- */
 .state-card {
-  max-width: 1180px;
-  margin: 0 auto;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.68);
-  border: 1px solid rgba(47, 91, 67, 0.08);
-  box-shadow: 0 22px 48px rgba(64, 79, 68, 0.1);
-  padding: 34px 28px;
-  color: #60776b;
-  font-size: 1.05rem;
+  text-align: center;
+  padding: 60px 20px;
+  color: #7a8f83;
+  font-size: 1.1rem;
 }
 
 .error-card {
-  color: #a14f67;
+  color: #d36b6b;
 }
 
-@media (max-width: 1024px) {
-  .team-row {
-    grid-template-columns: 220px minmax(0, 1fr);
-    gap: 22px;
-  }
-
-  .member-image-wrap {
-    width: 220px;
-    height: 290px;
-  }
-
-  .member-info-grid {
-    grid-template-columns: 1fr;
+/* ---------------- Responsive ---------------- */
+@media (max-width: 1100px) {
+  .team-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
 }
 
 @media (max-width: 768px) {
   .hero-section {
-    padding: 70px 16px 20px;
+    padding: 60px 20px 30px;
   }
 
   .team-section {
-    padding: 18px 16px 60px;
+    padding: 0 20px 80px;
   }
 
-  .team-row {
-    grid-template-columns: 1fr;
-    padding: 18px;
-    border-radius: 24px;
+  .team-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 
-  .member-image-wrap {
-    width: 100%;
-    height: 260px;
-    border-radius: 18px;
-  }
-
-  .hero-inner h1 {
-    font-size: clamp(2.4rem, 9vw, 3.6rem);
-  }
-
-  .hero-desc,
-  .member-about,
-  .info-card li {
-    font-size: 0.98rem;
-  }
-
-  .info-card {
-    border-radius: 18px;
-  }
-
-  .member-about.collapsed {
-    -webkit-line-clamp: 4;
+  .team-card {
+    padding: 12px;
   }
 }
 </style>

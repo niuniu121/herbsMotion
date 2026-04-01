@@ -3,9 +3,7 @@
     <div class="admin-container">
       <div class="header-row">
         <div>
-          <span class="admin-badge">Admin Panel</span>
           <h1>Our Services Management</h1>
-          <p>Manage service cards and list content. Each list item links to one detail page.</p>
         </div>
 
         <div class="header-actions">
@@ -25,12 +23,20 @@
           <div class="service-top">
             <div>
               <h2>{{ service.title || `Service ${serviceIndex + 1}` }}</h2>
-              <p class="service-meta">{{ service.slug || 'no-slug-yet' }}</p>
             </div>
 
             <div class="service-top-actions">
-              <button class="mini-outline-btn" @click="toggleExpand(service.localKey)">
-                {{ expandedMap[service.localKey] ? 'Collapse' : 'Expand' }}
+              <div class="service-bottom-actions">
+                <button
+                  class="outline-btn"
+                  @click="saveSingleService(service)"
+                  :disabled="savingMap[service.localKey]"
+                >
+                  {{ savingMap[service.localKey] ? 'Saving...' : 'Save Service' }}
+                </button>
+              </div>
+              <button class="mini-outline-btn" @click="toggleExpand(service)">
+                {{ expandedMap[getExpandKey(service)] ? 'Collapse' : 'Expand' }}
               </button>
               <button class="danger-btn" @click="confirmDeleteService(service)">Delete</button>
             </div>
@@ -42,23 +48,19 @@
               <input
                 v-model="service.title"
                 type="text"
-                placeholder="e.g. Physiotherapy"
+                placeholder=""
                 @input="updateSlugIfNeeded(service)"
               />
             </div>
 
             <div class="field">
               <label>Slug</label>
-              <input v-model="service.slug" type="text" placeholder="e.g. physiotherapy" />
+              <input v-model="service.slug" type="text" placeholder="" />
             </div>
 
             <div class="field">
               <label>Subtitle</label>
-              <input
-                v-model="service.subtitle"
-                type="text"
-                placeholder="Short subtitle for this service"
-              />
+              <input v-model="service.subtitle" type="text" placeholder="" />
             </div>
 
             <div class="field">
@@ -68,11 +70,7 @@
 
             <div class="field full">
               <label>Card Image URL</label>
-              <input
-                v-model="service.cardImage"
-                type="text"
-                placeholder="/images/service.jpg or https://..."
-              />
+              <input v-model="service.cardImage" type="text" placeholder="" />
             </div>
           </div>
 
@@ -88,7 +86,7 @@
           </div>
 
           <transition name="fade">
-            <div v-if="expandedMap[service.localKey]" class="list-section">
+            <div v-if="expandedMap[getExpandKey(service)]" class="list-section">
               <div class="section-head">
                 <div>
                   <h3>List Content</h3>
@@ -103,6 +101,7 @@
               <div v-else class="list-items-wrap">
                 <div
                   v-for="(item, itemIndex) in service.listItems"
+                  :id="`list-item-${item.id}`"
                   :key="item.id"
                   class="list-item-card"
                   :class="{ dragging: dragState.itemId === item.id }"
@@ -134,21 +133,19 @@
                   <div class="form-grid compact-grid">
                     <div class="field">
                       <label>List Title</label>
-                      <input
-                        v-model="item.title"
-                        type="text"
-                        placeholder="Shown in the list only"
-                      />
+                      <input v-model="item.title" type="text" placeholder="" />
                     </div>
 
-                    <!-- <div class="field full">
+                    <!--
+                    <div class="field full">
                       <label>List Description</label>
                       <textarea
                         v-model="item.description"
                         rows="3"
                         placeholder="Short text shown in the list only"
                       ></textarea>
-                    </div> -->
+                    </div>
+                    -->
                   </div>
                 </div>
               </div>
@@ -178,7 +175,6 @@
           <div class="modal-head">
             <div>
               <h2>{{ modal.type === 'service' ? 'Delete Service?' : 'Delete Item?' }}</h2>
-              <p>{{ modal.message }}</p>
             </div>
             <button class="icon-btn" @click="closeModal">✕</button>
           </div>
@@ -187,7 +183,7 @@
             {{
               modal.type === 'service'
                 ? 'This will remove the whole service and all linked detail pages.'
-                : 'This will remove only this list item. Its linked detail page will also be removed.'
+                : 'This list item will be removed. '
             }}
           </div>
 
@@ -208,7 +204,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, onBeforeUnmount, reactive, ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { collection, deleteDoc, doc, getDocs, serverTimestamp, setDoc } from 'firebase/firestore'
 import { db } from '@/firebase'
@@ -239,6 +235,8 @@ const modal = ref({
   message: '',
 })
 
+const EXPAND_STORAGE_KEY = 'admin-services-expanded-map'
+
 function uid(prefix = 'id') {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
@@ -257,6 +255,45 @@ function showToast(message) {
   setTimeout(() => {
     toast.value.show = false
   }, 2200)
+}
+
+function getExpandKey(service) {
+  return service.id || service.localKey
+}
+
+function saveExpandedState() {
+  try {
+    const snapshot = {}
+    services.value.forEach((service) => {
+      const key = getExpandKey(service)
+      snapshot[key] = !!expandedMap[key]
+    })
+    sessionStorage.setItem(EXPAND_STORAGE_KEY, JSON.stringify(snapshot))
+  } catch (error) {
+    console.warn('Failed to save expanded state:', error)
+  }
+}
+
+function restoreExpandedState() {
+  try {
+    const raw = sessionStorage.getItem(EXPAND_STORAGE_KEY)
+    if (!raw) return {}
+    const parsed = JSON.parse(raw)
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch (error) {
+    console.warn('Failed to restore expanded state:', error)
+    return {}
+  }
+}
+
+function migrateExpandState(fromKey, toKey) {
+  if (!fromKey || !toKey || fromKey === toKey) return
+
+  if (Object.prototype.hasOwnProperty.call(expandedMap, fromKey)) {
+    expandedMap[toKey] = !!expandedMap[fromKey]
+    delete expandedMap[fromKey]
+    saveExpandedState()
+  }
 }
 
 function createEmptyListItem() {
@@ -325,7 +362,6 @@ function sanitizeService(snapshotId, raw = {}) {
 
   let detailPages = Array.isArray(raw.detailPages) ? raw.detailPages.map(normalizeDetailPage) : []
 
-  // 兼容旧数据：如果之前只有 articles，没有 detailPages，就给每个 list item 建一个空 detailPage
   if (!detailPages.length && listItems.length) {
     detailPages = listItems.map((item) => createEmptyDetailPage(item.detailPageId || uid('detail')))
   }
@@ -354,15 +390,18 @@ function updateSlugIfNeeded(service) {
 function addService() {
   const service = createEmptyService()
   services.value.unshift(service)
-  expandedMap[service.localKey] = true
+  expandedMap[getExpandKey(service)] = true
   savingMap[service.localKey] = false
+  saveExpandedState()
 }
 
-function toggleExpand(serviceKey) {
-  expandedMap[serviceKey] = !expandedMap[serviceKey]
+function toggleExpand(service) {
+  const key = getExpandKey(service)
+  expandedMap[key] = !expandedMap[key]
+  saveExpandedState()
 }
 
-function addListItem(service) {
+async function addListItem(service) {
   const newItem = createEmptyListItem()
 
   service.listItems.push(newItem)
@@ -370,6 +409,20 @@ function addListItem(service) {
   const exists = service.detailPages.some((page) => page.id === newItem.detailPageId)
   if (!exists) {
     service.detailPages.push(createEmptyDetailPage(newItem.detailPageId))
+  }
+
+  const expandKey = getExpandKey(service)
+  expandedMap[expandKey] = true
+  saveExpandedState()
+
+  await nextTick()
+
+  const targetEl = document.getElementById(`list-item-${newItem.id}`)
+  if (targetEl) {
+    targetEl.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    })
   }
 }
 
@@ -439,10 +492,15 @@ async function loadServices() {
     rows.sort((a, b) => Number(a.order || 999) - Number(b.order || 999))
     services.value = rows
 
+    const storedExpandedMap = restoreExpandedState()
+
     rows.forEach((service) => {
-      expandedMap[service.localKey] = false
+      const expandKey = getExpandKey(service)
+      expandedMap[expandKey] = !!storedExpandedMap[expandKey]
       savingMap[service.localKey] = false
     })
+
+    saveExpandedState()
   } catch (error) {
     console.error('Failed to load services:', error)
     showToast('Failed to load services.')
@@ -459,6 +517,8 @@ async function saveSingleService(service) {
 
     const payload = buildPayload(service)
 
+    const oldExpandKey = getExpandKey(service)
+
     let targetId = service.id
     if (!targetId) {
       targetId = uid('serviceDoc')
@@ -466,6 +526,10 @@ async function saveSingleService(service) {
     }
 
     await setDoc(doc(db, 'services', targetId), payload, { merge: true })
+
+    const newExpandKey = getExpandKey(service)
+    migrateExpandState(oldExpandKey, newExpandKey)
+    saveExpandedState()
 
     showToast('Service saved successfully.')
   } catch (error) {
@@ -487,6 +551,7 @@ function goToDetail(service, item) {
   }
 
   ensureDetailPagesForList(service)
+  saveExpandedState()
 
   router.push({
     path: `/admin/services/${service.id}`,
@@ -539,7 +604,12 @@ async function confirmModalAction() {
         await deleteDoc(doc(db, 'services', service.id))
       }
 
+      const expandKey = getExpandKey(service)
+      delete expandedMap[expandKey]
+      delete savingMap[service.localKey]
+
       services.value = services.value.filter((entry) => entry.localKey !== service.localKey)
+      saveExpandedState()
       showToast('Service deleted.')
     } catch (error) {
       console.error('Delete service failed:', error)
@@ -566,6 +636,7 @@ async function confirmModalAction() {
         await setDoc(doc(db, 'services', service.id), payload, { merge: true })
       }
 
+      saveExpandedState()
       showToast('Item deleted.')
     } catch (error) {
       console.error('Delete item failed:', error)
@@ -606,6 +677,10 @@ function handleDragEnd() {
 }
 
 onMounted(loadServices)
+
+onBeforeUnmount(() => {
+  saveExpandedState()
+})
 </script>
 
 <style scoped>
@@ -697,7 +772,7 @@ h1 {
 
 .service-top h2 {
   margin: 0 0 8px;
-  color: #204763;
+  color: #2f6b4f;
   font-size: 28px;
 }
 

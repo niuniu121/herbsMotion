@@ -164,7 +164,13 @@ const isSubmitting = ref(false)
 
 const faqLoading = ref(false)
 const faqDatabase = ref([])
-
+//监听外部
+const handleExternalOpenLead = () => {
+  // 可以给一个默认的提示文字，代表是从预约页面过来的
+  pendingQuestion.value = 'Book a Consultation'
+  resetLeadForm()
+  showLeadModal.value = true
+}
 const messages = ref([
   {
     role: 'bot',
@@ -524,11 +530,16 @@ onMounted(() => {
   startPromptRotation()
   resetPromptAutoShow()
   fetchFaqsFromFirestore()
+  //监听预约页
+  window.addEventListener('open-herbsie-lead', handleExternalOpenLead)
 })
 
 onBeforeUnmount(() => {
   stopPromptRotation()
   if (promptAutoHideTimeout) clearTimeout(promptAutoHideTimeout)
+
+  //移除监听，防止内存泄漏
+  window.removeEventListener('open-herbsie-lead', handleExternalOpenLead)
 })
 </script>
 

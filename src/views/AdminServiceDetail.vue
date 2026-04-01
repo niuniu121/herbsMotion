@@ -3,11 +3,7 @@
     <div class="admin-container">
       <div class="header-row">
         <div>
-          <span class="admin-badge">Admin Panel</span>
           <h1>Edit Detail Content</h1>
-          <p>
-            Edit one detail page only. Articles here are fully independent from outer list content.
-          </p>
         </div>
 
         <div class="header-actions">
@@ -29,36 +25,28 @@
       </div>
 
       <div v-else class="detail-layout">
-        <!-- main heading -->
         <div class="admin-card main-card" v-if="currentDetailPage">
           <div class="section-head">
             <div>
               <h2>Main Heading</h2>
-              <p class="section-desc">
-                This controls the large title shown at the top of this detail page.
-              </p>
+              <p class="section-desc"></p>
             </div>
           </div>
 
           <div class="field">
-            <label>Big Title</label>
+            <label>Main Title</label>
             <input
               v-model="currentDetailPage.heroTitle"
               type="text"
-              placeholder="e.g. REMEDIAL MASSAGE"
+              placeholder="e.g. Physiotherapy Services"
             />
           </div>
         </div>
 
-        <!-- articles manager -->
         <div class="admin-card main-card" v-if="currentDetailPage">
           <div class="section-head">
             <div>
-              <h2>Articles Inside This Detail Page</h2>
-              <p class="section-desc">
-                These articles belong only to this detail page. They do not control outer list
-                content.
-              </p>
+              <h2>Detail Page</h2>
             </div>
 
             <button class="save-btn small-btn" @click="addArticleToCurrentDetail">
@@ -102,14 +90,10 @@
           </div>
         </div>
 
-        <!-- selected article editor -->
         <div class="admin-card main-card" v-if="currentArticle">
           <div class="section-head">
             <div>
               <h2>Selected Article</h2>
-              <p class="section-desc">
-                This is the article content shown inside the selected detail page.
-              </p>
             </div>
 
             <div class="topic-badge">
@@ -119,38 +103,17 @@
 
           <div class="field">
             <label>Article Title</label>
-            <input
-              v-model="currentArticle.title"
-              type="text"
-              placeholder="e.g. What is remedial massage?"
-            />
+            <input v-model="currentArticle.title" type="text" placeholder="" />
           </div>
-
-          <!-- <div class="field">
-            <label>Excerpt (Optional)</label>
-            <textarea
-              v-model="currentArticle.excerpt"
-              rows="3"
-              placeholder="Short introduction for this detail article..."
-            ></textarea>
-          </div> -->
 
           <div class="field">
             <label>Article Image URL (Optional)</label>
-            <input
-              v-model="currentArticle.image"
-              type="text"
-              placeholder="/images/example.jpg or https://..."
-            />
+            <input v-model="currentArticle.image" type="text" placeholder="" />
           </div>
 
           <div class="field">
             <label>Article Content</label>
-            <textarea
-              v-model="currentArticle.content"
-              rows="12"
-              placeholder="Write the full article content here..."
-            ></textarea>
+            <textarea v-model="currentArticle.content" rows="12" placeholder=""></textarea>
           </div>
 
           <div class="switch-row">
@@ -163,25 +126,6 @@
               />
             </label>
           </div>
-
-          <div class="field">
-            <label>Image Preview</label>
-            <div class="image-preview">
-              <img
-                v-if="currentArticle.image"
-                :src="currentArticle.image"
-                alt="Article Preview"
-                @error="currentArticle.image = ''"
-              />
-              <div v-else class="placeholder">No image for this article</div>
-            </div>
-          </div>
-        </div>
-
-        <div v-else-if="currentDetailPage" class="admin-card main-card">
-          <div class="empty-box">
-            This detail page has no selected article yet. Add one to start editing.
-          </div>
         </div>
 
         <div class="action-bar" v-if="currentDetailPage">
@@ -192,7 +136,6 @@
         </div>
       </div>
 
-      <!-- delete confirm -->
       <transition name="fade">
         <div v-if="deleteModal.open" class="modal-overlay" @click.self="closeDeleteModal">
           <div class="modal-card">
@@ -343,7 +286,6 @@ function normalizeDetailPage(page) {
 
 function sanitizeService(snapshotId, raw = {}) {
   const listItems = Array.isArray(raw.listItems) ? raw.listItems.map(normalizeListItem) : []
-
   let detailPages = Array.isArray(raw.detailPages) ? raw.detailPages.map(normalizeDetailPage) : []
 
   if (!detailPages.length) {
@@ -378,11 +320,9 @@ const currentDetailPage = computed(() => {
 
 const currentArticle = computed(() => {
   if (!currentDetailPage.value?.articles?.length) return null
-
   const matched = currentDetailPage.value.articles.find(
     (article) => article.id === selectedArticleId.value,
   )
-
   return matched || currentDetailPage.value.articles[0] || null
 })
 
@@ -396,7 +336,6 @@ const currentArticleDisplay = computed(() => {
 
 function ensureCurrentDetailPageExists() {
   if (!selectedDetailId.value) return
-
   const exists = form.value.detailPages.some((page) => page.id === selectedDetailId.value)
   if (!exists) {
     form.value.detailPages.push(createEmptyDetailPage(selectedDetailId.value))
@@ -405,7 +344,6 @@ function ensureCurrentDetailPageExists() {
 
 function ensureAtLeastOneArticleSelected() {
   if (!currentDetailPage.value) return
-
   if (!currentDetailPage.value.articles.length) return
 
   const exists = currentDetailPage.value.articles.some(
@@ -417,6 +355,7 @@ function ensureAtLeastOneArticleSelected() {
   }
 }
 
+// 🐛 Bug 修复区域：去掉了致命的 filter，保留所有编辑过的详情页！
 function buildPayload() {
   const listItems = Array.isArray(form.value.listItems)
     ? form.value.listItems.map((item) => ({
@@ -427,25 +366,21 @@ function buildPayload() {
       }))
     : []
 
-  const usedDetailPageIds = new Set(listItems.map((item) => item.detailPageId).filter(Boolean))
-
   const detailPages = Array.isArray(form.value.detailPages)
-    ? form.value.detailPages
-        .filter((page) => usedDetailPageIds.has(page.id))
-        .map((page) => ({
-          id: String(page.id || uid('detail')).trim(),
-          heroTitle: String(page.heroTitle || '').trim(),
-          articles: Array.isArray(page.articles)
-            ? page.articles.map((article) => ({
-                id: String(article.id || uid('article')).trim(),
-                title: String(article.title || '').trim(),
-                excerpt: String(article.excerpt || '').trim(),
-                content: String(article.content || '').trim(),
-                image: String(article.image || '').trim(),
-                active: typeof article.active === 'boolean' ? article.active : true,
-              }))
-            : [],
-        }))
+    ? form.value.detailPages.map((page) => ({
+        id: String(page.id || uid('detail')).trim(),
+        heroTitle: String(page.heroTitle || '').trim(),
+        articles: Array.isArray(page.articles)
+          ? page.articles.map((article) => ({
+              id: String(article.id || uid('article')).trim(),
+              title: String(article.title || '').trim(),
+              excerpt: String(article.excerpt || '').trim(),
+              content: String(article.content || '').trim(),
+              image: String(article.image || '').trim(),
+              active: typeof article.active === 'boolean' ? article.active : true,
+            }))
+          : [],
+      }))
     : []
 
   return {
@@ -456,7 +391,7 @@ function buildPayload() {
     order: Number(form.value.order || 999),
     active: !!form.value.active,
     listItems,
-    detailPages,
+    detailPages, // 现在它会被原封不动保存，不再被误删了
     updatedAt: serverTimestamp(),
   }
 }
@@ -504,7 +439,6 @@ function goToArticle(articleId) {
 
 function addArticleToCurrentDetail() {
   if (!currentDetailPage.value) return
-
   const newArticle = createEmptyArticle()
   currentDetailPage.value.articles.push(newArticle)
   goToArticle(newArticle.id)
@@ -512,7 +446,6 @@ function addArticleToCurrentDetail() {
 
 function confirmRemoveArticle(articleId) {
   const article = currentDetailPage.value?.articles?.find((item) => item.id === articleId)
-
   deleteModal.value = {
     open: true,
     articleId,
@@ -540,7 +473,6 @@ function removeArticleConfirmed() {
   )
 
   const nextArticleId = currentDetailPage.value.articles[0]?.id || ''
-
   closeDeleteModal()
 
   if (nextArticleId) {
@@ -548,9 +480,7 @@ function removeArticleConfirmed() {
   } else {
     router.replace({
       path: `/admin/services/${form.value.id}`,
-      query: {
-        detail: selectedDetailId.value,
-      },
+      query: { detail: selectedDetailId.value },
     })
   }
 
@@ -576,7 +506,6 @@ function handleDrop(targetArticleId) {
 
   const moved = currentDetailPage.value.articles.splice(fromIndex, 1)[0]
   currentDetailPage.value.articles.splice(toIndex, 0, moved)
-
   dragArticleId.value = null
 }
 
@@ -603,8 +532,8 @@ async function saveDetailPage() {
       }))
     }
 
+    // 将完全组装且不再被误删的数据写入数据库
     await setDoc(doc(db, 'services', form.value.id), buildPayload(), { merge: true })
-
     showToast('Detail page saved successfully.')
   } catch (error) {
     console.error('Failed to save detail page:', error)
@@ -621,18 +550,14 @@ function goBack() {
 watch(
   () => route.query.detail,
   () => {
-    if (!loading.value) {
-      loadDetailPage()
-    }
+    if (!loading.value) loadDetailPage()
   },
 )
 
 watch(
   () => route.query.article,
   () => {
-    if (!loading.value) {
-      ensureAtLeastOneArticleSelected()
-    }
+    if (!loading.value) ensureAtLeastOneArticleSelected()
   },
 )
 
@@ -708,7 +633,7 @@ h1 {
 
 .main-card h2 {
   margin: 0 0 18px;
-  color: #204763;
+  color: #2f6b4f;
   font-size: 28px;
 }
 

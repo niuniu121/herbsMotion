@@ -90,7 +90,7 @@
           </div>
         </div>
 
-        <div class="admin-card main-card" v-if="currentArticle">
+        <div class="admin-card main-card" v-if="currentArticle" id="article-editor">
           <div class="section-head">
             <div>
               <h2>Selected Article</h2>
@@ -103,7 +103,12 @@
 
           <div class="field">
             <label>Article Title</label>
-            <input v-model="currentArticle.title" type="text" placeholder="" />
+            <input
+              ref="articleTitleInput"
+              v-model="currentArticle.title"
+              type="text"
+              placeholder=""
+            />
           </div>
 
           <div class="field">
@@ -171,7 +176,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { db } from '@/firebase'
@@ -184,6 +189,7 @@ const saving = ref(false)
 const deleting = ref(false)
 const loadError = ref('')
 const dragArticleId = ref(null)
+const articleTitleInput = ref(null)
 
 const toast = ref({
   show: false,
@@ -426,8 +432,8 @@ async function loadDetailPage() {
   }
 }
 
-function goToArticle(articleId) {
-  router.replace({
+async function goToArticle(articleId) {
+  await router.replace({
     path: `/admin/services/${form.value.id}`,
     query: {
       detail: selectedDetailId.value,
@@ -436,11 +442,27 @@ function goToArticle(articleId) {
   })
 }
 
-function addArticleToCurrentDetail() {
+async function addArticleToCurrentDetail() {
   if (!currentDetailPage.value) return
+
   const newArticle = createEmptyArticle()
   currentDetailPage.value.articles.push(newArticle)
-  goToArticle(newArticle.id)
+
+  await goToArticle(newArticle.id)
+  await nextTick()
+  await nextTick()
+
+  const el = document.getElementById('article-editor')
+  if (el) {
+    el.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  }
+
+  if (articleTitleInput.value) {
+    articleTitleInput.value.focus()
+  }
 }
 
 function confirmRemoveArticle(articleId) {
@@ -481,7 +503,6 @@ async function removeArticleConfirmed() {
 
     const nextArticleId = currentDetailPage.value.articles[0]?.id || ''
 
-    // 这里强制关闭弹窗
     closeDeleteModal(true)
 
     if (nextArticleId) {

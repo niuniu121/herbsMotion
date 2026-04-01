@@ -25,21 +25,23 @@
               </p>
             </section>
 
-            <section v-if="visibleArticles.length" class="editorial-content" ref="masonryGridRef">
+            <section v-if="visibleArticles.length" class="editorial-content">
               <article
                 v-for="article in visibleArticles"
                 :key="article.id"
                 class="editorial-article"
-                :ref="(el) => setMasonryItemRef(article.id, el)"
               >
                 <div v-if="article.image && !article.imageError" class="article-hero-image">
                   <img
                     :src="article.image"
                     :alt="article.title || 'Article image'"
                     loading="lazy"
-                    @load="layoutMasonry"
                     @error="handleImageError(article)"
                   />
+                </div>
+
+                <div v-else class="article-image-placeholder">
+                  <span>{{ (article.title || 'A').charAt(0) }}</span>
                 </div>
 
                 <div class="article-text-body">
@@ -47,32 +49,9 @@
                     {{ article.title || 'Untitled Article' }}
                   </h3>
 
-                  <p v-if="article.excerpt" class="article-excerpt">
-                    {{ article.excerpt }}
-                  </p>
-
-                  <div
-                    v-if="getArticleParagraphs(article).length"
-                    class="article-paragraphs"
-                    :ref="(el) => setArticleContentRef(article.id, el)"
-                  >
-                    <p
-                      v-for="(paragraph, index) in getVisibleParagraphs(article)"
-                      :key="`${article.id}-${index}`"
-                      :class="{ expanded: expandedArticles[article.id] }"
-                    >
-                      {{ paragraph }}
-                    </p>
-                  </div>
-
-                  <p v-else class="article-empty-copy">Detailed content is coming soon.</p>
-
-                  <button
-                    v-if="shouldShowReadMore(article.id)"
-                    class="read-more-btn"
-                    @click="toggleArticle(article.id)"
-                  >
-                    {{ expandedArticles[article.id] ? 'Show less' : 'Read more' }}
+                  <button class="read-more-btn" @click="openArticleModal(article)">
+                    Read more
+                    <span class="arrow">→</span>
                   </button>
                 </div>
               </article>
@@ -102,12 +81,51 @@
       </div>
     </main>
 
+    <transition name="modal-fade">
+      <div v-if="activeArticle" class="article-modal-overlay" @click.self="closeArticleModal">
+        <div class="article-modal-card">
+          <button class="modal-close-btn" @click="closeArticleModal" aria-label="Close">✕</button>
+
+          <div class="modal-top-decoration"></div>
+
+          <div class="article-modal-body">
+            <h2 class="modal-title">
+              {{ activeArticle.title || 'Untitled Article' }}
+            </h2>
+
+            <div
+              v-if="activeArticle.image && !activeArticle.imageError"
+              class="modal-image-wrapper"
+            >
+              <img
+                :src="activeArticle.image"
+                :alt="activeArticle.title || 'Article image'"
+                class="modal-image"
+              />
+            </div>
+
+            <div v-if="modalParagraphs.length" class="modal-content">
+              <p v-for="(paragraph, index) in modalParagraphs" :key="index">
+                {{ paragraph }}
+              </p>
+            </div>
+
+            <p v-else class="modal-empty-copy">Detailed content is coming soon.</p>
+
+            <div class="modal-actions">
+              <button class="modal-back-btn" @click="closeArticleModal">← Back</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+
     <PageFooter />
   </div>
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import NavBar from '@/component/NavBar.vue'
@@ -119,14 +137,7 @@ const router = useRouter()
 
 const loading = ref(true)
 const service = ref(null)
-const expandedArticles = ref({})
-const articleContentRefs = ref({})
-const articleOverflowMap = ref({})
-
-const masonryGridRef = ref(null)
-const masonryItemRefs = ref({})
-
-let resizeObserver = null
+const activeArticle = ref(null)
 
 function uid(prefix = 'id') {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
@@ -265,140 +276,33 @@ const serviceSubtitle = computed(() => {
   return ''
 })
 
-function getArticleParagraphs(article) {
-  const content = String(article?.content || '').trim()
+const modalParagraphs = computed(() => {
+  const content = String(activeArticle.value?.content || '').trim()
   if (!content) return []
 
   return content
     .split(/\n{2,}|\r\n\r\n/)
     .map((item) => item.trim())
     .filter(Boolean)
+})
+
+function openArticleModal(article) {
+  activeArticle.value = article
+  document.body.style.overflow = 'hidden'
 }
 
-function getVisibleParagraphs(article) {
-  const paragraphs = getArticleParagraphs(article)
-  if (expandedArticles.value[article.id]) return paragraphs
-  return paragraphs.slice(0, 1)
-}
-
-function toggleArticle(id) {
-  expandedArticles.value[id] = !expandedArticles.value[id]
-
-  nextTick(() => {
-    checkOverflowForArticle(id)
-    layoutMasonry()
-  })
-}
-
-function setArticleContentRef(id, el) {
-  if (el) {
-    articleContentRefs.value[id] = el
-    if (resizeObserver) resizeObserver.observe(el)
-  } else {
-    delete articleContentRefs.value[id]
-  }
-}
-
-function setMasonryItemRef(id, el) {
-  if (el) {
-    masonryItemRefs.value[id] = el
-  } else {
-    delete masonryItemRefs.value[id]
-  }
-}
-
-function checkOverflowForArticle(id) {
-  const el = articleContentRefs.value[id]
-  if (!el) return
-
-  const isExpanded = !!expandedArticles.value[id]
-
-  if (isExpanded) {
-    articleOverflowMap.value[id] = true
-    return
-  }
-
-  const firstParagraph = el.querySelector('p')
-  if (!firstParagraph) {
-    articleOverflowMap.value[id] = false
-    return
-  }
-
-  articleOverflowMap.value[id] =
-    firstParagraph.scrollHeight > firstParagraph.clientHeight + 1 ||
-    firstParagraph.scrollWidth > firstParagraph.clientWidth + 1
-}
-
-function checkAllOverflows() {
-  visibleArticles.value.forEach((article) => {
-    checkOverflowForArticle(article.id)
-  })
-}
-
-function shouldShowReadMore(id) {
-  return !!articleOverflowMap.value[id]
-}
-
-function setupResizeObserver() {
-  if (typeof window === 'undefined' || typeof ResizeObserver === 'undefined') return
-
-  if (resizeObserver) {
-    resizeObserver.disconnect()
-  }
-
-  resizeObserver = new ResizeObserver(() => {
-    checkAllOverflows()
-    layoutMasonry()
-  })
-
-  Object.values(articleContentRefs.value).forEach((el) => {
-    if (el) resizeObserver.observe(el)
-  })
-}
-
-function layoutMasonry() {
-  nextTick(() => {
-    const grid = masonryGridRef.value
-    if (!grid || typeof window === 'undefined') return
-
-    const computedStyle = window.getComputedStyle(grid)
-    const rowGap =
-      parseFloat(computedStyle.getPropertyValue('row-gap')) ||
-      parseFloat(computedStyle.getPropertyValue('gap')) ||
-      34
-    const rowHeight = parseFloat(computedStyle.getPropertyValue('grid-auto-rows')) || 10
-
-    Object.values(masonryItemRefs.value).forEach((item) => {
-      if (!item) return
-
-      item.style.gridRowEnd = 'auto'
-
-      const itemHeight = item.getBoundingClientRect().height
-      const rowSpan = Math.ceil((itemHeight + rowGap) / (rowHeight + rowGap))
-
-      item.style.gridRowEnd = `span ${rowSpan}`
-    })
-  })
-}
-
-function handleWindowResize() {
-  checkAllOverflows()
-  layoutMasonry()
+function closeArticleModal() {
+  activeArticle.value = null
+  document.body.style.overflow = ''
 }
 
 function handleImageError(article) {
   article.imageError = true
-  nextTick(() => {
-    layoutMasonry()
-  })
 }
 
 async function loadService() {
   loading.value = true
-  expandedArticles.value = {}
-  articleContentRefs.value = {}
-  articleOverflowMap.value = {}
-  masonryItemRefs.value = {}
+  activeArticle.value = null
 
   try {
     const slug = String(route.params.slug || '').trim()
@@ -430,11 +334,6 @@ async function loadService() {
     service.value = null
   } finally {
     loading.value = false
-
-    await nextTick()
-    setupResizeObserver()
-    checkAllOverflows()
-    layoutMasonry()
   }
 }
 
@@ -449,33 +348,19 @@ function goToBooking() {
 watch(
   () => [route.params.slug, route.query.detail],
   async () => {
+    closeArticleModal()
     await loadService()
   },
 )
 
-watch(
-  visibleArticles,
-  async () => {
-    await nextTick()
-    setupResizeObserver()
-    checkAllOverflows()
-    layoutMasonry()
-  },
-  { deep: true },
-)
-
 onMounted(async () => {
   await loadService()
-  window.addEventListener('resize', handleWindowResize)
 })
 
-onBeforeUnmount(() => {
-  if (resizeObserver) {
-    resizeObserver.disconnect()
-    resizeObserver = null
+window.addEventListener?.('keydown', (event) => {
+  if (event.key === 'Escape' && activeArticle.value) {
+    closeArticleModal()
   }
-
-  window.removeEventListener('resize', handleWindowResize)
 })
 </script>
 
@@ -495,22 +380,22 @@ onBeforeUnmount(() => {
 }
 
 .detail-main {
-  padding: 104px 28px 96px;
+  padding: 104px 24px 96px;
 }
 
 .detail-shell {
-  max-width: 1560px;
+  max-width: 1540px;
   margin: 0 auto;
 }
 
 .content-wrapper {
-  max-width: 1480px;
+  max-width: 1420px;
   margin: 0 auto;
 }
 
 .top-actions {
-  max-width: 1320px;
-  margin: 0 auto 18px;
+  max-width: 1240px;
+  margin: 0 auto 14px;
 }
 
 .back-btn {
@@ -542,14 +427,14 @@ onBeforeUnmount(() => {
 }
 
 .editorial-header {
-  max-width: 1320px;
-  margin: 0 auto 34px;
+  max-width: 1240px;
+  margin: 0 auto 28px;
   text-align: left;
 }
 
 .editorial-header h1 {
   margin: 0;
-  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  font-size: clamp(2.4rem, 5vw, 4rem);
   line-height: 1.06;
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -557,135 +442,116 @@ onBeforeUnmount(() => {
 }
 
 .editorial-subtitle {
-  margin: 16px 0 0;
-  font-size: 1.04rem;
+  margin: 12px 0 0;
+  font-size: 1rem;
   line-height: 1.72;
   color: #5c7063;
-  max-width: 760px;
+  max-width: 720px;
 }
 
 .editorial-content {
-  max-width: 1320px;
+  max-width: 1240px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  column-gap: 34px;
-  row-gap: 34px;
-  grid-auto-rows: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px 24px;
   align-items: start;
 }
 
 .editorial-article {
-  display: flex;
-  flex-direction: column;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(8px);
   border-radius: 24px;
   overflow: hidden;
+  border: 1px solid rgba(47, 91, 67, 0.08);
   box-shadow: 0 10px 26px rgba(26, 51, 38, 0.05);
-  border: 1px solid rgba(26, 51, 38, 0.04);
   transition:
     transform 0.25s ease,
     box-shadow 0.25s ease;
-  will-change: transform;
 }
 
 .editorial-article:hover {
   transform: translateY(-4px);
-  box-shadow: 0 18px 38px rgba(26, 51, 38, 0.08);
+  box-shadow: 0 16px 34px rgba(26, 51, 38, 0.08);
 }
 
-.article-hero-image {
+.article-hero-image,
+.article-image-placeholder {
   width: 100%;
-  background: #f0f4f2;
+  aspect-ratio: 4 / 4.9;
+  background: #eef3ee;
   overflow: hidden;
 }
 
 .article-hero-image img {
   display: block;
   width: 100%;
-  height: auto;
-  max-height: 560px;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.article-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2f5b43;
+  font-size: 2.2rem;
+  font-weight: 700;
 }
 
 .article-text-body {
-  padding: 22px 22px 24px;
+  padding: 16px 16px 18px;
   display: flex;
   flex-direction: column;
-  flex: 1;
+  align-items: flex-start;
 }
 
 .article-title {
   margin: 0 0 12px;
-  font-size: 1.14rem;
-  line-height: 1.3;
+  font-size: 1rem;
+  line-height: 1.35;
   font-weight: 700;
   color: #1a3326;
   letter-spacing: -0.01em;
-}
-
-.article-excerpt {
-  margin: 0 0 12px;
-  font-size: 0.95rem;
-  line-height: 1.65;
-  font-weight: 500;
-  color: #8aaa79;
-}
-
-.article-paragraphs {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.article-paragraphs p {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.78;
-  color: #5c7063;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  transition: all 0.25s ease;
-}
-
-.article-paragraphs p.expanded {
-  display: block;
-  -webkit-line-clamp: unset;
-  overflow: visible;
-}
-
-.article-empty-copy {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.7;
-  color: #7a8f83;
+  min-height: 2.7em;
 }
 
 .read-more-btn {
-  margin-top: 14px;
-  align-self: flex-start;
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 0.92rem;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(47, 91, 67, 0.08);
+  border: 1px solid rgba(47, 91, 67, 0.12);
   color: #2f5b43;
+  border-radius: 999px;
+  padding: 9px 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
   cursor: pointer;
   transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .read-more-btn:hover {
-  opacity: 0.75;
   transform: translateY(-1px);
+  background: rgba(47, 91, 67, 0.12);
+  box-shadow: 0 8px 18px rgba(47, 91, 67, 0.1);
+}
+
+.arrow {
+  transition: transform 0.2s ease;
+}
+
+.read-more-btn:hover .arrow {
+  transform: translateX(3px);
 }
 
 .bottom-action {
-  max-width: 1320px;
-  margin: 76px auto 0;
+  max-width: 1240px;
+  margin: 72px auto 0;
 }
 
 .cta-card {
@@ -722,6 +588,143 @@ onBeforeUnmount(() => {
   transform: translateY(-2px);
   background: #1a3326;
   box-shadow: 0 12px 24px rgba(47, 91, 67, 0.2);
+}
+
+.article-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(21, 36, 28, 0.44);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 2000;
+}
+
+.article-modal-card {
+  position: relative;
+  width: min(760px, 100%);
+  max-height: 88vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(250, 247, 242, 0.98) 100%);
+  border-radius: 28px;
+  box-shadow: 0 28px 80px rgba(17, 39, 28, 0.22);
+  border: 1px solid rgba(47, 91, 67, 0.1);
+}
+
+.modal-top-decoration {
+  height: 12px;
+  background: linear-gradient(90deg, #cfdac8 0%, #f5dfe6 50%, #e9f2e9 100%);
+}
+
+.article-modal-body {
+  padding: 28px 20px 30px 28px;
+  overflow-y: auto;
+  max-height: calc(88vh - 12px);
+  scrollbar-gutter: stable;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(47, 91, 67, 0.08);
+  color: #2f5b43;
+  font-size: 1rem;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  transform: scale(1.05);
+  background: rgba(47, 91, 67, 0.14);
+}
+
+.modal-badge {
+  display: inline-block;
+  margin: 0 0 10px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(47, 91, 67, 0.08);
+  color: #2f5b43;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.modal-title {
+  margin: 0 0 18px;
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+  line-height: 1.15;
+  color: #163426;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.modal-image-wrapper {
+  margin-bottom: 20px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #eef3ee;
+}
+
+.modal-image {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-content p,
+.modal-empty-copy {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.78;
+  color: #4d6257;
+}
+
+.modal-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.modal-back-btn {
+  border: none;
+  border-radius: 999px;
+  background: #2f5b43;
+  color: #fff;
+  padding: 12px 18px;
+  font-size: 0.94rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+  box-shadow: 0 10px 22px rgba(47, 91, 67, 0.18);
+}
+
+.modal-back-btn:hover {
+  transform: translateY(-1px);
+  background: #1f4430;
 }
 
 .state-container {
@@ -776,6 +779,18 @@ onBeforeUnmount(() => {
   border-color: #8aaa79;
 }
 
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -783,20 +798,8 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 1200px) {
-  .detail-main {
-    padding: 96px 22px 88px;
-  }
-
-  .top-actions,
-  .editorial-header,
-  .editorial-content,
-  .bottom-action {
-    max-width: 1180px;
-  }
-
   .editorial-content {
-    column-gap: 26px;
-    row-gap: 26px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -811,41 +814,43 @@ onBeforeUnmount(() => {
     padding: 92px 16px 76px;
   }
 
-  .top-actions {
-    margin-bottom: 14px;
-  }
-
-  .editorial-header {
-    margin-bottom: 26px;
-  }
-
   .editorial-header h1 {
     font-size: 2.2rem;
   }
 
-  .article-text-body {
-    padding: 18px 18px 20px;
+  .editorial-content {
+    gap: 22px 18px;
   }
 
-  .article-title {
-    font-size: 1.08rem;
+  .article-modal-body {
+    padding: 24px 18px 24px;
   }
 
-  .article-excerpt,
-  .article-paragraphs p {
-    font-size: 0.92rem;
-  }
-
-  .cta-card {
-    padding: 38px 22px;
+  .modal-image {
+    max-height: 260px;
   }
 }
 
 @media (max-width: 640px) {
   .editorial-content {
     grid-template-columns: 1fr;
-    column-gap: 18px;
-    row-gap: 18px;
   }
+}
+
+.article-modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.article-modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.article-modal-body::-webkit-scrollbar-thumb {
+  background: rgba(47, 91, 67, 0.22);
+  border-radius: 999px;
+}
+
+.article-modal-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(47, 91, 67, 0.34);
 }
 </style>

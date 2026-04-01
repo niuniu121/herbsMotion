@@ -140,19 +140,16 @@
         <div v-if="deleteModal.open" class="modal-overlay" @click.self="closeDeleteModal">
           <div class="modal-card">
             <div class="modal-head">
-              <div>
-                <h2>Delete Article?</h2>
-                <p>
-                  This will remove
-                  <strong>{{ deleteModal.articleTitle || 'this article' }}</strong>
-                  from this detail page only.
-                </p>
-              </div>
-
               <button class="icon-btn" @click="closeDeleteModal">✕</button>
             </div>
-
-            <div class="warning-box">Outer list content will not be affected.</div>
+            <div class="warning-box">
+              <h2>Delete Article?</h2>
+              <p>
+                This will remove
+                <strong>{{ deleteModal.articleTitle || 'this article' }}</strong>
+                from this detail page.
+              </p>
+            </div>
 
             <div class="modal-actions">
               <button class="outline-btn" @click="closeDeleteModal">Cancel</button>

@@ -1,10 +1,12 @@
 <template>
   <RouterView />
   <HerbsieBot />
+  <FloatingBookButton />
 </template>
 <script setup>
 import { RouterView } from 'vue-router'
 import HerbsieBot from './component/HerbsieBot.vue'
+import FloatingBookButton from './component/FloatingBookButton.vue'
 </script>
 
 <style>

@@ -35,8 +35,8 @@
                 <span v-if="member.credentials" class="credentials">
                   {{ member.credentials }}
                 </span>
-                <span v-if="member.role" class="member-role-inline">
-                  {{ member.role }}
+                <span v-if="member.rolesText" class="member-role-inline">
+                  {{ member.rolesText }}
                 </span>
               </h2>
 
@@ -140,6 +140,18 @@ const parseLines = (value) => {
     .filter(Boolean)
 }
 
+const sanitizeRoles = (roles, fallbackRole = '') => {
+  if (Array.isArray(roles)) {
+    return roles.map((item) => String(item || '').trim()).filter(Boolean)
+  }
+
+  if (fallbackRole && String(fallbackRole).trim()) {
+    return [String(fallbackRole).trim()]
+  }
+
+  return []
+}
+
 const buildSlug = (memberData, index) => {
   if (memberData?.slug && String(memberData.slug).trim()) {
     return String(memberData.slug).trim()
@@ -177,19 +189,24 @@ const fetchPractitioner = async () => {
 
     const visibleMembers = members
       .filter((item) => item.visible !== false)
-      .map((item, index) => ({
-        id: item.id || `member_${index}`,
-        slug: buildSlug(item, index),
-        name: item.name || '',
-        role: item.role || '',
-        credentials: item.credentials || '',
-        image: item.image || '',
-        qualifications: item.qualifications || '',
-        education: item.education || '',
-        services: item.services || '',
-        interests: item.interests || '',
-        about: item.about || '',
-      }))
+      .map((item, index) => {
+        const roles = sanitizeRoles(item.roles, item.role)
+
+        return {
+          id: item.id || `member_${index}`,
+          slug: buildSlug(item, index),
+          name: item.name || '',
+          roles,
+          rolesText: roles.join(' / '),
+          credentials: item.credentials || '',
+          image: item.image || '',
+          qualifications: item.qualifications || '',
+          education: item.education || '',
+          services: item.services || '',
+          interests: item.interests || '',
+          about: item.about || '',
+        }
+      })
 
     const matched = visibleMembers.find((item) => item.slug === route.params.slug)
 

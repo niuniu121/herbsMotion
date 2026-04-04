@@ -42,15 +42,33 @@ async function copyEmail() {
             </button>
           </div>
 
-          <transition name="fade">
-            <span v-if="copied" class="copied-tip">Copied!</span>
-          </transition>
-
           <div class="contact-row">
             <span class="contact-label">Phone</span>
             <a class="contact-link" :href="`tel:${phone}`">{{ phone }}</a>
           </div>
+
+          <transition name="fade">
+            <span v-if="copied" class="copied-tip">Copied!</span>
+          </transition>
         </div>
+      </div>
+
+      <div class="footer-links-group">
+        <h4>Services</h4>
+        <RouterLink to="/our-services">Chinese Medicine</RouterLink>
+        <RouterLink to="/our-services">Physiotherapy</RouterLink>
+        <RouterLink to="/our-services">Remedial Massage</RouterLink>
+      </div>
+
+      <div class="footer-links-group">
+        <h4>About Us</h4>
+        <RouterLink to="/our-team">Meet Our Team</RouterLink>
+        <RouterLink to="/tcm">Focussed Healing</RouterLink>
+        <RouterLink to="/privacy-policy">Privacy Policy</RouterLink>
+      </div>
+
+      <div class="footer-map">
+        <h4 class="footer-map-title">Location</h4>
 
         <a
           class="mini-map-card"
@@ -63,7 +81,6 @@ async function copyEmail() {
             <div class="map-grid"></div>
             <div class="map-road road-one"></div>
             <div class="map-road road-two"></div>
-            <div class="map-road road-three"></div>
 
             <div class="map-pin">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -82,30 +99,11 @@ async function copyEmail() {
               <span class="mini-map-arrow">↗</span>
             </div>
 
-            <h4>Visit Our Clinic</h4>
+            <h5>Visit Our Clinic</h5>
             <p>{{ clinicAddress }}</p>
             <span class="mini-map-link">Open in Google Maps</span>
           </div>
         </a>
-      </div>
-
-      <div class="footer-links-group">
-        <h4>Services</h4>
-        <RouterLink to="/our-services">Chinese Medicine</RouterLink>
-        <RouterLink to="/our-services">Physiotherapy</RouterLink>
-        <RouterLink to="/our-services">Remedial Massage</RouterLink>
-      </div>
-
-      <div class="footer-links-group">
-        <h4>About Us</h4>
-        <RouterLink to="/our-team">Meet Our Team</RouterLink>
-        <RouterLink to="/tcm">Focussed Healing</RouterLink>
-        <RouterLink to="/our-services">Our Services</RouterLink>
-      </div>
-
-      <div class="footer-links-group">
-        <h4>Legal</h4>
-        <RouterLink to="/privacy-policy">Privacy Policy</RouterLink>
       </div>
     </div>
 
@@ -122,9 +120,9 @@ async function copyEmail() {
 }
 
 .container {
-  max-width: 1280px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 0 28px;
+  padding: 0 32px 0 8px;
 }
 
 .text-center {
@@ -133,24 +131,27 @@ async function copyEmail() {
 
 .footer-inner {
   display: grid;
-  grid-template-columns: 520px 1fr 1fr 0.9fr;
-  gap: 64px;
+  grid-template-columns: minmax(540px, 2.4fr) minmax(180px, 1fr) minmax(180px, 1fr) minmax(
+      320px,
+      1.45fr
+    );
+  gap: 72px;
   align-items: start;
 }
 
+/* left */
 .footer-left {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 20px;
-  width: 520px;
+  gap: 15px;
+  min-width: 0;
 }
 
 .footer-logo {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 2px;
+  min-height: 56px;
 }
 
 .logo {
@@ -167,29 +168,17 @@ async function copyEmail() {
   letter-spacing: 0.2px;
 }
 
-.footer-desc {
-  width: 100%;
-  max-width: 470px;
-  margin: 0;
-  font-size: 19px;
-  line-height: 1.7;
-  color: var(--text-dark, #2f4f39);
-  opacity: 0.84;
-}
-
-.contact-card,
-.mini-map-card {
-  width: 100%;
-  max-width: 520px;
-  box-sizing: border-box;
-}
-
+/* contact */
 .contact-card {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 22px 28px;
-  border-radius: 30px;
+  gap: 24px;
+  padding: 28px 40px;
+  border-radius: 32px;
   background: rgba(255, 255, 255, 0.24);
   backdrop-filter: blur(12px);
   box-shadow:
@@ -198,14 +187,13 @@ async function copyEmail() {
 }
 
 .contact-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 140px minmax(280px, 1fr);
   align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
+  column-gap: 34px;
 }
 
 .contact-label {
-  min-width: 116px;
   font-size: 18px;
   font-weight: 800;
   color: var(--text-dark, #2f4f39);
@@ -216,6 +204,8 @@ async function copyEmail() {
 
 .contact-link,
 .contact-email-btn {
+  justify-self: start;
+  min-width: 0;
   font-size: 21px;
   font-weight: 700;
   color: #2f6c4a;
@@ -229,6 +219,10 @@ async function copyEmail() {
     transform 0.24s ease;
 }
 
+.contact-email-btn {
+  white-space: nowrap;
+}
+
 .contact-link:hover,
 .contact-email-btn:hover {
   opacity: 0.75;
@@ -236,6 +230,9 @@ async function copyEmail() {
 }
 
 .copied-tip {
+  position: absolute;
+  right: 24px;
+  bottom: -14px;
   display: inline-flex;
   align-items: center;
   width: fit-content;
@@ -248,17 +245,71 @@ async function copyEmail() {
   box-shadow: 0 8px 18px rgba(47, 108, 74, 0.14);
 }
 
-/* map card */
+/* links */
+.footer-links-group {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  min-width: 0;
+  padding-top: 8px;
+}
+
+.footer-links-group h4 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--text-dark, #2f4f39);
+  line-height: 1.1;
+}
+
+.footer-links-group a {
+  color: var(--text-dark, #2f4f39);
+  text-decoration: none;
+  font-size: 18px;
+  line-height: 1.5;
+  opacity: 0.84;
+  transition:
+    opacity 0.24s ease,
+    transform 0.24s ease;
+}
+
+.footer-links-group a:hover {
+  opacity: 1;
+  transform: translateX(2px);
+  text-decoration: underline;
+}
+
+/* map */
+.footer-map {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 18px;
+  padding-top: 8px;
+}
+
+.footer-map-title {
+  width: 100%;
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text-dark, #2f4f39);
+  text-align: left;
+}
+
 .mini-map-card {
+  width: 100%;
+  max-width: 100%;
   display: grid;
-  grid-template-columns: 160px 1fr;
-  gap: 20px;
+  grid-template-columns: 88px 1fr;
+  gap: 16px;
   align-items: center;
-  padding: 18px;
-  border-radius: 32px;
+  padding: 8px;
+  border-radius: 26px;
   text-decoration: none;
   color: inherit;
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(14px);
   box-shadow:
     0 10px 24px rgba(47, 79, 57, 0.05),
@@ -278,8 +329,8 @@ async function copyEmail() {
 .mini-map-visual {
   position: relative;
   width: 100%;
-  height: 146px;
-  border-radius: 26px;
+  height: 94px;
+  border-radius: 18px;
   overflow: hidden;
   background:
     radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.72), transparent 32%),
@@ -295,7 +346,7 @@ async function copyEmail() {
   background-image:
     linear-gradient(rgba(47, 79, 57, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(47, 79, 57, 0.04) 1px, transparent 1px);
-  background-size: 18px 18px;
+  background-size: 14px 14px;
 }
 
 .map-road {
@@ -306,36 +357,27 @@ async function copyEmail() {
 }
 
 .road-one {
-  width: 170px;
-  height: 22px;
-  top: 20px;
-  left: -24px;
-  transform: rotate(20deg);
+  width: 110px;
+  height: 13px;
+  top: 14px;
+  left: -14px;
+  transform: rotate(22deg);
 }
 
 .road-two {
-  width: 160px;
-  height: 18px;
-  bottom: 30px;
-  left: 56px;
-  transform: rotate(-32deg);
-}
-
-.road-three {
-  width: 90px;
-  height: 14px;
+  width: 88px;
+  height: 11px;
   bottom: 10px;
-  left: 78px;
-  transform: rotate(35deg);
-  opacity: 0.82;
+  right: -8px;
+  transform: rotate(-32deg);
 }
 
 .map-pin {
   position: absolute;
   left: 52%;
   top: 50%;
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   transform: translate(-50%, -55%);
   color: #2f6c4a;
   filter: drop-shadow(0 8px 10px rgba(47, 108, 74, 0.16));
@@ -347,30 +389,30 @@ async function copyEmail() {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .mini-map-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
 }
 
 .mini-map-badge {
   display: inline-flex;
   align-items: center;
   width: fit-content;
-  padding: 7px 14px;
+  padding: 5px 10px;
   border-radius: 999px;
   background: rgba(47, 108, 74, 0.08);
   color: #2f6c4a;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 800;
 }
 
 .mini-map-arrow {
-  font-size: 22px;
+  font-size: 18px;
   color: #2f6c4a;
   opacity: 0.68;
   transition:
@@ -383,20 +425,20 @@ async function copyEmail() {
   opacity: 1;
 }
 
-.mini-map-content h4 {
+.mini-map-content h5 {
   margin: 0;
-  font-size: 22px;
+  font-size: 17px;
   font-weight: 800;
-  line-height: 1.18;
+  line-height: 1.2;
   color: var(--text-dark, #2f4f39);
 }
 
 .mini-map-content p {
   margin: 0;
-  font-size: 18px;
-  line-height: 1.55;
+  font-size: 14px;
+  line-height: 1.45;
   color: var(--text-dark, #2f4f39);
-  opacity: 0.84;
+  opacity: 0.82;
 }
 
 .mini-map-link {
@@ -404,44 +446,14 @@ async function copyEmail() {
   align-items: center;
   width: fit-content;
   margin-top: 2px;
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 800;
   color: #2f6c4a;
 }
 
-.footer-links-group {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding-top: 14px;
-}
-
-.footer-links-group h4 {
-  margin: 0 0 12px;
-  font-size: 30px;
-  font-weight: 800;
-  color: var(--text-dark, #2f4f39);
-}
-
-.footer-links-group a {
-  color: var(--text-dark, #2f4f39);
-  text-decoration: none;
-  font-size: 18px;
-  line-height: 1.7;
-  opacity: 0.84;
-  transition:
-    opacity 0.24s ease,
-    transform 0.24s ease;
-}
-
-.footer-links-group a:hover {
-  opacity: 1;
-  transform: translateX(2px);
-  text-decoration: underline;
-}
-
+/* bottom line */
 .copyright-container {
-  margin-top: 70px;
+  margin-top: 56px;
   padding-top: 24px;
   border-top: 1px solid rgba(47, 79, 57, 0.08);
 }
@@ -453,6 +465,7 @@ async function copyEmail() {
   opacity: 0.62;
 }
 
+/* animation */
 .fade-enter-active,
 .fade-leave-active {
   transition:
@@ -476,16 +489,40 @@ async function copyEmail() {
   }
 }
 
+/* responsive */
+@media (max-width: 1280px) {
+  .footer-inner {
+    grid-template-columns: minmax(480px, 2fr) 1fr 1fr minmax(300px, 1.35fr);
+    gap: 48px;
+  }
+
+  .contact-row {
+    grid-template-columns: 130px minmax(240px, 1fr);
+    column-gap: 24px;
+  }
+
+  .contact-email-btn {
+    font-size: 19px;
+  }
+}
+
 @media (max-width: 1200px) {
   .footer-inner {
-    grid-template-columns: 1.2fr 1fr 1fr;
-    gap: 42px;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
   }
 
   .footer-left {
     grid-column: 1 / -1;
-    width: 100%;
-    max-width: 520px;
+    gap: 24px;
+  }
+
+  .footer-map {
+    align-items: flex-start;
+  }
+
+  .contact-card {
+    max-width: 680px;
   }
 }
 
@@ -506,67 +543,63 @@ async function copyEmail() {
   .footer-left {
     width: 100%;
     max-width: 100%;
+    gap: 18px;
   }
 
   .logo-text {
     font-size: 26px;
   }
 
-  .footer-desc {
-    max-width: 100%;
-    font-size: 16px;
-  }
-
-  .contact-card,
-  .mini-map-card {
-    max-width: 100%;
-  }
-
   .contact-card {
-    padding: 18px 20px;
+    max-width: 100%;
+    padding: 20px 20px 18px;
+    gap: 18px;
+  }
+
+  .contact-row {
+    grid-template-columns: 1fr;
+    row-gap: 8px;
   }
 
   .contact-label {
-    min-width: 82px;
     font-size: 15px;
   }
 
   .contact-link,
   .contact-email-btn {
     font-size: 17px;
+    white-space: normal;
     word-break: break-word;
     text-align: left;
   }
 
-  .mini-map-card {
-    grid-template-columns: 1fr;
-    padding: 16px;
-  }
-
-  .mini-map-visual {
-    height: 132px;
-  }
-
-  .mini-map-content h4 {
-    font-size: 20px;
-  }
-
-  .mini-map-content p,
-  .mini-map-link {
-    font-size: 16px;
+  .copied-tip {
+    position: static;
+    margin-top: 4px;
   }
 
   .footer-links-group {
     padding-top: 0;
-    gap: 14px;
+    gap: 18px;
   }
 
-  .footer-links-group h4 {
+  .footer-links-group h4,
+  .footer-map-title {
     font-size: 24px;
   }
 
   .footer-links-group a {
     font-size: 17px;
+  }
+
+  .footer-map {
+    padding-top: 0;
+    align-items: flex-start;
+  }
+
+  .mini-map-card {
+    max-width: 100%;
+    grid-template-columns: 80px 1fr;
   }
 }
 </style>

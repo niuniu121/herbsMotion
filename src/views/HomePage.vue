@@ -3,9 +3,9 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import NavBar from '../component/NavBar.vue'
 import PageFooter from '../component/PageFooter.vue'
-import imgPhysio from '../assets/wulizhiliao1.png'
-import imgMedicine from '../assets/zhongyi2.png'
-import imgMassage from '../assets/anmo1.png'
+import imgPhysio from '../assets/wulizhiliao.png'
+import imgMedicine from '../assets/zhongyi.png'
+import imgMassage from '../assets/anmo.png'
 
 const router = useRouter()
 

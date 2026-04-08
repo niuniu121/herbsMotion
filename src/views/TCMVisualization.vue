@@ -2827,15 +2827,15 @@ onUnmounted(() => {
 }
 
 .info-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
-  display: flex;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  font-weight: 800;
+  font-size: 18px;
   flex-shrink: 0;
-  font-size: 24px;
-  font-weight: 700;
 }
 
 .info-icon.teal-soft {
@@ -2845,19 +2845,15 @@ onUnmounted(() => {
 
 .info-panel-header h3 {
   margin: 0;
-  font-size: 2.2rem;
-  line-height: 1.2;
-  font-weight: 700;
-  color: #1f2a24;
-  letter-spacing: -0.02em;
+  font-size: 24px;
+  color: var(--text-primary);
 }
 
 .info-panel-text {
   margin: 0;
-  font-size: 1.18rem;
-  line-height: 1.9;
-  color: #2f3a35;
-  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.85;
+  color: #555;
 }
 
 @media (max-width: 768px) {

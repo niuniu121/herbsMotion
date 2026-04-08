@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '../views/HomePage.vue'
 import TCMVisualization from '../views/TCMVisualization.vue'
 import PhysioOutcomeView from '../views/PhysioOutcomeView.vue'
@@ -19,7 +19,7 @@ import ServiceDetail from '@/views/ServiceDetail.vue'
 import PractitionerDetail from '@/views/PractitionerDetail.vue'
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
 
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {

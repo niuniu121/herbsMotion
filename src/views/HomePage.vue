@@ -7,12 +7,18 @@ import imgPhysio from '../assets/wulizhiliao2.jpg'
 import imgMedicine from '../assets/zhongyizhiliao.jpg'
 import imgMassage from '../assets/anmo3.png'
 
+import clinicSpace1 from '../assets/front_desk1.png'
+import clinicSpace2 from '../assets/front_desk.png'
+import clinicSpace3 from '../assets/back_desk.png'
+import clinicSpace4 from '../assets/side_desk.png'
+
 const router = useRouter()
 
 const loading = ref(true)
 const currentBgColor = ref('#CFDAC8')
 const sectionRefs = ref([])
 let observer = null
+let clinicAutoPlayTimer = null
 
 const heroCards = [
   {
@@ -38,6 +44,36 @@ const heroCards = [
   },
 ]
 
+const clinicSpaces = [clinicSpace2, clinicSpace4, clinicSpace1, clinicSpace3]
+const currentClinicSlide = ref(0)
+
+const nextClinicSlide = () => {
+  currentClinicSlide.value = (currentClinicSlide.value + 1) % clinicSpaces.length
+}
+
+const prevClinicSlide = () => {
+  currentClinicSlide.value =
+    (currentClinicSlide.value - 1 + clinicSpaces.length) % clinicSpaces.length
+}
+
+const goToClinicSlide = (index) => {
+  currentClinicSlide.value = index
+}
+
+const startClinicAutoPlay = () => {
+  stopClinicAutoPlay()
+  clinicAutoPlayTimer = setInterval(() => {
+    nextClinicSlide()
+  }, 5000)
+}
+
+const stopClinicAutoPlay = () => {
+  if (clinicAutoPlayTimer) {
+    clearInterval(clinicAutoPlayTimer)
+    clinicAutoPlayTimer = null
+  }
+}
+
 const setSectionRef = (el) => {
   if (el && !sectionRefs.value.includes(el)) {
     sectionRefs.value.push(el)
@@ -48,14 +84,13 @@ const setSectionRef = (el) => {
 const navigateTo = (path) => {
   if (path) {
     router.push(path)
-    window.scrollTo(0, 0) // 跳转后页面滚动到最顶部
+    window.scrollTo(0, 0)
   }
 }
 
 onMounted(() => {
   window.scrollTo(0, 0)
 
-  // 首次进入播放 loading，返回首页时直接显示
   if (!sessionStorage.getItem('home_first_loaded')) {
     setTimeout(() => {
       loading.value = false
@@ -84,6 +119,8 @@ onMounted(() => {
       observer.observe(section)
     }
   })
+
+  startClinicAutoPlay()
 })
 
 onUnmounted(() => {
@@ -91,6 +128,7 @@ onUnmounted(() => {
     observer.disconnect()
     observer = null
   }
+  stopClinicAutoPlay()
   sectionRefs.value = []
 })
 </script>
@@ -208,6 +246,62 @@ onUnmounted(() => {
         </div>
       </section>
 
+      <section class="clinic-showcase-section" :ref="setSectionRef" data-bgcolor="#F4EFE7">
+        <div class="container clinic-showcase-inner">
+          <div class="clinic-showcase-heading animate-slide-in-left">
+            <p class="text-uppercase text-pink">OUR SPACE</p>
+            <h2 class="section-headline">A calm, welcoming clinic designed for healing.</h2>
+            <p class="clinic-showcase-description">
+              Explore our reception and consultation space designed to feel warm, peaceful, and
+              professional from the moment you arrive.
+            </p>
+          </div>
+
+          <div class="clinic-carousel-wrap animate-slide-in-up">
+            <button
+              class="clinic-carousel-btn clinic-carousel-btn-left"
+              @click="prevClinicSlide"
+              aria-label="Previous image"
+              type="button"
+            >
+              ‹
+            </button>
+
+            <div class="clinic-carousel">
+              <Transition name="clinic-fade" mode="out-in">
+                <img
+                  :key="currentClinicSlide"
+                  :src="clinicSpaces[currentClinicSlide]"
+                  :alt="`Clinic space ${currentClinicSlide + 1}`"
+                  class="clinic-carousel-image"
+                />
+              </Transition>
+            </div>
+
+            <button
+              class="clinic-carousel-btn clinic-carousel-btn-right"
+              @click="nextClinicSlide"
+              aria-label="Next image"
+              type="button"
+            >
+              ›
+            </button>
+          </div>
+
+          <div class="clinic-carousel-dots">
+            <button
+              v-for="(item, index) in clinicSpaces"
+              :key="index"
+              class="clinic-dot"
+              :class="{ active: currentClinicSlide === index }"
+              @click="goToClinicSlide(index)"
+              :aria-label="`Go to slide ${index + 1}`"
+              type="button"
+            ></button>
+          </div>
+        </div>
+      </section>
+
       <section class="cta-section text-center" :ref="setSectionRef" data-bgcolor="#F5DFE6">
         <div class="container cta-inner animate-on-load">
           <h2 class="section-headline">Start Your Healing Story Today</h2>
@@ -215,7 +309,7 @@ onUnmounted(() => {
             Your first consultation includes a complete body assessment and a customised treatment
             plan tailored to your lifestyle.
           </p>
-          <button class="btn-book-now">Book Online Now</button>
+          <button class="btn-book-now" @click="navigateTo('/book')">Book Online Now</button>
         </div>
       </section>
 
@@ -674,7 +768,6 @@ button {
   opacity: 0.8;
 }
 
-/* clean side-by-side image layout */
 .philosophy-images {
   flex: 1;
   display: flex;
@@ -702,6 +795,152 @@ button {
 }
 
 /* ========================================================================== */
+/* Clinic Showcase Section */
+/* ========================================================================== */
+.clinic-showcase-section {
+  padding: 110px 0;
+}
+
+.clinic-showcase-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.clinic-showcase-heading {
+  max-width: 760px;
+}
+
+.clinic-showcase-description {
+  max-width: 720px;
+  font-size: 18px;
+  line-height: 1.7;
+  opacity: 0.85;
+  margin: 0;
+}
+
+.clinic-carousel-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.clinic-carousel {
+  position: relative;
+  width: 100%;
+  height: 620px;
+  border-radius: 32px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
+}
+
+.clinic-carousel-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.clinic-carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(8px);
+  color: var(--text-primary);
+  font-size: 34px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    opacity 0.25s ease,
+    visibility 0.25s ease;
+  cursor: pointer;
+}
+
+.clinic-carousel-btn:hover {
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-50%) scale(1.06);
+}
+
+.clinic-carousel-btn-left {
+  left: 24px;
+}
+
+.clinic-carousel-btn-right {
+  right: 24px;
+}
+
+/* 桌面端：默认隐藏，hover 轮播区域时显示 */
+@media (hover: hover) and (pointer: fine) {
+  .clinic-carousel-btn {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .clinic-carousel-wrap:hover .clinic-carousel-btn {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+}
+
+/* 触屏设备：保留按钮可见，方便手动切换 */
+@media (hover: none), (pointer: coarse) {
+  .clinic-carousel-btn {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+}
+
+.clinic-carousel-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.clinic-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(47, 79, 57, 0.22);
+  cursor: pointer;
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    width 0.25s ease;
+}
+
+.clinic-dot.active {
+  width: 28px;
+  background: var(--primary-teal);
+}
+
+.clinic-fade-enter-active,
+.clinic-fade-leave-active {
+  transition: opacity 0.45s ease;
+}
+
+.clinic-fade-enter-from,
+.clinic-fade-leave-to {
+  opacity: 0;
+}
+
+/* ========================================================================== */
 /* CTA Section */
 /* ========================================================================== */
 .cta-section {
@@ -726,8 +965,15 @@ button {
 }
 
 /* ========================================================================== */
-/* Mobile */
+/* Responsive */
 /* ========================================================================== */
+@media (max-width: 1024px) {
+  .clinic-carousel {
+    height: 500px;
+    border-radius: 26px;
+  }
+}
+
 @media (max-width: 768px) {
   .hero-headline {
     font-size: 38px;
@@ -780,6 +1026,33 @@ button {
     width: 100%;
     max-width: 320px;
     height: 300px;
+  }
+
+  .clinic-showcase-section {
+    padding: 70px 0;
+  }
+
+  .clinic-showcase-description {
+    font-size: 16px;
+  }
+
+  .clinic-carousel {
+    height: 340px;
+    border-radius: 22px;
+  }
+
+  .clinic-carousel-btn {
+    width: 42px;
+    height: 42px;
+    font-size: 28px;
+  }
+
+  .clinic-carousel-btn-left {
+    left: 12px;
+  }
+
+  .clinic-carousel-btn-right {
+    right: 12px;
   }
 
   .cta-section {

@@ -4,7 +4,7 @@ import { ref } from 'vue'
 const copied = ref(false)
 
 const email = 'info@herbsmotion.com.au'
-const phone = '0394844931'
+const phone = '(03) 9484 4931'
 
 const clinicAddress = '696 Burke Rd, Camberwell VIC 3124'
 const googleMapsUrl =

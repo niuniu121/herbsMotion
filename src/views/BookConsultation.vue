@@ -94,7 +94,7 @@
             <a class="secondary-btn"> Call Us </a>
           </div>
 
-          <p class="contact-note">info@herbsmotion.com.au · 0394844931</p>
+          <p class="contact-note">info@herbsmotion.com.au · (03) 9484 4931</p>
         </div>
       </section>
     </main>

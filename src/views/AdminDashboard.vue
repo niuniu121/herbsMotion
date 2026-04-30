@@ -5,7 +5,7 @@
         <div class="top-left">
           <span class="admin-badge">Admin Panel</span>
           <h1>Content Management</h1>
-          <p>Manage promotion content, FAQ, team information, services and more.</p>
+          <p>Manage promotion content, FAQ, QNA, team information, services and more.</p>
         </div>
 
         <button class="logout-btn" @click="handleLogout">Logout</button>
@@ -30,6 +30,13 @@
           <div class="card-icon">❓</div>
           <h2>FAQ</h2>
           <p>Create, edit and organise frequently asked questions.</p>
+          <span class="card-link">Open module →</span>
+        </button>
+
+        <button class="admin-card" @click="goTo('/admin/qna')">
+          <div class="card-icon">💬</div>
+          <h2>QNA</h2>
+          <p>Create, edit and organise QNA content for the website and chatbot.</p>
           <span class="card-link">Open module →</span>
         </button>
 
@@ -98,7 +105,7 @@ const handleLogout = async () => {
   font-size: 24px;
   line-height: 1.6;
   color: rgba(47, 107, 79, 0.75);
-  max-width: 760px;
+  max-width: 820px;
 }
 
 .admin-badge {

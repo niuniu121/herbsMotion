@@ -128,6 +128,11 @@ const router = createRouter({
       path: '/qna',
       name: 'QNA',
       component: () => import('../views/QNAPage.vue')
+    },
+    {
+      path: '/admin/qna',
+      name: 'AdminQna',
+      component: () => import('@/views/AdminQna.vue'),
     }
   ],
 })

@@ -4,6 +4,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 const isScrolled = ref(false)
 const isMobileMenuOpen = ref(false)
 const isDropdownOpen = ref(false)
+const isFaqDropdownOpen = ref(false)
 
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 50
@@ -15,21 +16,32 @@ const toggleMobileMenu = () => {
   if (isMobileMenuOpen.value) {
     document.body.style.overflow = 'hidden'
     isDropdownOpen.value = false
+    isFaqDropdownOpen.value = false
   } else {
     document.body.style.overflow = ''
     isDropdownOpen.value = false
+    isFaqDropdownOpen.value = false
   }
 }
 
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false
   isDropdownOpen.value = false
+  isFaqDropdownOpen.value = false
   document.body.style.overflow = ''
 }
 
 const toggleDropdownMobile = () => {
   if (window.innerWidth <= 768) {
     isDropdownOpen.value = !isDropdownOpen.value
+    isFaqDropdownOpen.value = false
+  }
+}
+
+const toggleFaqDropdownMobile = () => {
+  if (window.innerWidth <= 768) {
+    isFaqDropdownOpen.value = !isFaqDropdownOpen.value
+    isDropdownOpen.value = false
   }
 }
 
@@ -84,7 +96,29 @@ onUnmounted(() => {
           </div>
 
           <RouterLink to="/our-services" @click="closeMobileMenu">Our Services</RouterLink>
-          <RouterLink to="/faq" @click="closeMobileMenu">FAQ</RouterLink>
+
+          <div class="dropdown-wrapper" @click="toggleFaqDropdownMobile">
+            <a href="#" class="dropdown-trigger" @click.prevent>
+              FAQ
+              <svg
+                :class="['chevron-icon', { rotate: isFaqDropdownOpen }]"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </a>
+
+            <div :class="['dropdown-menu', { 'show-mobile': isFaqDropdownOpen }]">
+              <RouterLink to="/faq" @click="closeMobileMenu">FAQ</RouterLink>
+              <RouterLink to="/qna" @click="closeMobileMenu">QNA</RouterLink>
+            </div>
+          </div>
+
           <a href="#" class="mobile-only-link" @click="closeMobileMenu">Location</a>
         </nav>
       </div>
@@ -133,9 +167,6 @@ onUnmounted(() => {
   min-width: 0;
 }
 
-/* =========================
-   Logo
-   ========================= */
 .logo-area {
   display: inline-flex;
   align-items: center;
@@ -172,9 +203,6 @@ onUnmounted(() => {
   transform: translateY(-0.5px);
 }
 
-/* =========================
-   Navigation
-   ========================= */
 .nav-overlay {
   display: flex;
   align-items: center;
@@ -202,9 +230,6 @@ onUnmounted(() => {
   color: var(--accent-pink);
 }
 
-/* =========================
-   Actions
-   ========================= */
 .auth-buttons {
   display: flex;
   align-items: center;
@@ -215,43 +240,36 @@ onUnmounted(() => {
   margin-left: auto;
 }
 
-.btn-login {
-  color: var(--text-dark);
-  text-decoration: none;
-  font-weight: 500;
-  padding: 10px 12px;
-  line-height: 1;
-  transition: color 0.3s ease;
-  white-space: nowrap;
-}
-
-.btn-login:hover {
-  color: var(--accent-pink);
-}
-
 .btn-get-started {
-  background-color: var(--primary-teal);
-  color: white;
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 42px;
+  background: #2f5b43;
+  color: #ffffff;
   border-radius: 999px;
-  padding: 14px 26px;
-  font-family: inherit;
+  text-decoration: none;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1;
+  border: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  white-space: nowrap;
 }
 
 .btn-get-started:hover {
-  background-color: var(--text-dark);
-  transform: translateY(-2px);
+  background: #264b37;
+  color: #ffffff;
+  text-decoration: none;
 }
 
-/* =========================
-   Dropdown
-   ========================= */
+.btn-get-started:visited,
+.btn-get-started:active,
+.btn-get-started:focus {
+  color: #ffffff;
+  text-decoration: none;
+}
+
 .dropdown-wrapper {
   position: relative;
 }
@@ -312,9 +330,6 @@ onUnmounted(() => {
   }
 }
 
-/* =========================
-   Hamburger
-   ========================= */
 .mobile-only-link {
   display: none;
 }
@@ -330,9 +345,6 @@ onUnmounted(() => {
   display: block;
 }
 
-/* =========================
-   Tablet refinement
-   ========================= */
 @media (max-width: 1200px) {
   .header-inner {
     gap: 28px;
@@ -371,9 +383,6 @@ onUnmounted(() => {
   }
 }
 
-/* =========================
-   Mobile / H5
-   ========================= */
 @media (max-width: 768px) {
   .page-header {
     padding: 16px 0;
@@ -410,10 +419,6 @@ onUnmounted(() => {
     transform: translateY(-0.5px);
   }
 
-  .desktop-only {
-    display: none !important;
-  }
-
   .auth-buttons {
     gap: 10px;
     margin-left: 0;
@@ -428,9 +433,6 @@ onUnmounted(() => {
     width: 132px;
     min-height: 44px;
     text-align: center;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
   }
 
   .hamburger {
@@ -547,35 +549,5 @@ onUnmounted(() => {
   .chevron-icon.rotate {
     transform: rotate(180deg);
   }
-}
-
-.btn-get-started {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 18px 42px;
-  background: #2f5b43;
-  color: #ffffff;
-  border-radius: 999px;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 1rem;
-  line-height: 1;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-get-started:hover {
-  background: #264b37;
-  color: #ffffff;
-  text-decoration: none;
-}
-
-.btn-get-started:visited,
-.btn-get-started:active,
-.btn-get-started:focus {
-  color: #ffffff;
-  text-decoration: none;
 }
 </style>

@@ -223,7 +223,7 @@ onBeforeUnmount(() => {
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 26px 28px;
+  gap: 34px 32px;
   align-items: stretch;
 }
 
@@ -244,12 +244,12 @@ onBeforeUnmount(() => {
   transform: translateY(-8px);
 }
 
-/* ---------------- Image Frame ---------------- */
+/* ---------------- Round Image Frame ---------------- */
 .card-image-wrapper {
-  width: calc(100% - 28px);
-  max-width: 250px;
-  aspect-ratio: 3 / 4;
-  margin: 0 auto 5px auto;
+  width: calc(100% - 18px);
+  max-width: 285px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto 18px auto;
   position: relative;
   background-color: transparent;
   flex-shrink: 0;
@@ -258,9 +258,9 @@ onBeforeUnmount(() => {
 .card-image-wrapper::before {
   content: '';
   position: absolute;
-  inset: -7px;
+  inset: -8px;
   border: 1.5px solid #8aaa79;
-  border-radius: 94px 94px 22px 22px;
+  border-radius: 50%;
   z-index: 1;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -270,7 +270,7 @@ onBeforeUnmount(() => {
   position: absolute;
   inset: 0;
   background-color: #f5dfe6;
-  border-radius: 86px 86px 16px 16px;
+  border-radius: 50%;
   transform: translate(12px, 12px);
   z-index: 0;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -281,11 +281,11 @@ onBeforeUnmount(() => {
   height: 100%;
   object-fit: cover;
   object-position: center top;
-  border-radius: 86px 86px 16px 16px;
+  border-radius: 50%;
   position: relative;
   z-index: 2;
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
 }
 
 .member-image-placeholder {
@@ -294,14 +294,14 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.6rem;
+  font-size: 3rem;
   color: #2f5b43;
   font-family: serif;
   background-color: #e9f0ea;
-  border-radius: 86px 86px 16px 16px;
+  border-radius: 50%;
   position: relative;
   z-index: 2;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
 }
 
 .team-card:hover .card-image-wrapper::after {
@@ -311,11 +311,11 @@ onBeforeUnmount(() => {
 
 .team-card:hover .card-image-wrapper::before {
   border-color: #2f5b43;
-  inset: -9px;
+  inset: -10px;
 }
 
 .team-card:hover .member-image {
-  transform: scale(1.02);
+  transform: scale(1.03);
 }
 
 /* ---------------- Content ---------------- */
@@ -401,11 +401,11 @@ onBeforeUnmount(() => {
 @media (max-width: 1100px) {
   .team-grid {
     max-width: 980px;
-    gap: 24px 24px;
+    gap: 30px 26px;
   }
 
   .card-image-wrapper {
-    max-width: 228px;
+    max-width: 260px;
   }
 }
 
@@ -427,8 +427,8 @@ onBeforeUnmount(() => {
 
   .team-grid {
     grid-template-columns: 1fr;
-    gap: 30px;
-    max-width: 420px;
+    gap: 34px;
+    max-width: 430px;
   }
 
   .team-card {
@@ -436,8 +436,8 @@ onBeforeUnmount(() => {
   }
 
   .card-image-wrapper {
-    width: calc(100% - 32px);
-    max-width: 270px;
+    width: calc(100% - 28px);
+    max-width: 285px;
   }
 
   .hero-inner h1 {

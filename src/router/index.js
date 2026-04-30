@@ -17,6 +17,7 @@ import AppointmentRequest from '@/views/AppointmentRequest.vue'
 import OurServices from '@/views/OurServices.vue'
 import ServiceDetail from '@/views/ServiceDetail.vue'
 import PractitionerDetail from '@/views/PractitionerDetail.vue'
+import QNAPage from '@/views/QNAPage.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -123,6 +124,11 @@ const router = createRouter({
       name: 'ServiceDetail',
       component: ServiceDetail,
     },
+    {
+      path: '/qna',
+      name: 'QNA',
+      component: () => import('../views/QNAPage.vue')
+    }
   ],
 })
 

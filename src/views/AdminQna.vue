@@ -5,9 +5,6 @@
         <div>
           <p class="badge">Admin Panel</p>
           <h1>QNA Management</h1>
-          <p class="desc">
-            Manage QNA content, food guidance, lifestyle guidance, and custom page sections.
-          </p>
         </div>
 
         <button class="back-btn" type="button" @click="handleBackClick">Back</button>
@@ -23,10 +20,6 @@
             </div>
 
             <div class="toolbar-right">
-              <button class="secondary-btn" type="button" @click="restoreOriginalContent">
-                Restore Original Content
-              </button>
-
               <button class="secondary-btn" type="button" @click="addSection">+ Add Section</button>
 
               <button class="save-btn" type="button" :disabled="saving" @click="saveContent">
@@ -155,7 +148,6 @@
                     <div class="sub-section-header">
                       <div>
                         <h4>QNA Items</h4>
-                        <p>Manage questions and answers inside this section.</p>
                       </div>
 
                       <button class="secondary-btn" type="button" @click="addQna(section)">
@@ -228,11 +220,7 @@
                             <div class="form-side">
                               <div class="form-group">
                                 <label>Question</label>
-                                <input
-                                  v-model.trim="qna.question"
-                                  type="text"
-                                  placeholder="Enter QNA question"
-                                />
+                                <input v-model.trim="qna.question" type="text" placeholder="" />
                               </div>
 
                               <div class="form-group">
@@ -252,7 +240,7 @@
                                   class="answer-textarea"
                                   :class="{ expanded: qna.answerExpanded }"
                                   rows="8"
-                                  placeholder="Enter QNA answer here. Press Enter for a new paragraph or a new line."
+                                  placeholder=""
                                 ></textarea>
                               </div>
                             </div>
@@ -267,7 +255,6 @@
                     <div class="sub-section-header">
                       <div>
                         <h4>Food Groups</h4>
-                        <p>Manage food categories and items inside this section.</p>
                       </div>
 
                       <button class="secondary-btn" type="button" @click="addFoodGroup(section)">
@@ -376,7 +363,6 @@
                     <div class="sub-section-header">
                       <div>
                         <h4>Lifestyle Cards</h4>
-                        <p>Manage lifestyle guidance cards inside this section.</p>
                       </div>
 
                       <button

@@ -506,8 +506,7 @@ const physioConditions = [
         desc: '• Dynamic valgus and poor landing control can maintain pain.\n• Mechanics matter a lot in this condition.',
       },
     ],
-  },
-  ,
+  },,
   {
     id: 'hipsurgeryrehabilitation',
     name: 'Hip Surgery Rehabilitation',
